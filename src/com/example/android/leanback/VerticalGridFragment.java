@@ -14,10 +14,7 @@
 
 package com.example.android.leanback;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -59,7 +56,7 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
-        for (HashMap.Entry<String, List<Movie>> entry : movies.entrySet())
+        for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
         {
             List<Movie> list = entry.getValue();
             Collections.shuffle(list, new Random(seed));
