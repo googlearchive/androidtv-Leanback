@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
  * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
@@ -152,7 +153,7 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-            for (HashMap.Entry<String, List<Movie>> entry : movies.entrySet())
+            for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
             {
                 if (selectedMovie.getCategory().indexOf(entry.getKey()) >= 0) {
                     List<Movie> list = entry.getValue();
