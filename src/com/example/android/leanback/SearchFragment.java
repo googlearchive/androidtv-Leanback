@@ -17,6 +17,7 @@ package com.example.android.leanback;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -86,7 +87,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
     private void loadRows(String query) {
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (HashMap.Entry<String, List<Movie>> entry : movies.entrySet())
+        for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
         {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 Movie movie = entry.getValue().get(i);

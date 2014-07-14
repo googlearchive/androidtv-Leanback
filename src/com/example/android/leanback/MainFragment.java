@@ -43,10 +43,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /*
  * Main class to show BrowseFragment with header and rows of videos
@@ -145,7 +142,7 @@ public class MainFragment extends BrowseFragment implements
 
         int i = 0;
 
-        for (HashMap.Entry<String, List<Movie>> entry : data.entrySet())
+        for (Map.Entry<String, List<Movie>> entry : data.entrySet())
         {
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
             List<Movie> list = entry.getValue();

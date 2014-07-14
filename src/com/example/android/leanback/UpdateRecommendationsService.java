@@ -23,6 +23,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
  * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens 
@@ -48,7 +49,7 @@ public class UpdateRecommendationsService extends IntentService {
                     .setContext(getApplicationContext())
                     .setSmallIcon(R.drawable.videos_by_google_icon);
 
-            for (HashMap.Entry<String, List<Movie>> entry : recommendations.entrySet())
+            for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet())
             {
                 for (int i = 0; i < entry.getValue().size(); i++) {
                     Movie movie = entry.getValue().get(i);
