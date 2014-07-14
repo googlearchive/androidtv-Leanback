@@ -21,5 +21,5 @@ Please read and follow the steps in the CONTRIBUTING.md
 See LICENSE
 
 ## Google+
-Android TV Page on Google+ [https://g.co/androidtvdev](https://g.co/androidtvdev)
+Android TV Community Page on Google+ [https://g.co/androidtvdev](https://g.co/androidtvdev)
 ## Change List
