@@ -84,7 +84,7 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         new DetailRowBuilderTask().execute(selectedMovie);
 
         setOnItemClickedListener(getDefaultItemClickedListener());
-
+        updateBackground(selectedMovie.getBackgroundImageURI());
     }
 
     private class DetailRowBuilderTask extends AsyncTask<Movie, Integer, DetailsOverviewRow> {
@@ -104,7 +104,6 @@ public class LeanbackDetailsFragment extends DetailsFragment {
                         .centerCrop()
                         .get();
                 row.setImageBitmap(getActivity(), poster);
-                updateBackground(selectedMovie.getBackgroundImageURI());
             } catch (IOException e) {
             }
 
