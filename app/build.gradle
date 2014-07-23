@@ -5,7 +5,7 @@ android {
     buildToolsVersion "20"
 
     defaultConfig {
-        applicationId "com.chriscartland.videoland"
+        applicationId "com.example.android.leanback"
         minSdkVersion 20
         targetSdkVersion 20
         versionCode 1
