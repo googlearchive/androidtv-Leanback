@@ -32,6 +32,9 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <uses-feature android:name="android.software.leanback"
+        android:required="true" />
+
     <application
         android:allowBackup="false"
         android:icon="@drawable/videos_by_google_banner"
