@@ -1,4 +1,4 @@
-# AndroidTV Leanback
+# AndroidTV Leanback Support Library sample for videos
 
 The Leanback API Demo/Video By Googles app is designed to run on an Android TV device and demonstrates how to use the Leanback Support library
 in order to comply with the UX guidelines of Android TV.
