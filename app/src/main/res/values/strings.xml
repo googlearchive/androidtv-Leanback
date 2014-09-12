@@ -99,6 +99,18 @@
     <string name="noah_description">to build an Ark to save creation from the coming flood.</string>
     <string name="noah_title">Noah</string>
     <string name="dragon2_title">How to Train Your Dragon 2</string>
-    <string name="dragon2_description">A dummy move info</string>
+    <string name="dragon2_description">Set in the mythical world of burly Vikings and wild dragons,
+        and based on the book by Cressida Cowell, the action comedy tells the story of Hiccup, a
+        Viking teenager who doesn\'t exactly fit in with his tribe\'s longstanding tradition of
+        heroic dragon slayers. Hiccup\'s world is turned upside down when he encounters a dragon
+        that challenges he and his fellow Vikings to see the world from an entirely different point
+        of view.
+    </string>
+    <string name="maleficent_title">Maleficent</string>
+    <string name="maleficent_description">The untold story of Disney\'s most iconic villain from the
+        1959 classic "Sleeping Beauty." A beautiful, pure-hearted young woman with stunning black
+        wings, Maleficent has an idyllic life growing up in a peaceable forest kingdom, until one
+        day when an invading army of humans threatens the harmony of the land.
+    </string>
 
 </resources>

@@ -278,16 +278,20 @@ public class VideoDatabase {
             }
             Log.d(TAG, "DONE loading movies.");
             // add dummy movies to illustrate action deep link in search detail
-            // Android TV Search requires that the media’s title, MIME type, and production year
-            // match exactly to those found from Google’s servers.
+            // Android TV Search requires that the media’s title, MIME type, production year,
+            // and duration all match exactly to those found from Google’s servers.
             addWord(mHelperContext.getString(R.string.noah_title),
                     mHelperContext.getString(R.string.noah_description),
                     R.drawable.noah,
-                    496800);
+                    8280000);
             addWord(mHelperContext.getString(R.string.dragon2_title),
                     mHelperContext.getString(R.string.dragon2_description),
                     R.drawable.dragon2,
-                    378000);
+                    6300000);
+            addWord(mHelperContext.getString(R.string.maleficent_title),
+                    mHelperContext.getString(R.string.maleficent_description),
+                    R.drawable.maleficent,
+                    5820000);
         }
 
         /**
@@ -327,7 +331,7 @@ public class VideoDatabase {
             // Randomly pick a photo as icon for this word
             Random r = new Random();
             initialValues.put(KEY_ICON, icon);
-            initialValues.put(KEY_DATA_TYPE, "video/x-flv");
+            initialValues.put(KEY_DATA_TYPE, "video/mp4");
             initialValues.put(KEY_IS_LIVE, false);
             initialValues.put(KEY_VIDEO_WIDTH, 1280);
             initialValues.put(KEY_VIDEO_HEIGHT, 720);
