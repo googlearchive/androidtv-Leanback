@@ -57,7 +57,7 @@
     <string name="failed_to_connect">Could not connect to the device</string>
     <string name="failed_to_seek">Failed to seek to the specified position on the remote device</string>
     <string name="video_error_media_load_timeout">Media loading timed out</string>
-    <string name="video_error_server_unaccessible">Media server was not reachable</string>
+    <string name="video_error_server_inaccessible">Media server was not reachable</string>
     <string name="video_error_unknown_error">Failed to load video</string>
     <string name="oops">Oops</string>
 
@@ -71,4 +71,34 @@
     <string name="prefs_volume_dialog_title">Volume Assignment</string>
     <string name="prefs_volume_default">device</string>
     <string name="title_activity_test">TestActivity</string>
+
+    <!-- Global Search -->
+    <!-- The action label for global search -->
+    <string name="global_search">GLOBALSEARCH</string>
+
+    <!-- The label for use as a searchable item -->
+    <string name="search_label">Dictionary</string>
+
+    <!-- The hint text that appears in the search box. -->
+    <string name="search_hint">Search the video</string>
+
+    <!-- The description that will show up in the search settings for this source.  -->
+    <string name="settings_description">Definitions of words</string>
+
+    <!-- General instructions in the main activity. -->
+    <string name="search_instructions">Use the search box in the Action Bar to look up a word</string>
+
+    <!-- Shown above search results when we receive a search request. -->
+    <plurals name="search_results">
+        <item quantity="one">%1$d result for \"%2$s\": </item>
+        <item quantity="other">%1$d results for \"%2$s\": </item>
+    </plurals>
+
+    <!-- Search failure message. -->
+    <string name="no_results">No results found for \"%s\"</string>
+    <string name="noah_description">to build an Ark to save creation from the coming flood.</string>
+    <string name="noah_title">Noah</string>
+    <string name="dragon2_title">How to Train Your Dragon 2</string>
+    <string name="dragon2_description">A dummy move info</string>
+
 </resources>
