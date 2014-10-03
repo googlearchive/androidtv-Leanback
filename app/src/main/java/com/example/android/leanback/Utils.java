@@ -37,9 +37,6 @@ public class Utils {
 
     /**
      * Returns the screen/display size
-     * 
-     * @param context
-     * @return
      */
     public static Point getDisplaySize(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -48,34 +45,11 @@ public class Utils {
         display.getSize(size);
         int width = size.x;
         int height = size.y;
-        return new Point(width, height);
-    }
-
-    /**
-     * Shows an error dialog with a given text message.
-     * 
-     * @param context
-     * @param errorString
-     */
-
-    public static final void showErrorDialog(Context context, String errorString) {
-        new AlertDialog.Builder(context).setTitle(R.string.error)
-                .setMessage(errorString)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                })
-                .create()
-                .show();
+        return size;
     }
 
     /**
      * Shows a (long) toast
-     * 
-     * @param context
-     * @param msg
      */
     public static void showToast(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
@@ -83,15 +57,12 @@ public class Utils {
 
     /**
      * Shows a (long) toast.
-     * 
-     * @param context
-     * @param resourceId
      */
     public static void showToast(Context context, int resourceId) {
         Toast.makeText(context, context.getString(resourceId), Toast.LENGTH_LONG).show();
     }
 
-    public static int dpToPx(int dp, Context ctx) {
+    public static int convertDpToPixel(Context ctx, int dp) {
         float density = ctx.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
     }

@@ -14,11 +14,6 @@
 
 package com.example.android.leanback;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,10 +28,14 @@ import android.support.v17.leanback.widget.Row;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 /*
- * This class demonstrates how to do in-app search 
+ * This class demonstrates how to do in-app search
  */
-@SuppressLint("DefaultLocale")
 public class SearchFragment extends android.support.v17.leanback.app.SearchFragment
         implements android.support.v17.leanback.app.SearchFragment.SearchResultProvider {
     private static final String TAG = "SearchFragment";
@@ -87,14 +86,12 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
     private void loadRows(String query) {
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
-        {
-            for (int i = 0; i < entry.getValue().size(); i++) {
-                Movie movie = entry.getValue().get(i);
+        for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
+            for(Movie movie : entry.getValue()) {
                 if (movie.getTitle().toLowerCase(Locale.ENGLISH)
                         .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0
                         || movie.getDescription().toLowerCase(Locale.ENGLISH)
-                                .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0) {
+                        .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0) {
                     listRowAdapter.add(movie);
                 }
             }
@@ -111,7 +108,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
                 if (item instanceof Movie) {
                     Movie movie = (Movie) item;
                     Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(getResources().getString(R.string.movie), movie);
+                    intent.putExtra(DetailsActivity.MOVIE, movie);
                     startActivity(intent);
                 }
             }

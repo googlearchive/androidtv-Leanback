@@ -49,58 +49,25 @@ public class VideoProvider {
     private static String TAG_BACKGROUND = "background";
     private static String TAG_TITLE = "title";
 
-    private static HashMap<String, List<Movie>> mMovieList;
-    private static Context mContext;
-    private static String mPrefixUrl;
+    private static HashMap<String, List<Movie>> sMovieList;
+    private static Context sContext;
+    private static String sPrefixUrl;
 
     public static void setContext(Context context) {
-        if (mContext == null)
-            mContext = context;
-    }
-
-    protected JSONObject parseUrl(String urlString) {
-        Log.d(TAG, "Parse URL: " + urlString);
-        InputStream is = null;
-
-        mPrefixUrl = mContext.getResources().getString(R.string.prefix_url);
-
-        try {
-            java.net.URL url = new java.net.URL(urlString);
-            URLConnection urlConnection = url.openConnection();
-            is = new BufferedInputStream(urlConnection.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    urlConnection.getInputStream(), "iso-8859-1"), 8);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            String json = sb.toString();
-            return new JSONObject(json);
-        } catch (Exception e) {
-            Log.d(TAG, "Failed to parse the json for media list", e);
-            return null;
-        } finally {
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.d(TAG, "JSON feed closed", e);
-                }
-            }
-        }
+        if (sContext == null)
+            sContext = context;
     }
 
     public static HashMap<String, List<Movie>> getMovieList() {
-        return mMovieList;
+        return sMovieList;
     }
 
     public static HashMap<String, List<Movie>> buildMedia(Context ctx, String url)
             throws JSONException {
-        if (null != mMovieList) {
-            return mMovieList;
+        if (null != sMovieList) {
+            return sMovieList;
         }
-        mMovieList = new HashMap<String, List<Movie>>();
+        sMovieList = new HashMap<String, List<Movie>>();
 
         JSONObject jsonObj = new VideoProvider().parseUrl(url);
         JSONArray categories = jsonObj.getJSONArray(TAG_GOOGLE_VIDEOS);
@@ -138,16 +105,20 @@ public class VideoProvider {
                                 videoUrl, cardImageUrl,
                                 bgImageUrl));
                     }
-                    mMovieList.put(category_name, categoryList);
+                    sMovieList.put(category_name, categoryList);
                 }
             }
         }
-        return mMovieList;
+        return sMovieList;
     }
 
-    private static Movie buildMovieInfo(String category, String title,
-            String description, String studio, String videoUrl, String cardImageUrl,
-            String bgImageUrl) {
+    private static Movie buildMovieInfo(String category,
+                                        String title,
+                                        String description,
+                                        String studio,
+                                        String videoUrl,
+                                        String cardImageUrl,
+                                        String bgImageUrl) {
         Movie movie = new Movie();
         movie.setId(Movie.getCount());
         Movie.incCount();
@@ -164,7 +135,7 @@ public class VideoProvider {
 
     private static String getVideoPrefix(String category, String videoUrl) {
         String ret = "";
-        ret = mPrefixUrl + category.replace(" ", "%20") + '/' +
+        ret = sPrefixUrl + category.replace(" ", "%20") + '/' +
                 videoUrl.replace(" ", "%20");
         return ret;
     }
@@ -172,9 +143,42 @@ public class VideoProvider {
     private static String getThumbPrefix(String category, String title, String imageUrl) {
         String ret = "";
 
-        ret = mPrefixUrl + category.replace(" ", "%20") + '/' +
+        ret = sPrefixUrl + category.replace(" ", "%20") + '/' +
                 title.replace(" ", "%20") + '/' +
                 imageUrl.replace(" ", "%20");
         return ret;
+    }
+
+    protected JSONObject parseUrl(String urlString) {
+        Log.d(TAG, "Parse URL: " + urlString);
+        InputStream is = null;
+
+        sPrefixUrl = sContext.getResources().getString(R.string.prefix_url);
+
+        try {
+            java.net.URL url = new java.net.URL(urlString);
+            URLConnection urlConnection = url.openConnection();
+            is = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    urlConnection.getInputStream(), "iso-8859-1"), 8);
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            String json = sb.toString();
+            return new JSONObject(json);
+        } catch (Exception e) {
+            Log.d(TAG, "Failed to parse the json for media list", e);
+            return null;
+        } finally {
+            if (null != is) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    Log.d(TAG, "JSON feed closed", e);
+                }
+            }
+        }
     }
 }

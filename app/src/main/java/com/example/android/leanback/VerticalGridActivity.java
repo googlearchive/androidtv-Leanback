@@ -18,14 +18,14 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /*
- * Wrapper class for VerticalGridFragment
+ * VerticalGridActivity that loads VerticalGridFragment
  */
-public class VerticalGridActivity extends Activity
-{
-    /** Called when the activity is first created. */
+public class VerticalGridActivity extends Activity {
+    /**
+     * Called when the activity is first created.
+     */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.vertical_grid);
         getWindow().setBackgroundDrawableResource(R.drawable.grid_bg);

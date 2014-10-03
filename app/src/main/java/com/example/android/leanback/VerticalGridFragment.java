@@ -14,16 +14,25 @@
 
 package com.example.android.leanback;
 
-import java.util.*;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
-import android.support.v17.leanback.widget.OnItemClickedListener;
-import android.support.v17.leanback.widget.OnItemSelectedListener;
+import android.support.v17.leanback.widget.ImageCardView;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.OnItemViewSelectedListener;
+import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
+import android.view.View;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /*
  * VerticalGridFragment shows a grid of videos
@@ -37,7 +46,7 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         setTitle(getString(R.string.vertical_grid_title));
@@ -56,35 +65,69 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
-        for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
-        {
+        for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
             List<Movie> list = entry.getValue();
             Collections.shuffle(list, new Random(seed));
-            for (int j = 0; j < list.size(); j++) {
-                mAdapter.add(list.get(j));
+            for(Movie movie:list) {
+                mAdapter.add(movie);
             }
         }
 
         setAdapter(mAdapter);
 
-        setOnItemSelectedListener(new OnItemSelectedListener() {
+        setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
             @Override
-            public void onItemSelected(Object item, Row row) {
+            public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
+                                       RowPresenter.ViewHolder rowViewHolder, Row row) {
+                Log.i(TAG, "onItemSelected: " + item + " row " + row);
             }
         });
 
-        setOnItemClickedListener(new OnItemClickedListener() {
+        setOnItemViewClickedListener(new OnItemViewClickedListener() {
             @Override
-            public void onItemClicked(Object item, Row row) {
-                if (item instanceof Movie) {
-                    Movie movie = (Movie) item;
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(getString(R.string.movie), movie);
-                    startActivity(intent);
-                }
+            public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
+                                      RowPresenter.ViewHolder rowViewHolder, Row row) {
+                Log.i(TAG, "onItemClicked: " + item + " row " + row);
+            }
+        });
+        setOnSearchClickedListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
             }
         });
 
+        setOnItemViewClickedListener(new ItemViewClickedListener());
+        setOnItemViewSelectedListener(new ItemViewSelectedListener());
+    }
+
+    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
+                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+
+            if (item instanceof Movie) {
+                Movie movie = (Movie) item;
+                Log.d(TAG, "Item: " + item.toString());
+                Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                intent.putExtra(DetailsActivity.MOVIE, movie);
+
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        getActivity(),
+                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                getActivity().startActivity(intent, bundle);
+            }
+        }
+    }
+
+
+    private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
+        @Override
+        public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
+                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
+        }
     }
 
 }

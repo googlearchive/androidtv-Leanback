@@ -113,7 +113,8 @@ public class RecommendationBuilder {
 
         Bitmap image = Picasso.with(mContext)
                 .load(mImageUri)
-                .resize(Utils.dpToPx(CARD_WIDTH, mContext), Utils.dpToPx(CARD_HEIGHT, mContext))
+                .resize(Utils.convertDpToPixel(mContext, CARD_WIDTH),
+                        Utils.convertDpToPixel(mContext, CARD_HEIGHT))
                 .get();
 
         Notification notification = new NotificationCompat.BigPictureStyle(
@@ -124,8 +125,7 @@ public class RecommendationBuilder {
                         .setLocalOnly(true)
                         .setOngoing(true)
                         .setColor(mContext.getResources().getColor(R.color.fastlane_background))
-                        // .setCategory(Notification.CATEGORY_RECOMMENDATION)
-                        .setCategory("recommendation")
+                        .setCategory(Notification.CATEGORY_RECOMMENDATION)
                         .setLargeIcon(image)
                         .setSmallIcon(mSmallIcon)
                         .setContentIntent(mIntent)
