@@ -17,6 +17,7 @@ package com.example.android.leanback;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BackgroundManager;
@@ -27,11 +28,15 @@ import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
 import android.support.v17.leanback.widget.DetailsOverviewRowPresenter;
 import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
-import android.support.v17.leanback.widget.OnItemClickedListener;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
@@ -59,16 +64,21 @@ public class LeanbackDetailsFragment extends DetailsFragment {
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
 
-    private Movie selectedMovie;
+    private Movie mSelectedMovie;
 
     private Drawable mDefaultBackground;
     private Target mBackgroundTarget;
     private DisplayMetrics mMetrics;
+    private DetailsOverviewRowPresenter mDorPresenter;
+    private DetailRowBuilderTask mDetailRowBuilderTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate DetailsFragment");
+        Log.d(TAG, "onCreate DetailsFragment");
         super.onCreate(savedInstanceState);
+
+        mDorPresenter =
+                new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
 
         BackgroundManager backgroundManager = BackgroundManager.getInstance(getActivity());
         backgroundManager.attach(getActivity().getWindow());
@@ -79,82 +89,120 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
 
-        selectedMovie = (Movie) getActivity().getIntent().getSerializableExtra("Movie");
-        Log.d(TAG, "DetailsActivity movie: " + selectedMovie.toString());
-        new DetailRowBuilderTask().execute(selectedMovie);
+        mSelectedMovie = (Movie) getActivity().getIntent().getSerializableExtra(DetailsActivity.MOVIE);
+        if (null != mSelectedMovie || checkGlobalSearchIntent()) {
+            Log.d(TAG, "DetailsActivity movie: " + mSelectedMovie.toString());
+            mDetailRowBuilderTask = (DetailRowBuilderTask) new DetailRowBuilderTask().execute(mSelectedMovie);
+            mDorPresenter.setSharedElementEnterTransition(getActivity(),
+                    DetailsActivity.SHARED_ELEMENT_NAME);
+            updateBackground(mSelectedMovie.getBackgroundImageURI());
+            setOnItemViewClickedListener(new ItemViewClickedListener());
+        }
+    }
 
-        setOnItemClickedListener(getDefaultItemClickedListener());
-        updateBackground(selectedMovie.getBackgroundImageURI());
+    @Override
+    public void onStop() {
+        mDetailRowBuilderTask.cancel(true);
+        super.onStop();
+    }
+
+    /*
+     * Check if there is a global search intent
+     */
+    private boolean checkGlobalSearchIntent() {
+        Intent intent = getActivity().getIntent();
+        String intentAction = intent.getAction();
+        String globalSearch = getString(R.string.global_search);
+        if (globalSearch.equalsIgnoreCase(intentAction)) {
+            Uri intentData = intent.getData();
+            Log.d(TAG, "action: " + intentAction + " intentData:" + intentData);
+            int selectedIndex = Integer.parseInt(intentData.getLastPathSegment());
+            HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
+            int movieTally = 0;
+            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
+                List<Movie> list = entry.getValue();
+                for(Movie movie : list) {
+                    movieTally++;
+                    if (selectedIndex == movieTally) {
+                        mSelectedMovie = movie;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private class DetailRowBuilderTask extends AsyncTask<Movie, Integer, DetailsOverviewRow> {
+
+        private volatile boolean running = true;
+
         @Override
         protected DetailsOverviewRow doInBackground(Movie... movies) {
-            selectedMovie = movies[0];
 
-            Log.d(TAG, "doInBackground: " + selectedMovie.toString());
-            DetailsOverviewRow row = new DetailsOverviewRow(selectedMovie);
-            try {
-                Bitmap poster = Picasso.with(getActivity())
-                        .load(selectedMovie.getCardImageUrl())
-                        .resize(Utils.dpToPx(DETAIL_THUMB_WIDTH, getActivity()
-                                .getApplicationContext()),
-                                Utils.dpToPx(DETAIL_THUMB_HEIGHT, getActivity()
-                                        .getApplicationContext()))
-                        .centerCrop()
-                        .get();
-                row.setImageBitmap(getActivity(), poster);
-            } catch (IOException e) {
+            while(running) {
+                mSelectedMovie = movies[0];
+
+                Log.d(TAG, "doInBackground: " + mSelectedMovie.toString());
+                DetailsOverviewRow row = new DetailsOverviewRow(mSelectedMovie);
+                try {
+                    Bitmap poster = Picasso.with(getActivity())
+                            .load(mSelectedMovie.getCardImageUrl())
+                            .resize(Utils.convertDpToPixel(getActivity()
+                                            .getApplicationContext(), DETAIL_THUMB_WIDTH),
+                                    Utils.convertDpToPixel(getActivity()
+                                            .getApplicationContext(), DETAIL_THUMB_HEIGHT))
+                            .centerCrop()
+                            .get();
+                    row.setImageBitmap(getActivity(), poster);
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
+
+                row.addAction(new Action(ACTION_WATCH_TRAILER, getResources().getString(
+                        R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
+                row.addAction(new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
+                        getResources().getString(R.string.rent_2)));
+                row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
+                        getResources().getString(R.string.buy_2)));
+                return row;
             }
-
-            row.addAction(new Action(ACTION_WATCH_TRAILER, getResources().getString(
-                    R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
-            row.addAction(new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
-                    getResources().getString(R.string.rent_2)));
-            row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
-                    getResources().getString(R.string.buy_2)));
-            return row;
+            return null;
         }
 
         @Override
         protected void onPostExecute(DetailsOverviewRow detailRow) {
-            ClassPresenterSelector ps = new ClassPresenterSelector();
-            DetailsOverviewRowPresenter dorPresenter =
-                    new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
+            if (!running) {
+                return;
+            }
+            ClassPresenterSelector presenterSelector = new ClassPresenterSelector();
             // set detail background and style
-            dorPresenter.setBackgroundColor(getResources().getColor(R.color.detail_background));
-            dorPresenter.setStyleLarge(true);
-            dorPresenter.setOnActionClickedListener(new OnActionClickedListener() {
+            mDorPresenter.setBackgroundColor(getResources().getColor(R.color.detail_background));
+            mDorPresenter.setStyleLarge(true);
+            mDorPresenter.setOnActionClickedListener(new OnActionClickedListener() {
                 @Override
                 public void onActionClicked(Action action) {
                     if (action.getId() == ACTION_WATCH_TRAILER) {
-                        Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                        intent.putExtra(getResources().getString(R.string.movie), selectedMovie);
-                        intent.putExtra(getResources().getString(R.string.should_start), true);
+                        Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                        intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
                         startActivity(intent);
-                    }
-                    else {
+                    } else {
                         Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
-            ps.addClassPresenter(DetailsOverviewRow.class, dorPresenter);
-            ps.addClassPresenter(ListRow.class,
-                    new ListRowPresenter());
-
-            ArrayObjectAdapter adapter = new ArrayObjectAdapter(ps);
+            presenterSelector.addClassPresenter(DetailsOverviewRow.class, mDorPresenter);
+            presenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+            ArrayObjectAdapter adapter = new ArrayObjectAdapter(presenterSelector);
             adapter.add(detailRow);
 
-            String subcategories[] = {
-                    getString(R.string.related_movies)
-            };
+            String subcategories[] = {getString(R.string.related_movies)};
             HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-            for (Map.Entry<String, List<Movie>> entry : movies.entrySet())
-            {
-                if (selectedMovie.getCategory().indexOf(entry.getKey()) >= 0) {
+            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
+                if (mSelectedMovie.getCategory().indexOf(entry.getKey()) >= 0) {
                     List<Movie> list = entry.getValue();
                     for (int j = 0; j < list.size(); j++) {
                         listRowAdapter.add(list.get(j));
@@ -167,20 +215,30 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             setAdapter(adapter);
         }
 
+        @Override
+        protected void onCancelled() {
+            running = false;
+        }
     }
 
-    protected OnItemClickedListener getDefaultItemClickedListener() {
-        return new OnItemClickedListener() {
-            @Override
-            public void onItemClicked(Object item, Row row) {
-                if (item instanceof Movie) {
-                    Movie movie = (Movie) item;
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(getResources().getString(R.string.movie), movie);
-                    startActivity(intent);
-                }
+    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
+                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+
+            if (item instanceof Movie) {
+                Movie movie = (Movie) item;
+                Log.d(TAG, "Item: " + item.toString());
+                Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                intent.putExtra(DetailsActivity.MOVIE, movie);
+
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        getActivity(),
+                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                getActivity().startActivity(intent, bundle);
             }
-        };
+        }
     }
 
     protected void updateBackground(URI uri) {

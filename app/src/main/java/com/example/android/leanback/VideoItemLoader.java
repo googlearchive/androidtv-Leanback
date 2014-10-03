@@ -16,12 +16,12 @@
 
 package com.example.android.leanback;
 
-import java.util.HashMap;
-import java.util.List;
-
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
+
+import java.util.HashMap;
+import java.util.List;
 
 /*
  * This class asynchronously loads videos from a backend

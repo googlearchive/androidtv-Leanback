@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens 
- * when they're clicked from Recommendations seciton on Home screen
+ * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens
+ * when they're clicked from Recommendations section on Home screen
  */
 public class UpdateRecommendationsService extends IntentService {
     private static final String TAG = "UpdateRecommendationsService";
@@ -41,6 +41,7 @@ public class UpdateRecommendationsService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Updating recommendation cards");
         HashMap<String, List<Movie>> recommendations = VideoProvider.getMovieList();
+        if (recommendations == null) return;
 
         int count = 0;
 
@@ -49,10 +50,8 @@ public class UpdateRecommendationsService extends IntentService {
                     .setContext(getApplicationContext())
                     .setSmallIcon(R.drawable.videos_by_google_icon);
 
-            for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet())
-            {
-                for (int i = 0; i < entry.getValue().size(); i++) {
-                    Movie movie = entry.getValue().get(i);
+            for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
+                for(Movie movie : entry.getValue()) {
                     Log.d(TAG, "Recommendation - " + movie.getTitle());
 
                     builder.setBackground(movie.getCardImageUrl())

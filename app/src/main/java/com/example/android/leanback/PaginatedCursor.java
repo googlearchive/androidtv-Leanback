@@ -69,16 +69,16 @@ public class PaginatedCursor extends AbstractCursor {
             mColumnTypes[i] = type;
             switch (type) {
                 case Cursor.FIELD_TYPE_BLOB:
-                    mByteArrayCacheIndexMap[i] = mByteArrayCacheColumnSize ++;
+                    mByteArrayCacheIndexMap[i] = mByteArrayCacheColumnSize++;
                     break;
                 case Cursor.FIELD_TYPE_FLOAT:
-                    mFloatCacheIndexMap[i] = mFloatCacheColumnSize ++;
+                    mFloatCacheIndexMap[i] = mFloatCacheColumnSize++;
                     break;
                 case Cursor.FIELD_TYPE_INTEGER:
-                    mIntCacheIndexMap[i] = mIntCacheColumnSize ++;
+                    mIntCacheIndexMap[i] = mIntCacheColumnSize++;
                     break;
                 case Cursor.FIELD_TYPE_STRING:
-                    mStringCacheIndexMap[i] = mStringCacheColumnSize ++;
+                    mStringCacheIndexMap[i] = mStringCacheColumnSize++;
                     break;
             }
         }
@@ -119,7 +119,7 @@ public class PaginatedCursor extends AbstractCursor {
                     switch (mCursor.getType(col)) {
                         case Cursor.FIELD_TYPE_BLOB:
                             mByteArrayDataCache[row][mByteArrayCacheIndexMap[col]] =
-                                mCursor.getBlob(col);
+                                    mCursor.getBlob(col);
                             break;
                         case Cursor.FIELD_TYPE_FLOAT:
                             mFloatDataCache[row][mFloatCacheIndexMap[col]] = mCursor.getFloat(col);
@@ -129,7 +129,7 @@ public class PaginatedCursor extends AbstractCursor {
                             break;
                         case Cursor.FIELD_TYPE_STRING:
                             mStringDataCache[row][mStringCacheIndexMap[col]] =
-                                mCursor.getString(col);
+                                    mCursor.getString(col);
                             break;
                     }
                 }
@@ -143,11 +143,8 @@ public class PaginatedCursor extends AbstractCursor {
     @Override
     public boolean onMove(int oldPosition, int newPosition) {
         // If it's a consecutive move and haven't exceeds the threshold, do nothing.
-        if ((newPosition - oldPosition) == 1 &&
+        if ((newPosition - oldPosition) != 1 ||
                 (newPosition + PAGE_THRESHOLD) <= mLastCachePosition) {
-            return true;
-        } else {
-            // Otherwise should start caching more Data;
             loadCacheStartingFromPosition(newPosition);
         }
         return true;

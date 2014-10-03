@@ -19,27 +19,20 @@ package com.example.android.leanback;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.Rating;
 import android.provider.BaseColumns;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Contains logic to return specific words from the video database, and
@@ -71,7 +64,7 @@ public class VideoDatabase {
     private static final int DATABASE_VERSION = 2;
 
     private final VideoDatabaseOpenHelper mDatabaseOpenHelper;
-    private static final HashMap<String, String> mColumnMap = buildColumnMap();
+    private static final HashMap<String, String> COLUMN_MAP = buildColumnMap();
 
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
@@ -82,7 +75,6 @@ public class VideoDatabase {
      * @param context The Context within which to work, used to create the DB
      */
     public VideoDatabase(Context context) {
-        Log.d(TAG, "new VideoDatabaseOpenHelper");
         mDatabaseOpenHelper = new VideoDatabaseOpenHelper(context);
     }
 
@@ -126,14 +118,13 @@ public class VideoDatabase {
      * @return Cursor positioned to matching word, or null if not found.
      */
     public Cursor getWord(String rowId, String[] columns) {
+        /* This builds a query that looks like:
+         *     SELECT <columns> FROM <table> WHERE rowid = <rowId>
+         */
         String selection = "rowid = ?";
         String[] selectionArgs = new String[]{rowId};
 
         return query(selection, selectionArgs, columns);
-
-        /* This builds a query that looks like:
-         *     SELECT <columns> FROM <table> WHERE rowid = <rowId>
-         */
     }
 
     /**
@@ -144,11 +135,6 @@ public class VideoDatabase {
      * @return Cursor over all words that match, or null if none found.
      */
     public Cursor getWordMatch(String query, String[] columns) {
-        String selection = KEY_NAME + " MATCH ?";
-        String[] selectionArgs = new String[]{query + "*"};
-
-        return query(selection, selectionArgs, columns);
-
         /* This builds a query that looks like:
          *     SELECT <columns> FROM <table> WHERE <KEY_WORD> MATCH 'query*'
          * which is an FTS3 search for the query text (plus a wildcard) inside the word column.
@@ -162,6 +148,10 @@ public class VideoDatabase {
          *   the selection clause to use FTS_VIRTUAL_TABLE instead of KEY_WORD (to search across
          *   the entire table, but sorting the relevance could be difficult.
          */
+        String selection = KEY_NAME + " MATCH ?";
+        String[] selectionArgs = new String[]{query + "*"};
+
+        return query(selection, selectionArgs, columns);
     }
 
     /**
@@ -179,7 +169,7 @@ public class VideoDatabase {
          */
         SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
         builder.setTables(FTS_VIRTUAL_TABLE);
-        builder.setProjectionMap(mColumnMap);
+        builder.setProjectionMap(COLUMN_MAP);
 
         Cursor cursor = new PaginatedCursor(builder.query(mDatabaseOpenHelper.getReadableDatabase(),
                 columns, selection, selectionArgs, null, null, null));
@@ -192,7 +182,6 @@ public class VideoDatabase {
         }
         return cursor;
     }
-
 
     /**
      * This creates/opens the database.
@@ -233,9 +222,7 @@ public class VideoDatabase {
         @Override
         public void onCreate(SQLiteDatabase db) {
             mDatabase = db;
-            Log.d(TAG, "Creating table");
             mDatabase.execSQL(FTS_TABLE_CREATE);
-            Log.d(TAG, "Loading database...");
             loadDatabase();
         }
 
@@ -255,43 +242,44 @@ public class VideoDatabase {
         }
 
         private void loadMovies() throws IOException {
-            Log.d(TAG, "Loading medias...");
+            Log.d(TAG, "Loading movies...");
 
-            //HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
             HashMap<String, List<Movie>> movies = null;
             try {
                 VideoProvider.setContext(mHelperContext);
                 movies = VideoProvider.buildMedia(mHelperContext,
                         mHelperContext.getResources().getString(R.string.catalog_url));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "JSon Exception when loading movie", e);
             }
 
             for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
                 List<Movie> list = entry.getValue();
-                for (int j = 0; j < list.size(); j++) {
-                    long id = addMovie(list.get(j));
+                for(Movie movie : list) {
+                    long id = addMovie(movie);
                     if (id < 0) {
-                        Log.e(TAG, "unable to add movie: " + list.get(j).toString());
+                        Log.e(TAG, "unable to add movie: " + movie.toString());
                     }
                 }
             }
-            Log.d(TAG, "DONE loading movies.");
             // add dummy movies to illustrate action deep link in search detail
             // Android TV Search requires that the media’s title, MIME type, production year,
             // and duration all match exactly to those found from Google’s servers.
-            addWord(mHelperContext.getString(R.string.noah_title),
+            addMovieForDeepLink(mHelperContext.getString(R.string.noah_title),
                     mHelperContext.getString(R.string.noah_description),
                     R.drawable.noah,
-                    8280000);
-            addWord(mHelperContext.getString(R.string.dragon2_title),
+                    8280000,
+                    "2014");
+            addMovieForDeepLink(mHelperContext.getString(R.string.dragon2_title),
                     mHelperContext.getString(R.string.dragon2_description),
                     R.drawable.dragon2,
-                    6300000);
-            addWord(mHelperContext.getString(R.string.maleficent_title),
+                    6300000,
+                    "2014");
+            addMovieForDeepLink(mHelperContext.getString(R.string.maleficent_title),
                     mHelperContext.getString(R.string.maleficent_description),
                     R.drawable.maleficent,
-                    5820000);
+                    5820000,
+                    "2014");
         }
 
         /**
@@ -320,16 +308,14 @@ public class VideoDatabase {
         }
 
         /**
-         * Add a word to the database.
+         * Add an entry to the database for dummy deep link.
          *
          * @return rowId or -1 if failed
          */
-        public long addWord(String word, String definition, int icon, long duration) {
+        public long addMovieForDeepLink(String title, String description, int icon, long duration, String production_year) {
             ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_NAME, word);
-            initialValues.put(KEY_DESCRIPTION, definition);
-            // Randomly pick a photo as icon for this word
-            Random r = new Random();
+            initialValues.put(KEY_NAME, title);
+            initialValues.put(KEY_DESCRIPTION, description);
             initialValues.put(KEY_ICON, icon);
             initialValues.put(KEY_DATA_TYPE, "video/mp4");
             initialValues.put(KEY_IS_LIVE, false);
@@ -340,7 +326,7 @@ public class VideoDatabase {
             initialValues.put(KEY_RENTAL_PRICE, "Free");
             initialValues.put(KEY_RATING_STYLE, Rating.RATING_5_STARS);
             initialValues.put(KEY_RATING_SCORE, 3.5f);
-            initialValues.put(KEY_PRODUCTION_YEAR, 2014);
+            initialValues.put(KEY_PRODUCTION_YEAR, production_year);
             initialValues.put(KEY_COLUMN_DURATION, duration);
             return mDatabase.insert(FTS_VIRTUAL_TABLE, null, initialValues);
         }

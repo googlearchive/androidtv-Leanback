@@ -68,7 +68,8 @@ public class CardPresenter extends Presenter {
         protected void updateCardViewImage(URI uri) {
             Picasso.with(mContext)
                     .load(uri.toString())
-                    .resize(Utils.dpToPx(CARD_WIDTH, mContext), Utils.dpToPx(CARD_HEIGHT, mContext))
+                    .resize(Utils.convertDpToPixel(mContext, CARD_WIDTH),
+                            Utils.convertDpToPixel(mContext, CARD_HEIGHT))
                     .error(mDefaultCardImage)
                     .into(mImageCardViewTarget);
         }
