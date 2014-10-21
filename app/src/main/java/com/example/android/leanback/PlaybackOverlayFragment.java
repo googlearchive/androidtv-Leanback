@@ -354,7 +354,12 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         if (++mCurrentItem >= mItems.size()) {
             mCurrentItem = 0;
         }
-        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
+        }
+        else {
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+        }
         updatePlaybackRow(mCurrentItem);
     }
 
@@ -362,7 +367,12 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         if (--mCurrentItem < 0) {
             mCurrentItem = mItems.size() - 1;
         }
-        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
+        }
+        else {
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+        }
         updatePlaybackRow(mCurrentItem);
     }
 
