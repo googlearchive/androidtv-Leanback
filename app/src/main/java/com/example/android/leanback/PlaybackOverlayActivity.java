@@ -121,8 +121,9 @@ public class PlaybackOverlayActivity extends Activity implements
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                mVideoView.start();
-                mPlaybackState = PlaybackState.PLAYING;
+                if (mPlaybackState == PlaybackState.PLAYING) {
+                    mVideoView.start();
+                }
             }
         });
 
