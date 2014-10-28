@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -97,12 +97,14 @@ public class LeanbackDetailsFragment extends DetailsFragment {
                     DetailsActivity.SHARED_ELEMENT_NAME);
             updateBackground(mSelectedMovie.getBackgroundImageURI());
             setOnItemViewClickedListener(new ItemViewClickedListener());
+        } else {
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
         }
     }
 
     @Override
     public void onStop() {
-        mDetailRowBuilderTask.cancel(true);
         super.onStop();
     }
 
@@ -119,9 +121,12 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             int selectedIndex = Integer.parseInt(intentData.getLastPathSegment());
             HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
             int movieTally = 0;
+            if (movies == null) {
+                return false;
+            }
             for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
                 List<Movie> list = entry.getValue();
-                for(Movie movie : list) {
+                for (Movie movie : list) {
                     movieTally++;
                     if (selectedIndex == movieTally) {
                         mSelectedMovie = movie;
@@ -133,6 +138,14 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         return false;
     }
 
+    protected void updateBackground(URI uri) {
+        Picasso.with(getActivity())
+                .load(uri.toString())
+                .resize(mMetrics.widthPixels, mMetrics.heightPixels)
+                .error(mDefaultBackground)
+                .into(mBackgroundTarget);
+    }
+
     private class DetailRowBuilderTask extends AsyncTask<Movie, Integer, DetailsOverviewRow> {
 
         private volatile boolean running = true;
@@ -140,7 +153,7 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         @Override
         protected DetailsOverviewRow doInBackground(Movie... movies) {
 
-            while(running) {
+            while (running) {
                 mSelectedMovie = movies[0];
 
                 Log.d(TAG, "doInBackground: " + mSelectedMovie.toString());
@@ -239,13 +252,5 @@ public class LeanbackDetailsFragment extends DetailsFragment {
                 getActivity().startActivity(intent, bundle);
             }
         }
-    }
-
-    protected void updateBackground(URI uri) {
-        Picasso.with(getActivity())
-                .load(uri.toString())
-                .resize(mMetrics.widthPixels, mMetrics.heightPixels)
-                .error(mDefaultBackground)
-                .into(mBackgroundTarget);
     }
 }

@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -68,7 +68,7 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
         for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
             List<Movie> list = entry.getValue();
             Collections.shuffle(list, new Random(seed));
-            for(Movie movie:list) {
+            for (Movie movie : list) {
                 mAdapter.add(movie);
             }
         }

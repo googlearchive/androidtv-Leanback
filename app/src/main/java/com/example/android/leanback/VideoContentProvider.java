@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -26,27 +26,25 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
+
 /**
  * Provides access to the video database.
  */
 public class VideoContentProvider extends ContentProvider {
-    private static String TAG = "VideoContentProvider";
-
-    public static String AUTHORITY = "com.example.android.leanback";
     // MIME types used for searching words or looking up a single definition
     public static final String WORDS_MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "/vnd.example.android.leanback.VideoContentProvider";
     public static final String DEFINITION_MIME_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE +
             "/vnd.example.android.leanback.VideoContentProvider";
-
-    private VideoDatabase mVideoDatabase;
-
     // UriMatcher stuff
     private static final int SEARCH_WORDS = 0;
-    private static final int GET_WORD = 1;
     private static final int SEARCH_SUGGEST = 2;
     private static final int REFRESH_SHORTCUT = 3;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
+    public static String AUTHORITY = "com.example.android.tvleanback";
+    private static String TAG = "VideoContentProvider";
+    private VideoDatabase mVideoDatabase;
 
     /**
      * Builds up a UriMatcher for search suggestion and shortcut refresh queries.
@@ -57,7 +55,6 @@ public class VideoContentProvider extends ContentProvider {
         Log.d(TAG, "suggest_uri_path_query: " + SearchManager.SUGGEST_URI_PATH_QUERY);
         matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
         matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY + "/*", SEARCH_SUGGEST);
-
         return matcher;
     }
 
@@ -125,8 +122,6 @@ public class VideoContentProvider extends ContentProvider {
         switch (URI_MATCHER.match(uri)) {
             case SEARCH_WORDS:
                 return WORDS_MIME_TYPE;
-            case GET_WORD:
-                return DEFINITION_MIME_TYPE;
             case SEARCH_SUGGEST:
                 return SearchManager.SUGGEST_MIME_TYPE;
             case REFRESH_SHORTCUT:
@@ -152,5 +147,4 @@ public class VideoContentProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException();
     }
-
 }
