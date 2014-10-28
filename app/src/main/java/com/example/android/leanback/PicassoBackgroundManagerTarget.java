@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;

@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.LoaderManager;
 import android.content.Intent;
@@ -62,15 +62,14 @@ public class MainFragment extends BrowseFragment implements
     private static int BACKGROUND_UPDATE_DELAY = 300;
     private static int GRID_ITEM_WIDTH = 200;
     private static int GRID_ITEM_HEIGHT = 200;
-
+    private static String mVideosUrl;
+    private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
     private Target mBackgroundTarget;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
-    private final Handler mHandler = new Handler();
     private URI mBackgroundURI;
-    private static String mVideosUrl;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -224,6 +223,11 @@ public class MainFragment extends BrowseFragment implements
         mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
     }
 
+    private void updateRecommendations() {
+        Intent recommendationIntent = new Intent(getActivity(), UpdateRecommendationsService.class);
+        getActivity().startService(recommendationIntent);
+    }
+
     private class UpdateBackgroundTask extends TimerTask {
 
         @Override
@@ -260,11 +264,6 @@ public class MainFragment extends BrowseFragment implements
         @Override
         public void onUnbindViewHolder(ViewHolder viewHolder) {
         }
-    }
-
-    private void updateRecommendations() {
-        Intent recommendationIntent = new Intent(getActivity(), UpdateRecommendationsService.class);
-        getActivity().startService(recommendationIntent);
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
