@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -51,7 +51,7 @@ public class UpdateRecommendationsService extends IntentService {
                     .setSmallIcon(R.drawable.videos_by_google_icon);
 
             for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
-                for(Movie movie : entry.getValue()) {
+                for (Movie movie : entry.getValue()) {
                     Log.d(TAG, "Recommendation - " + movie.getTitle());
 
                     builder.setBackground(movie.getCardImageUrl())

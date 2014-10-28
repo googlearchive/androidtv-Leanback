@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;

@@ -11,10 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -61,6 +62,12 @@ public class BrowseErrorActivity extends Activity {
                 mErrorFragment.setErrorContent();
             }
         }, TIMER_DELAY);
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        startActivity(new Intent(this, SearchActivity.class));
+        return true;
     }
 
     static public class SpinnerFragment extends Fragment {

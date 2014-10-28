@@ -1,4 +1,4 @@
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;
@@ -28,12 +28,6 @@ public class PaginatedCursor extends AbstractCursor {
     private final float[][] mFloatDataCache;
     private final int[][] mIntDataCache;
     private final String[][] mStringDataCache;
-
-    private int mByteArrayCacheColumnSize;
-    private int mFloatCacheColumnSize;
-    private int mIntCacheColumnSize;
-    private int mStringCacheColumnSize;
-
     /**
      * Index mapping from column index into the data type specific cache index;
      */
@@ -41,7 +35,10 @@ public class PaginatedCursor extends AbstractCursor {
     private final int[] mFloatCacheIndexMap;
     private final int[] mIntCacheIndexMap;
     private final int[] mStringCacheIndexMap;
-
+    private int mByteArrayCacheColumnSize;
+    private int mFloatCacheColumnSize;
+    private int mIntCacheColumnSize;
+    private int mStringCacheColumnSize;
     private int mLastCachePosition;
 
     public PaginatedCursor(Cursor cursor) {
