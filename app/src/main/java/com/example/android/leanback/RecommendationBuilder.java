@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -36,7 +36,6 @@ public class RecommendationBuilder {
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
 
-    public static final String EXTRA_BACKGROUND_IMAGE_URL = "background_image_url";
     private Context mContext;
     private NotificationManager mNotificationManager;
 
@@ -108,7 +107,8 @@ public class RecommendationBuilder {
 
         Bundle extras = new Bundle();
         if (mBackgroundUri != null) {
-            extras.putString(EXTRA_BACKGROUND_IMAGE_URL, mBackgroundUri);
+            Log.d(TAG, "Background - " + mBackgroundUri);
+            extras.putString(Notification.EXTRA_BACKGROUND_IMAGE_URI, mBackgroundUri);
         }
 
         Bitmap image = Picasso.with(mContext)

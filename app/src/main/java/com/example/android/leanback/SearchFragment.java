@@ -12,9 +12,8 @@
  * the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -87,7 +86,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-            for(Movie movie : entry.getValue()) {
+            for (Movie movie : entry.getValue()) {
                 if (movie.getTitle().toLowerCase(Locale.ENGLISH)
                         .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0
                         || movie.getDescription().toLowerCase(Locale.ENGLISH)

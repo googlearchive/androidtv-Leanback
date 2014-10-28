@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.SearchManager;
 import android.content.ContentValues;
@@ -39,8 +39,6 @@ import java.util.Map;
  * load the video database table when it needs to be created.
  */
 public class VideoDatabase {
-    private static final String TAG = "VideoDatabase";
-
     //The columns we'll include in the video database table
     public static final String KEY_NAME = SearchManager.SUGGEST_COLUMN_TEXT_1;
     public static final String KEY_DESCRIPTION = SearchManager.SUGGEST_COLUMN_TEXT_2;
@@ -58,16 +56,14 @@ public class VideoDatabase {
     public static final String KEY_PRODUCTION_YEAR = SearchManager.SUGGEST_COLUMN_PRODUCTION_YEAR;
     public static final String KEY_COLUMN_DURATION = SearchManager.SUGGEST_COLUMN_DURATION;
     public static final String KEY_ACTION = SearchManager.SUGGEST_COLUMN_INTENT_ACTION;
-
+    private static final String TAG = "VideoDatabase";
     private static final String DATABASE_NAME = "video_database_leanback";
     private static final String FTS_VIRTUAL_TABLE = "Leanback_table";
     private static final int DATABASE_VERSION = 2;
-
-    private final VideoDatabaseOpenHelper mDatabaseOpenHelper;
     private static final HashMap<String, String> COLUMN_MAP = buildColumnMap();
-
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
+    private final VideoDatabaseOpenHelper mDatabaseOpenHelper;
 
     /**
      * Constructor
@@ -191,6 +187,11 @@ public class VideoDatabase {
         private final Context mHelperContext;
         private SQLiteDatabase mDatabase;
 
+        VideoDatabaseOpenHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            mHelperContext = context;
+        }
+
         /* Note that FTS3 does not support column constraints and thus, you cannot
          * declare a primary key. However, "rowid" is automatically used as a unique
          * identifier, so when making requests, we will use "_id" as an alias for "rowid"
@@ -213,11 +214,6 @@ public class VideoDatabase {
                         KEY_PRODUCTION_YEAR + "," +
                         KEY_COLUMN_DURATION + "," +
                         KEY_ACTION + ");";
-
-        VideoDatabaseOpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            mHelperContext = context;
-        }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
@@ -255,7 +251,7 @@ public class VideoDatabase {
 
             for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
                 List<Movie> list = entry.getValue();
-                for(Movie movie : list) {
+                for (Movie movie : list) {
                     long id = addMovie(movie);
                     if (id < 0) {
                         Log.e(TAG, "unable to add movie: " + movie.toString());
@@ -338,6 +334,8 @@ public class VideoDatabase {
             db.execSQL("DROP TABLE IF EXISTS " + FTS_VIRTUAL_TABLE);
             onCreate(db);
         }
+
+
     }
 
 }

@@ -11,9 +11,10 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -47,7 +48,6 @@ public class PlaybackOverlayActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playback_controls);
         loadViews();
-        //setupCallbacks();
         overScan();
     }
 
@@ -56,6 +56,7 @@ public class PlaybackOverlayActivity extends Activity implements
         super.onDestroy();
         mVideoView.suspend();
     }
+
     /**
      * Implementation of OnPlayPauseClickedListener
      */
@@ -76,6 +77,21 @@ public class PlaybackOverlayActivity extends Activity implements
         } else {
             mPlaybackState = PlaybackState.PAUSED;
             mVideoView.pause();
+        }
+    }
+
+    /**
+     * Implementation of OnPlayPauseClickedListener
+     */
+    public void onFragmentFfwRwd(Movie movie, int position) {
+        mVideoView.setVideoPath(movie.getVideoUrl());
+
+        Log.d(TAG, "seek current time: " + position);
+        if (mPlaybackState == PlaybackState.PLAYING) {
+            if (position > 0) {
+                mVideoView.seekTo(position);
+                mVideoView.start();
+            }
         }
     }
 
@@ -137,11 +153,30 @@ public class PlaybackOverlayActivity extends Activity implements
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        onVisibleBehindCanceled();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (!requestVisibleBehind(true)) {
+            mVideoView.stopPlayback();
+        }
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        startActivity(new Intent(this, SearchActivity.class));
+        return true;
+    }
+
     /*
      * List of various states that we can be in
      */
     public static enum PlaybackState {
         PLAYING, PAUSED, BUFFERING, IDLE;
     }
-
 }

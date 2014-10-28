@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.android.leanback;
+package com.example.android.tvleanback;
 
 import android.app.Activity;
 import android.content.Context;
@@ -48,7 +48,6 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -58,15 +57,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /*
  * Class for video playback with media control
  */
 public class PlaybackOverlayFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment {
     private static final String TAG = "PlaybackControlsFragment";
-
-    private static Context sContext;
-
     private static final boolean SHOW_DETAIL = true;
     private static final boolean HIDE_MORE_ACTIONS = false;
     private static final int PRIMARY_CONTROLS = 5;
@@ -77,7 +75,12 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private static final int DEFAULT_UPDATE_PERIOD = 1000;
     private static final int UPDATE_PERIOD = 16;
     private static final int SIMULATED_BUFFERED_TIME = 10000;
+    private static final int CLICK_TRACKING_DELAY = 1000;
+    private static final int INITIAL_SPEED = 10000;
 
+    private static Context sContext;
+    private final Handler mClickTrackingHandler = new Handler();
+    OnPlayPauseClickedListener mCallback;
     private ArrayObjectAdapter mRowsAdapter;
     private ArrayObjectAdapter mPrimaryActionsAdapter;
     private ArrayObjectAdapter mSecondaryActionsAdapter;
@@ -93,17 +96,14 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private PlaybackControlsRow mPlaybackControlsRow;
     private ArrayList<Movie> mItems = new ArrayList<Movie>();
     private int mCurrentItem;
+    private long mDuration;
     private Handler mHandler;
     private Runnable mRunnable;
     private Movie mSelectedMovie;
     private PicassoPlaybackControlsRowTarget mPlaybackControlsRowTarget;
-
-    OnPlayPauseClickedListener mCallback;
-
-    // Container Activity must implement this interface
-    public interface OnPlayPauseClickedListener {
-        public void onFragmentPlayPause(Movie movie, int position, Boolean playPause);
-    }
+    private int mFfwRwdSpeed = INITIAL_SPEED;
+    private Timer mClickTrackingTimer;
+    private int mClickCount;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -197,9 +197,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 } else if (action.getId() == mSkipPreviousAction.getId()) {
                     prev();
                 } else if (action.getId() == mFastForwardAction.getId()) {
-                    Toast.makeText(getActivity(), "TODO: Fast Forward", Toast.LENGTH_SHORT).show();
+                    fastForward();
                 } else if (action.getId() == mRewindAction.getId()) {
-                    Toast.makeText(getActivity(), "TODO: Rewind", Toast.LENGTH_SHORT).show();
+                    fastRewind();
                 }
                 if (action instanceof PlaybackControlsRow.MultiAction) {
                     ((PlaybackControlsRow.MultiAction) action).nextIndex();
@@ -224,13 +224,12 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             mmr.setDataSource(movie.getVideoUrl(), new HashMap<String, String>());
-        }
-        else {
+        } else {
             mmr.setDataSource(movie.getVideoUrl());
         }
         String time = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long duration = Long.parseLong(time);
-        return (int) duration;
+        mDuration = Long.parseLong(time);
+        return (int) mDuration;
     }
 
     private void addPlaybackControlsRow() {
@@ -316,7 +315,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     private void addOtherRows() {
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for(Movie movie: mItems) {
+        for (Movie movie : mItems) {
             listRowAdapter.add(movie);
         }
         HeaderItem header = new HeaderItem(0, getString(R.string.related_movies), null);
@@ -356,10 +355,10 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
             mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
-        }
-        else {
+        } else {
             mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
         }
+        mFfwRwdSpeed = INITIAL_SPEED;
         updatePlaybackRow(mCurrentItem);
     }
 
@@ -369,11 +368,36 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
             mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
-        }
-        else {
+        } else {
             mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
         }
+        mFfwRwdSpeed = INITIAL_SPEED;
         updatePlaybackRow(mCurrentItem);
+    }
+
+    private void fastForward() {
+        Log.d(TAG, "current time: " + mPlaybackControlsRow.getCurrentTime());
+        startClickTrackingTimer();
+        int currentTime = mPlaybackControlsRow.getCurrentTime() + mFfwRwdSpeed;
+        if (currentTime > (int) mDuration) {
+            currentTime = (int) mDuration;
+        }
+        fastFR(currentTime);
+    }
+
+    private void fastRewind() {
+        startClickTrackingTimer();
+        int currentTime = mPlaybackControlsRow.getCurrentTime() - mFfwRwdSpeed;
+        if (currentTime < 0 || currentTime > (int) mDuration) {
+            currentTime = 0;
+        }
+        fastFR(currentTime);
+    }
+
+    private void fastFR(int currentTime) {
+        mCallback.onFragmentFfwRwd(mItems.get(mCurrentItem), currentTime);
+        mPlaybackControlsRow.setCurrentTime(currentTime);
+        mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
     }
 
     private void stopProgressAutomation() {
@@ -386,6 +410,33 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     public void onStop() {
         stopProgressAutomation();
         super.onStop();
+    }
+
+    protected void updateVideoImage(URI uri) {
+        Picasso.with(sContext)
+                .load(uri.toString())
+                .resize(Utils.convertDpToPixel(sContext, CARD_WIDTH),
+                        Utils.convertDpToPixel(sContext, CARD_HEIGHT))
+                .into(mPlaybackControlsRowTarget);
+    }
+
+    private void startClickTrackingTimer() {
+        if (null != mClickTrackingTimer) {
+            mClickCount++;
+            mClickTrackingTimer.cancel();
+        } else {
+            mClickCount = 0;
+            mFfwRwdSpeed = INITIAL_SPEED;
+        }
+        mClickTrackingTimer = new Timer();
+        mClickTrackingTimer.schedule(new UpdateFfwRwdSpeedTask(), CLICK_TRACKING_DELAY);
+    }
+
+    // Container Activity must implement this interface
+    public interface OnPlayPauseClickedListener {
+        public void onFragmentPlayPause(Movie movie, int position, Boolean playPause);
+
+        public void onFragmentFfwRwd(Movie movie, int position);
     }
 
     static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {
@@ -420,12 +471,24 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
     }
 
-    protected void updateVideoImage(URI uri) {
-        Picasso.with(sContext)
-                .load(uri.toString())
-                .resize(Utils.convertDpToPixel(sContext, CARD_WIDTH),
-                        Utils.convertDpToPixel(sContext, CARD_HEIGHT))
-                .into(mPlaybackControlsRowTarget);
-    }
+    private class UpdateFfwRwdSpeedTask extends TimerTask {
 
+        @Override
+        public void run() {
+            mClickTrackingHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mClickCount == 0) {
+                        mFfwRwdSpeed = INITIAL_SPEED;
+                    } else if (mClickCount == 1) {
+                        mFfwRwdSpeed *= 2;
+                    } else if (mClickCount >= 2) {
+                        mFfwRwdSpeed *= 4;
+                    }
+                    mClickCount = 0;
+                    mClickTrackingTimer = null;
+                }
+            });
+        }
+    }
 }
