@@ -32,6 +32,9 @@ import java.io.FileNotFoundException;
  * Provides access to the video database.
  */
 public class VideoContentProvider extends ContentProvider {
+    private static String TAG = "VideoContentProvider";
+    public static String AUTHORITY = "com.example.android.tvleanback";
+
     // MIME types used for searching words or looking up a single definition
     public static final String WORDS_MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "/vnd.example.android.leanback.VideoContentProvider";
@@ -42,8 +45,7 @@ public class VideoContentProvider extends ContentProvider {
     private static final int SEARCH_SUGGEST = 2;
     private static final int REFRESH_SHORTCUT = 3;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
-    public static String AUTHORITY = "com.example.android.tvleanback";
-    private static String TAG = "VideoContentProvider";
+
     private VideoDatabase mVideoDatabase;
 
     /**
