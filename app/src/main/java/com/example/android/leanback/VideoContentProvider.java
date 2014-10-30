@@ -35,7 +35,6 @@ public class VideoContentProvider extends ContentProvider {
     private static String TAG = "VideoContentProvider";
     public static String AUTHORITY = "com.example.android.tvleanback";
 
-
     // MIME types used for searching words or looking up a single definition
     public static final String WORDS_MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "/vnd.example.android.leanback.VideoContentProvider";
