@@ -21,7 +21,7 @@
     android:layout_height="match_parent">
 
     <fragment
-        android:name="com.example.android.leanback.MainFragment"
+        android:name="com.example.android.tvleanback.MainFragment"
         android:id="@+id/main_browse_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
