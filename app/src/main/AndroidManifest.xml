@@ -32,6 +32,11 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+     <!-- The android.hardware.microphone feature requirement is implied by the RECORD_AUDIO permission but it's not available on every Android TV devices. -->
+     <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
     <uses-feature android:name="android.software.leanback"
         android:required="true" />
 
