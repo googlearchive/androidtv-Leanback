@@ -16,7 +16,7 @@
 -->
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="com.example.android.tvleanback.LeanbackDetailsFragment"
+    android:name="com.example.android.tvleanback.ui.MovieDetailsFragment"
     android:id="@+id/details_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
