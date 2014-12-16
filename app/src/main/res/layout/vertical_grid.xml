@@ -16,7 +16,7 @@
 -->
 
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:name="com.example.android.tvleanback.VerticalGridFragment"
+    android:name="com.example.android.tvleanback.ui.VerticalGridFragment"
     android:id="@+id/vertical_grid_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

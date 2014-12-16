@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -21,6 +21,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
+
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.model.Movie;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
