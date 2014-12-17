@@ -66,6 +66,8 @@ public class LeanbackDetailsFragment extends DetailsFragment {
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
 
+    private static final int NO_NOTIFICATION = -1;
+
     private Movie mSelectedMovie;
 
     private Drawable mDefaultBackground;
@@ -97,7 +99,9 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             mDetailRowBuilderTask = (DetailRowBuilderTask) new DetailRowBuilderTask().execute(mSelectedMovie);
             mDorPresenter.setSharedElementEnterTransition(getActivity(),
                     DetailsActivity.SHARED_ELEMENT_NAME);
-            removeNotification();
+
+            removeNotification(getActivity().getIntent().getIntExtra(DetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
+
             updateBackground(mSelectedMovie.getBackgroundImageURI());
             setOnItemViewClickedListener(new ItemViewClickedListener());
         } else {
@@ -106,9 +110,8 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         }
     }
 
-    private void removeNotification() {
-        int notificationId = getActivity().getIntent().getIntExtra(DetailsActivity.NOTIFICATION_ID, -1);
-        if (notificationId != -1) {
+    private void removeNotification(int notificationId) {
+        if (notificationId != NO_NOTIFICATION) {
             NotificationManager notificationManager = (NotificationManager) getActivity()
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(notificationId);
