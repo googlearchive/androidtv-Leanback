@@ -14,6 +14,8 @@
 
 package com.example.android.tvleanback;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -95,11 +97,21 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             mDetailRowBuilderTask = (DetailRowBuilderTask) new DetailRowBuilderTask().execute(mSelectedMovie);
             mDorPresenter.setSharedElementEnterTransition(getActivity(),
                     DetailsActivity.SHARED_ELEMENT_NAME);
+            removeNotification();
             updateBackground(mSelectedMovie.getBackgroundImageURI());
             setOnItemViewClickedListener(new ItemViewClickedListener());
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
+        }
+    }
+
+    private void removeNotification() {
+        int notificationId = getActivity().getIntent().getIntExtra(DetailsActivity.NOTIFICATION_ID, -1);
+        if (notificationId != -1) {
+            NotificationManager notificationManager = (NotificationManager) getActivity()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(notificationId);
         }
     }
 
