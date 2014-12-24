@@ -45,10 +45,19 @@ public class CardPresenter extends Presenter {
         Log.d(TAG, "onCreateViewHolder");
         mContext = parent.getContext();
 
-        ImageCardView cardView = new ImageCardView(mContext);
+        ImageCardView cardView = new ImageCardView(mContext) {
+            @Override
+            public void setSelected(boolean selected) {
+                int color1 = mContext.getResources().getColor(R.color.detail_background);
+                int color2 = mContext.getResources().getColor(R.color.default_background);
+                int color = selected ? color1 : color2;
+                findViewById(R.id.info_field).setBackgroundColor(color);
+                super.setSelected(selected);
+            }
+        };
+
         cardView.setFocusable(true);
         cardView.setFocusableInTouchMode(true);
-        cardView.setBackgroundColor(mContext.getResources().getColor(R.color.fastlane_background));
         return new ViewHolder(cardView);
     }
 
