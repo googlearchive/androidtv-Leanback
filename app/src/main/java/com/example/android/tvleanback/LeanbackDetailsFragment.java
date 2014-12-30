@@ -15,7 +15,6 @@
 package com.example.android.tvleanback;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,8 +39,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.util.HashMap;
 import java.util.List;
@@ -138,27 +139,14 @@ public class LeanbackDetailsFragment extends DetailsFragment {
     }
 
     protected void updateBackground(String uri) {
-        int width = mMetrics.widthPixels;
-        int height = mMetrics.heightPixels;
-        Picasso.with(getActivity())
+        Glide.with(getActivity())
                 .load(uri)
-                .resize(width, height)
                 .centerCrop()
                 .error(mDefaultBackground)
-                .into(new Target() {
+                .into(new SimpleTarget<GlideDrawable>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        mBackgroundManager.setBitmap(bitmap);
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        mBackgroundManager.setDrawable(mDefaultBackground);
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        mBackgroundManager.setDrawable(placeHolderDrawable);
+                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                        mBackgroundManager.setDrawable(resource);
                     }
                 });
     }
@@ -177,27 +165,17 @@ public class LeanbackDetailsFragment extends DetailsFragment {
                 .getApplicationContext(), DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity()
                 .getApplicationContext(), DETAIL_THUMB_HEIGHT);
-        Picasso.with(getActivity())
+        Glide.with(getActivity())
                 .load(mSelectedMovie.getCardImageUrl())
-                .resize(width, height)
                 .centerCrop()
                 .error(R.drawable.default_background)
-                .into(new Target() {
+                .into(new SimpleTarget<GlideDrawable>(width, height) {
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        row.setImageBitmap(getActivity(), bitmap);
-                        mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        row.setImageDrawable(errorDrawable);
-                        mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        row.setImageDrawable(placeHolderDrawable);
+                    public void onResourceReady(GlideDrawable resource,
+                                                GlideAnimation<? super GlideDrawable>
+                                                        glideAnimation) {
+                        Log.d(TAG, "details overview card image url ready: " + resource);
+                        row.setImageDrawable(resource);
                         mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
                     }
                 });
