@@ -35,7 +35,7 @@ public class PlaybackOverlayActivity extends Activity implements
     private static final double MEDIA_RIGHT_MARGIN = 0.025;
     private static final double MEDIA_BOTTOM_MARGIN = 0.025;
     private static final double MEDIA_LEFT_MARGIN = 0.025;
-
+    private PlaybackOverlayFragment mPlaybackOverlayFragment;
     private VideoView mVideoView;
     private PlaybackState mPlaybackState = PlaybackState.IDLE;
 
@@ -96,6 +96,10 @@ public class PlaybackOverlayActivity extends Activity implements
 
     private void loadViews() {
         mVideoView = (VideoView) findViewById(R.id.videoView);
+
+        mPlaybackOverlayFragment = (PlaybackOverlayFragment)
+                getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+        mPlaybackOverlayFragment.pressPlay();
     }
 
     private void overScan() {
