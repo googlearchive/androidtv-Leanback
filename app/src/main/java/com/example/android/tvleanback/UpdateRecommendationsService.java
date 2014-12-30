@@ -24,9 +24,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,13 +79,17 @@ public class UpdateRecommendationsService extends IntentService {
                         .setIntent(buildPendingIntent(movie));
 
                 try {
-                    Bitmap bitmap = Picasso.with(getApplicationContext())
+                    Bitmap bitmap = Glide.with(getApplicationContext())
                             .load(movie.getCardImageUrl())
+                            .asBitmap()
+                            .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
                             .get();
                     notificationBuilder.setBitmap(bitmap);
                     Notification notification = notificationBuilder.build();
                     mNotificationManager.notify(id, notification);
-                } catch (IOException e) {
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Could not create recommendation: " + e);
+                } catch (ExecutionException e) {
                     Log.e(TAG, "Could not create recommendation: " + e);
                 }
 

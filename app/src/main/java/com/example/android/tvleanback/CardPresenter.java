@@ -21,7 +21,7 @@ import android.support.v17.leanback.widget.Presenter;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand. 
@@ -59,9 +59,8 @@ public class CardPresenter extends Presenter {
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getStudio());
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            Picasso.with(mContext)
+            Glide.with(mContext)
                     .load(movie.getCardImageUrl())
-                    .resize(CARD_WIDTH, CARD_HEIGHT)
                     .centerCrop()
                     .error(mDefaultCardImage)
                     .into(cardView.getMainImageView());
