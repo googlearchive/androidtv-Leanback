@@ -42,8 +42,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -66,10 +68,10 @@ public class MainFragment extends BrowseFragment implements
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
-    private Target mBackgroundTarget;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
     private URI mBackgroundURI;
+    private BackgroundManager mBackgroundManager;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -93,9 +95,8 @@ public class MainFragment extends BrowseFragment implements
     }
 
     private void prepareBackgroundManager() {
-        BackgroundManager backgroundManager = BackgroundManager.getInstance(getActivity());
-        backgroundManager.attach(getActivity().getWindow());
-        mBackgroundTarget = new PicassoBackgroundManagerTarget(backgroundManager);
+        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
@@ -197,13 +198,21 @@ public class MainFragment extends BrowseFragment implements
         mDefaultBackground = getResources().getDrawable(resourceId);
     }
 
-    protected void updateBackground(URI uri) {
-        Picasso.with(getActivity())
-                .load(uri.toString())
-                .resize(mMetrics.widthPixels, mMetrics.heightPixels)
+    protected void updateBackground(String uri) {
+        int width = mMetrics.widthPixels;
+        int height = mMetrics.heightPixels;
+        Glide.with(getActivity())
+                .load(uri)
                 .centerCrop()
                 .error(mDefaultBackground)
-                .into(mBackgroundTarget);
+                .into(new SimpleTarget<GlideDrawable>(width, height) {
+                    @Override
+                    public void onResourceReady(GlideDrawable resource,
+                                                GlideAnimation<? super GlideDrawable>
+                                                        glideAnimation) {
+                        mBackgroundManager.setDrawable(resource);
+                    }
+                });
         mBackgroundTimer.cancel();
     }
 
@@ -236,7 +245,7 @@ public class MainFragment extends BrowseFragment implements
                 @Override
                 public void run() {
                     if (mBackgroundURI != null) {
-                        updateBackground(mBackgroundURI);
+                        updateBackground(mBackgroundURI.toString());
                     }
                 }
             });

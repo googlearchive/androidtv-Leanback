@@ -15,15 +15,21 @@
 package com.example.android.tvleanback;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.util.Log;
 
-import java.io.IOException;
+import com.bumptech.glide.Glide;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /*
  * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens
@@ -33,6 +39,11 @@ public class UpdateRecommendationsService extends IntentService {
     private static final String TAG = "UpdateRecommendationsService";
     private static final int MAX_RECOMMENDATIONS = 3;
 
+    private static int CARD_WIDTH = 313;
+    private static int CARD_HEIGHT = 176;
+
+    private NotificationManager mNotificationManager;
+
     public UpdateRecommendationsService() {
         super("RecommendationService");
     }
@@ -41,38 +52,51 @@ public class UpdateRecommendationsService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Updating recommendation cards");
         HashMap<String, List<Movie>> recommendations = VideoProvider.getMovieList();
-        if (recommendations == null) return;
+        if (recommendations == null) {
+            return;
+        }
+
+        if (mNotificationManager == null) {
+            mNotificationManager = (NotificationManager) getApplicationContext()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        RecommendationBuilder builder = new RecommendationBuilder()
+                .setContext(getApplicationContext())
+                .setSmallIcon(R.drawable.videos_by_google_icon);
 
         int count = 0;
+        for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
+            for (Movie movie : entry.getValue()) {
+                Log.d(TAG, "Recommendation - " + movie.getTitle());
 
-        try {
-            RecommendationBuilder builder = new RecommendationBuilder()
-                    .setContext(getApplicationContext())
-                    .setSmallIcon(R.drawable.videos_by_google_icon);
+                final int id = count + 1;
+                final RecommendationBuilder notificationBuilder = builder.setBackground(movie.getCardImageUrl())
+                        .setId(id)
+                        .setPriority(MAX_RECOMMENDATIONS - count)
+                        .setTitle(movie.getTitle())
+                        .setDescription(getString(R.string.popular_header))
+                        .setIntent(buildPendingIntent(movie));
 
-            for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
-                for (Movie movie : entry.getValue()) {
-                    Log.d(TAG, "Recommendation - " + movie.getTitle());
-
-                    builder.setBackground(movie.getCardImageUrl())
-                            .setId(count + 1)
-                            .setPriority(MAX_RECOMMENDATIONS - count)
-                            .setTitle(movie.getTitle())
-                            .setDescription(getString(R.string.popular_header))
-                            .setImage(movie.getCardImageUrl())
-                            .setIntent(buildPendingIntent(movie))
-                            .build();
-
-                    if (++count >= MAX_RECOMMENDATIONS) {
-                        break;
-                    }
+                try {
+                    Bitmap bitmap = Glide.with(getApplicationContext())
+                            .load(movie.getCardImageUrl())
+                            .asBitmap()
+                            .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
+                            .get();
+                    notificationBuilder.setBitmap(bitmap);
+                    Notification notification = notificationBuilder.build();
+                    mNotificationManager.notify(id, notification);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Could not create recommendation: " + e);
+                } catch (ExecutionException e) {
+                    Log.e(TAG, "Could not create recommendation: " + e);
                 }
+
                 if (++count >= MAX_RECOMMENDATIONS) {
                     break;
                 }
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Unable to update recommendation", e);
         }
     }
 
