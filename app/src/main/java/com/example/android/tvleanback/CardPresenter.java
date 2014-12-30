@@ -48,9 +48,9 @@ public class CardPresenter extends Presenter {
         ImageCardView cardView = new ImageCardView(mContext) {
             @Override
             public void setSelected(boolean selected) {
-                int color1 = mContext.getResources().getColor(R.color.detail_background);
-                int color2 = mContext.getResources().getColor(R.color.default_background);
-                int color = selected ? color1 : color2;
+                int selected_background = mContext.getResources().getColor(R.color.detail_background);
+                int default_background = mContext.getResources().getColor(R.color.default_background);
+                int color = selected ? selected_background : default_background;
                 findViewById(R.id.info_field).setBackgroundColor(color);
                 super.setSelected(selected);
             }

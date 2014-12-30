@@ -53,6 +53,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -305,7 +306,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         if (SHOW_IMAGE) {
             mPlaybackControlsRowTarget = new PicassoPlaybackControlsRowTarget(mPlaybackControlsRow);
-            updateVideoImage(mItems.get(mCurrentItem).getCardImageURI());
+            Movie movie = mItems.get(mCurrentItem);
+            updateVideoImage(movie.getCardImageURI());
         }
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
         mPlaybackControlsRow.setTotalTime(getDuration());
@@ -347,6 +349,10 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             }
         };
         mHandler.postDelayed(mRunnable, getUpdatePeriod());
+    }
+
+    public void pressPlay() {
+        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
     }
 
     private void next() {
@@ -413,8 +419,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     protected void updateVideoImage(URI uri) {
+        String uriStr = uri.toString();
         Picasso.with(sContext)
-                .load(uri.toString())
+                .load(uriStr)
                 .resize(Utils.convertDpToPixel(sContext, CARD_WIDTH),
                         Utils.convertDpToPixel(sContext, CARD_HEIGHT))
                 .into(mPlaybackControlsRowTarget);
