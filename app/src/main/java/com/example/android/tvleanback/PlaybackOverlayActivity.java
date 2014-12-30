@@ -173,6 +173,7 @@ public class PlaybackOverlayActivity extends Activity implements
 
     @Override
     public void onVisibleBehindCanceled() {
+        super.onVisibleBehindCanceled();
         stopPlayback();
     }
 
