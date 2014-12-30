@@ -26,8 +26,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.io.FileNotFoundException;
-
 /**
  * Provides access to the video database.
  */

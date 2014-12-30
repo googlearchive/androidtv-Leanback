@@ -15,19 +15,13 @@
 package com.example.android.tvleanback;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
-import java.net.URI;
+import com.bumptech.glide.Glide;
 
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand. 
@@ -39,11 +33,14 @@ public class CardPresenter extends Presenter {
     private static Context mContext;
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
+    private Drawable mDefaultCardImage;
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         Log.d(TAG, "onCreateViewHolder");
         mContext = parent.getContext();
+
+        mDefaultCardImage = mContext.getResources().getDrawable(R.drawable.movie);
 
         ImageCardView cardView = new ImageCardView(mContext);
         cardView.setFocusable(true);
@@ -55,87 +52,27 @@ public class CardPresenter extends Presenter {
     @Override
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
         Movie movie = (Movie) item;
-        ((ViewHolder) viewHolder).setMovie(movie);
+        ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
         if (movie.getCardImageUrl() != null) {
-            ((ViewHolder) viewHolder).mCardView.setTitleText(movie.getTitle());
-            ((ViewHolder) viewHolder).mCardView.setContentText(movie.getStudio());
-            ((ViewHolder) viewHolder).mCardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            ((ViewHolder) viewHolder).updateCardViewImage(movie.getCardImageURI());
+            cardView.setTitleText(movie.getTitle());
+            cardView.setContentText(movie.getStudio());
+            cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
+            Glide.with(mContext)
+                    .load(movie.getCardImageUrl())
+                    .centerCrop()
+                    .error(mDefaultCardImage)
+                    .into(cardView.getMainImageView());
         }
     }
 
     @Override
     public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
         Log.d(TAG, "onUnbindViewHolder");
-        ViewHolder vh = (ViewHolder) viewHolder;
+        ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
-        vh.mCardView.setBadgeImage(null);
-        vh.mCardView.setMainImage(null);
-    }
-
-    @Override
-    public void onViewAttachedToWindow(Presenter.ViewHolder viewHolder) {
-        // TO DO
-    }
-
-    static class ViewHolder extends Presenter.ViewHolder {
-        private Movie mMovie;
-        private ImageCardView mCardView;
-        private Drawable mDefaultCardImage;
-        private PicassoImageCardViewTarget mImageCardViewTarget;
-
-        public ViewHolder(View view) {
-            super(view);
-            mCardView = (ImageCardView) view;
-            mImageCardViewTarget = new PicassoImageCardViewTarget(mCardView);
-            mDefaultCardImage = mContext.getResources().getDrawable(R.drawable.movie);
-        }
-
-        public Movie getMovie() {
-            return mMovie;
-        }
-
-        public void setMovie(Movie m) {
-            mMovie = m;
-        }
-
-        public ImageCardView getCardView() {
-            return mCardView;
-        }
-
-        protected void updateCardViewImage(URI uri) {
-            Picasso.with(mContext)
-                    .load(uri.toString())
-                    .resize(Utils.convertDpToPixel(mContext, CARD_WIDTH),
-                            Utils.convertDpToPixel(mContext, CARD_HEIGHT))
-                    .error(mDefaultCardImage)
-                    .into(mImageCardViewTarget);
-        }
-    }
-
-    public static class PicassoImageCardViewTarget implements Target {
-        private ImageCardView mImageCardView;
-
-        public PicassoImageCardViewTarget(ImageCardView imageCardView) {
-            mImageCardView = imageCardView;
-        }
-
-        @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
-            Drawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
-            mImageCardView.setMainImage(bitmapDrawable);
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable drawable) {
-            mImageCardView.setMainImage(drawable);
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable drawable) {
-            // Do nothing, default_background manager has its own transitions
-        }
+        cardView.setBadgeImage(null);
+        cardView.setMainImage(null);
     }
 }
