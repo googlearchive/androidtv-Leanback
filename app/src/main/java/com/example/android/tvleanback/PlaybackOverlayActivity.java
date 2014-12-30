@@ -156,13 +156,28 @@ public class PlaybackOverlayActivity extends Activity implements
     @Override
     public void onResume() {
         super.onResume();
-        onVisibleBehindCanceled();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (!requestVisibleBehind(true)) {
+        if (mVideoView.isPlaying()) {
+            if (!requestVisibleBehind(true)) {
+                // Try to play behind launcher, but if it fails, stop playback.
+                stopPlayback();
+            }
+        } else {
+            requestVisibleBehind(false);
+        }
+    }
+
+    @Override
+    public void onVisibleBehindCanceled() {
+        stopPlayback();
+    }
+
+    private void stopPlayback() {
+        if (mVideoView != null) {
             mVideoView.stopPlayback();
         }
     }
