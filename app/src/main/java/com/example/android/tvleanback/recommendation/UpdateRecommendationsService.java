@@ -24,16 +24,16 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.ui.MovieDetailsActivity;
-import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /*
  * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens
@@ -84,13 +84,17 @@ public class UpdateRecommendationsService extends IntentService {
                         .setIntent(buildPendingIntent(movie, id));
 
                 try {
-                    Bitmap bitmap = Picasso.with(getApplicationContext())
+                    Bitmap bitmap = Glide.with(getApplicationContext())
                             .load(movie.getCardImageUrl())
+                            .asBitmap()
+                            .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
                             .get();
                     notificationBuilder.setBitmap(bitmap);
                     Notification notification = notificationBuilder.build();
                     mNotificationManager.notify(id, notification);
-                } catch (IOException e) {
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Could not create recommendation: " + e);
+                } catch (ExecutionException e) {
                     Log.e(TAG, "Could not create recommendation: " + e);
                 }
 
