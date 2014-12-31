@@ -14,6 +14,8 @@
 
 package com.example.android.tvleanback;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -61,6 +63,8 @@ public class LeanbackDetailsFragment extends DetailsFragment {
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
 
+    private static final int NO_NOTIFICATION = -1;
+
     private Movie mSelectedMovie;
 
     private ArrayObjectAdapter mAdapter;
@@ -81,6 +85,8 @@ public class LeanbackDetailsFragment extends DetailsFragment {
                 .getSerializableExtra(DetailsActivity.MOVIE);
         if (null != mSelectedMovie || checkGlobalSearchIntent()) {
             Log.d(TAG, "DetailsActivity movie: " + mSelectedMovie.toString());
+            removeNotification(getActivity().getIntent()
+                    .getIntExtra(DetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             setupAdapter();
             setupDetailsOverviewRow();
             setupDetailsOverviewRowPresenter();
@@ -91,6 +97,14 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
+        }
+    }
+
+    private void removeNotification(int notificationId) {
+        if (notificationId != NO_NOTIFICATION) {
+            NotificationManager notificationManager = (NotificationManager) getActivity()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(notificationId);
         }
     }
 
