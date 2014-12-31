@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,6 +26,11 @@ import android.support.v17.leanback.widget.OnItemClickedListener;
 import android.support.v17.leanback.widget.Row;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.presenter.CardPresenter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -106,8 +111,8 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
             public void onItemClicked(Object item, Row row) {
                 if (item instanceof Movie) {
                     Movie movie = (Movie) item;
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(DetailsActivity.MOVIE, movie);
+                    Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                    intent.putExtra(MovieDetailsActivity.MOVIE, movie);
                     startActivity(intent);
                 }
             }

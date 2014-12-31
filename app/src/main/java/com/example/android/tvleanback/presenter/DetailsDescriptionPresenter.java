@@ -12,9 +12,11 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.presenter;
 
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
+
+import com.example.android.tvleanback.model.Movie;
 
 public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
 

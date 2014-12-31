@@ -1,4 +1,4 @@
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.data;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;

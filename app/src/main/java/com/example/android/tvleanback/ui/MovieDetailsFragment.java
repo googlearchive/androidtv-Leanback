@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.NotificationManager;
 import android.content.Context;
@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.DetailsFragment;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
@@ -42,6 +41,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.Utils;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.presenter.CardPresenter;
+import com.example.android.tvleanback.presenter.DetailsDescriptionPresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -53,7 +58,7 @@ import java.util.Map;
  * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its meta plus related videos.
  */
-public class LeanbackDetailsFragment extends DetailsFragment {
+public class MovieDetailsFragment extends android.support.v17.leanback.app.DetailsFragment {
     private static final String TAG = "DetailsFragment";
 
     private static final int ACTION_WATCH_TRAILER = 1;
@@ -82,11 +87,11 @@ public class LeanbackDetailsFragment extends DetailsFragment {
         prepareBackgroundManager();
 
         mSelectedMovie = (Movie) getActivity().getIntent()
-                .getSerializableExtra(DetailsActivity.MOVIE);
+                .getSerializableExtra(MovieDetailsActivity.MOVIE);
         if (null != mSelectedMovie || checkGlobalSearchIntent()) {
             Log.d(TAG, "DetailsActivity movie: " + mSelectedMovie.toString());
             removeNotification(getActivity().getIntent()
-                    .getIntExtra(DetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
+                    .getIntExtra(MovieDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             setupAdapter();
             setupDetailsOverviewRow();
             setupDetailsOverviewRowPresenter();
@@ -235,14 +240,14 @@ public class LeanbackDetailsFragment extends DetailsFragment {
 
         // Hook up transition element.
         detailsPresenter.setSharedElementEnterTransition(getActivity(),
-                DetailsActivity.SHARED_ELEMENT_NAME);
+                MovieDetailsActivity.SHARED_ELEMENT_NAME);
 
         detailsPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
                     Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
-                    intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
+                    intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
@@ -281,13 +286,13 @@ public class LeanbackDetailsFragment extends DetailsFragment {
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.MOVIE, movie);
+                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             }
         }

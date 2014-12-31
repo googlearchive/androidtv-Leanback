@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.presenter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -21,6 +21,8 @@ import android.support.v17.leanback.widget.Presenter;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.model.Movie;
 import com.squareup.picasso.Picasso;
 
 /*

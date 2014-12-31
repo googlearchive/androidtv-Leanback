@@ -12,13 +12,12 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,12 +36,16 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.data.VideoItemLoader;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.presenter.CardPresenter;
+import com.example.android.tvleanback.presenter.GridItemPresenter;
+import com.example.android.tvleanback.recommendation.UpdateRecommendationsService;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -61,8 +64,6 @@ public class MainFragment extends BrowseFragment implements
     private static final String TAG = "MainFragment";
 
     private static int BACKGROUND_UPDATE_DELAY = 300;
-    private static int GRID_ITEM_WIDTH = 200;
-    private static int GRID_ITEM_HEIGHT = 200;
     private static String mVideosUrl;
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -172,7 +173,7 @@ public class MainFragment extends BrowseFragment implements
         HeaderItem gridHeader = new HeaderItem(i, getString(R.string.more_samples),
                 null);
 
-        GridItemPresenter gridPresenter = new GridItemPresenter();
+        GridItemPresenter gridPresenter = new GridItemPresenter(this);
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
         gridRowAdapter.add(getString(R.string.grid_view));
         gridRowAdapter.add(getString(R.string.error_fragment));
@@ -260,29 +261,6 @@ public class MainFragment extends BrowseFragment implements
         }
     }
 
-    private class GridItemPresenter extends Presenter {
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent) {
-            TextView view = new TextView(parent.getContext());
-            view.setLayoutParams(new ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT));
-            view.setFocusable(true);
-            view.setFocusableInTouchMode(true);
-            view.setBackgroundColor(getResources().getColor(R.color.default_background));
-            view.setTextColor(Color.WHITE);
-            view.setGravity(Gravity.CENTER);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-            ((TextView) viewHolder.view).setText((String) item);
-        }
-
-        @Override
-        public void onUnbindViewHolder(ViewHolder viewHolder) {
-        }
-    }
-
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -291,13 +269,13 @@ public class MainFragment extends BrowseFragment implements
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.MOVIE, movie);
+                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.grid_view)) >= 0) {

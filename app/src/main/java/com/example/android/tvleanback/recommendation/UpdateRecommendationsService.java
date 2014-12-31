@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.recommendation;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -24,6 +24,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.ui.MovieDetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -98,12 +102,12 @@ public class UpdateRecommendationsService extends IntentService {
     }
 
     private PendingIntent buildPendingIntent(Movie movie, int id) {
-        Intent detailsIntent = new Intent(this, DetailsActivity.class);
-        detailsIntent.putExtra(DetailsActivity.MOVIE, movie);
-        detailsIntent.putExtra(DetailsActivity.NOTIFICATION_ID, id);
+        Intent detailsIntent = new Intent(this, MovieDetailsActivity.class);
+        detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
+        detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(DetailsActivity.class);
+        stackBuilder.addParentStack(MovieDetailsActivity.class);
         stackBuilder.addNextIntent(detailsIntent);
         // Ensure a unique PendingIntents, otherwise all recommendations end up with the same
         // PendingIntent
