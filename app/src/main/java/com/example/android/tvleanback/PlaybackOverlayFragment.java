@@ -345,6 +345,10 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mHandler.postDelayed(mRunnable, getUpdatePeriod());
     }
 
+    public void pressPlay() {
+        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+    }
+
     private void next() {
         if (++mCurrentItem >= mItems.size()) {
             mCurrentItem = 0;

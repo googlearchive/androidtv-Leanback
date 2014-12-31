@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /*
  * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens
