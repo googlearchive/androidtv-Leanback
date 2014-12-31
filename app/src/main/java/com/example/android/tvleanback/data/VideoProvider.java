@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.data;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.model.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;

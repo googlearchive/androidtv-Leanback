@@ -12,24 +12,30 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.android.tvleanback.R;
+
 /*
- * MainActivity class that loads MainFragment
+ * Details activity class that loads LeanbackDetailsFragment class
  */
-public class MainActivity extends Activity {
+public class MovieDetailsActivity extends Activity {
+    public static final String SHARED_ELEMENT_NAME = "hero";
+    public static final String MOVIE = "Movie";
+    public static final String NOTIFICATION_ID = "NotificationId";
+
     /**
      * Called when the activity is first created.
      */
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.details);
+
     }
 
     @Override

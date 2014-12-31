@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.recommendation;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -21,6 +21,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.example.android.tvleanback.R;
 
 /*
  * This class builds recommendations as notifications with videos as inputs.

@@ -12,11 +12,13 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.android.tvleanback.R;
 
 /*
  * SearchActivity for SearchFragment
