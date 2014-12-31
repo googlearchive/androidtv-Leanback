@@ -42,10 +42,19 @@ public class CardPresenter extends Presenter {
 
         mDefaultCardImage = mContext.getResources().getDrawable(R.drawable.movie);
 
-        ImageCardView cardView = new ImageCardView(mContext);
+        ImageCardView cardView = new ImageCardView(mContext) {
+            @Override
+            public void setSelected(boolean selected) {
+                int selected_background = mContext.getResources().getColor(R.color.detail_background);
+                int default_background = mContext.getResources().getColor(R.color.default_background);
+                int color = selected ? selected_background : default_background;
+                findViewById(R.id.info_field).setBackgroundColor(color);
+                super.setSelected(selected);
+            }
+        };
+
         cardView.setFocusable(true);
         cardView.setFocusableInTouchMode(true);
-        cardView.setBackgroundColor(mContext.getResources().getColor(R.color.fastlane_background));
         return new ViewHolder(cardView);
     }
 
