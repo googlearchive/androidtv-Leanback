@@ -17,9 +17,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.FrameLayout;
 import android.widget.VideoView;
 
 import com.example.android.tvleanback.R;
@@ -32,12 +30,6 @@ public class PlaybackOverlayActivity extends Activity implements
         PlaybackOverlayFragment.OnPlayPauseClickedListener {
     private static final String TAG = "PlaybackOverlayActivity";
 
-    private static final double MEDIA_HEIGHT = 0.95;
-    private static final double MEDIA_WIDTH = 0.95;
-    private static final double MEDIA_TOP_MARGIN = 0.025;
-    private static final double MEDIA_RIGHT_MARGIN = 0.025;
-    private static final double MEDIA_BOTTOM_MARGIN = 0.025;
-    private static final double MEDIA_LEFT_MARGIN = 0.025;
     private PlaybackOverlayFragment mPlaybackOverlayFragment;
     private VideoView mVideoView;
     private PlaybackState mPlaybackState = PlaybackState.IDLE;
@@ -50,7 +42,6 @@ public class PlaybackOverlayActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playback_controls);
         loadViews();
-        //overScan();
     }
 
     @Override
@@ -103,20 +94,6 @@ public class PlaybackOverlayActivity extends Activity implements
         mPlaybackOverlayFragment = (PlaybackOverlayFragment)
                 getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
         mPlaybackOverlayFragment.pressPlay();
-    }
-
-    private void overScan() {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int w = (int) (metrics.widthPixels * MEDIA_WIDTH);
-        int h = (int) (metrics.heightPixels * MEDIA_HEIGHT);
-        int marginLeft = (int) (metrics.widthPixels * MEDIA_LEFT_MARGIN);
-        int marginTop = (int) (metrics.heightPixels * MEDIA_TOP_MARGIN);
-        int marginRight = (int) (metrics.widthPixels * MEDIA_RIGHT_MARGIN);
-        int marginBottom = (int) (metrics.heightPixels * MEDIA_BOTTOM_MARGIN);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(w, h);
-        lp.setMargins(marginLeft, marginTop, marginRight, marginBottom);
-        mVideoView.setLayoutParams(lp);
     }
 
     private void setupCallbacks() {
