@@ -71,12 +71,13 @@ public class UpdateRecommendationsService extends IntentService {
                 Log.d(TAG, "Recommendation - " + movie.getTitle());
 
                 final int id = count + 1;
-                final RecommendationBuilder notificationBuilder = builder.setBackground(movie.getCardImageUrl())
+                final RecommendationBuilder notificationBuilder = builder
+                        .setBackground(movie.getCardImageUrl())
                         .setId(id)
                         .setPriority(MAX_RECOMMENDATIONS - count)
                         .setTitle(movie.getTitle())
                         .setDescription(getString(R.string.popular_header))
-                        .setIntent(buildPendingIntent(movie));
+                        .setIntent(buildPendingIntent(movie, id));
 
                 try {
                     Bitmap bitmap = Picasso.with(getApplicationContext())
@@ -96,9 +97,10 @@ public class UpdateRecommendationsService extends IntentService {
         }
     }
 
-    private PendingIntent buildPendingIntent(Movie movie) {
+    private PendingIntent buildPendingIntent(Movie movie, int id) {
         Intent detailsIntent = new Intent(this, DetailsActivity.class);
-        detailsIntent.putExtra("Movie", movie);
+        detailsIntent.putExtra(DetailsActivity.MOVIE, movie);
+        detailsIntent.putExtra(DetailsActivity.NOTIFICATION_ID, id);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(DetailsActivity.class);
