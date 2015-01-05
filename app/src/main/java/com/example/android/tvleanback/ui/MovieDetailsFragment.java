@@ -14,6 +14,8 @@
 
 package com.example.android.tvleanback.ui;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -70,6 +72,8 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
 
+    private static final int NO_NOTIFICATION = -1;
+
     private Movie mSelectedMovie;
 
     private Drawable mDefaultBackground;
@@ -101,11 +105,20 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
             mDetailRowBuilderTask = (DetailRowBuilderTask) new DetailRowBuilderTask().execute(mSelectedMovie);
             mDorPresenter.setSharedElementEnterTransition(getActivity(),
                     MovieDetailsActivity.SHARED_ELEMENT_NAME);
+            removeNotification(getActivity().getIntent().getIntExtra(MovieDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             updateBackground(mSelectedMovie.getBackgroundImageURI());
             setOnItemViewClickedListener(new ItemViewClickedListener());
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
+        }
+    }
+
+    private void removeNotification(int notificationId) {
+        if (notificationId != NO_NOTIFICATION) {
+            NotificationManager notificationManager = (NotificationManager) getActivity()
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(notificationId);
         }
     }
 
