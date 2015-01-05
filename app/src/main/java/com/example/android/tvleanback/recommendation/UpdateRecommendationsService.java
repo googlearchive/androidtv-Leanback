@@ -58,14 +58,15 @@ public class UpdateRecommendationsService extends IntentService {
             for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
                 for (Movie movie : entry.getValue()) {
                     Log.d(TAG, "Recommendation - " + movie.getTitle());
+                    int id = count + 1;
 
                     builder.setBackground(movie.getCardImageUrl())
-                            .setId(count + 1)
+                            .setId(id)
                             .setPriority(MAX_RECOMMENDATIONS - count)
                             .setTitle(movie.getTitle())
                             .setDescription(getString(R.string.popular_header))
                             .setImage(movie.getCardImageUrl())
-                            .setIntent(buildPendingIntent(movie))
+                            .setIntent(buildPendingIntent(movie, id))
                             .build();
 
                     if (++count >= MAX_RECOMMENDATIONS) {
@@ -81,9 +82,10 @@ public class UpdateRecommendationsService extends IntentService {
         }
     }
 
-    private PendingIntent buildPendingIntent(Movie movie) {
+    private PendingIntent buildPendingIntent(Movie movie, int id) {
         Intent detailsIntent = new Intent(this, MovieDetailsActivity.class);
-        detailsIntent.putExtra("Movie", movie);
+        detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
+        detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MovieDetailsActivity.class);

@@ -26,6 +26,7 @@ import com.example.android.tvleanback.R;
 public class MovieDetailsActivity extends Activity {
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String MOVIE = "Movie";
+    public static final String NOTIFICATION_ID = "NotificationId";
 
     /**
      * Called when the activity is first created.
