@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -49,6 +49,11 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.util.Log;
 
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.Utils;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.presenter.CardPresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -113,7 +118,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
         mItems = new ArrayList<Movie>();
         mSelectedMovie = (Movie) getActivity()
-                .getIntent().getSerializableExtra(DetailsActivity.MOVIE);
+                .getIntent().getSerializableExtra(MovieDetailsActivity.MOVIE);
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 

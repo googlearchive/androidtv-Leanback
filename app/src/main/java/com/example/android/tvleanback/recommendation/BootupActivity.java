@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.recommendation;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

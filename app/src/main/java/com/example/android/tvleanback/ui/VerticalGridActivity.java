@@ -12,23 +12,26 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.android.tvleanback.R;
+
 /*
- * SearchActivity for SearchFragment
+ * VerticalGridActivity that loads VerticalGridFragment
  */
-public class SearchActivity extends Activity {
+public class VerticalGridActivity extends Activity {
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.search);
+        setContentView(R.layout.vertical_grid);
+        getWindow().setBackgroundDrawableResource(R.drawable.grid_bg);
     }
 
     @Override
