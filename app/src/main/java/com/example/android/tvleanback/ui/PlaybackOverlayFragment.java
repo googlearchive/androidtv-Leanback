@@ -48,6 +48,7 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.util.Log;
+import android.view.View;
 
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.Utils;
@@ -171,6 +172,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             throw new ClassCastException(activity.toString()
                     + " must implement OnPlayPauseClickedListener");
         }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
     }
 
     private void setupRows() {
@@ -354,10 +360,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             }
         };
         mHandler.postDelayed(mRunnable, getUpdatePeriod());
-    }
-
-    public void pressPlay() {
-        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
     }
 
     private void next() {
