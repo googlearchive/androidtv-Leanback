@@ -17,6 +17,8 @@ package com.example.android.tvleanback.ui;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +40,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.android.tvleanback.PicassoBackgroundManagerTarget;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.data.VideoItemLoader;
@@ -68,10 +69,10 @@ public class MainFragment extends BrowseFragment implements
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
-    private Target mBackgroundTarget;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
     private URI mBackgroundURI;
+    private BackgroundManager mBackgroundManager;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -95,9 +96,8 @@ public class MainFragment extends BrowseFragment implements
     }
 
     private void prepareBackgroundManager() {
-        BackgroundManager backgroundManager = BackgroundManager.getInstance(getActivity());
-        backgroundManager.attach(getActivity().getWindow());
-        mBackgroundTarget = new PicassoBackgroundManagerTarget(backgroundManager);
+        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
@@ -199,13 +199,30 @@ public class MainFragment extends BrowseFragment implements
         mDefaultBackground = getResources().getDrawable(resourceId);
     }
 
-    protected void updateBackground(URI uri) {
+    protected void updateBackground(String uri) {
+        int width = mMetrics.widthPixels;
+        int height = mMetrics.heightPixels;
         Picasso.with(getActivity())
-                .load(uri.toString())
-                .resize(mMetrics.widthPixels, mMetrics.heightPixels)
+                .load(uri)
+                .resize(width, height)
                 .centerCrop()
                 .error(mDefaultBackground)
-                .into(mBackgroundTarget);
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        mBackgroundManager.setBitmap(bitmap);
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        mBackgroundManager.setDrawable(errorDrawable);
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        mBackgroundManager.setDrawable(placeHolderDrawable);
+                    }
+                });
         mBackgroundTimer.cancel();
     }
 
@@ -238,7 +255,7 @@ public class MainFragment extends BrowseFragment implements
                 @Override
                 public void run() {
                     if (mBackgroundURI != null) {
-                        updateBackground(mBackgroundURI);
+                        updateBackground(mBackgroundURI.toString());
                     }
                 }
             });

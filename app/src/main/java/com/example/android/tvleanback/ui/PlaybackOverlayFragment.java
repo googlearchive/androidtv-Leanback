@@ -16,7 +16,6 @@ package com.example.android.tvleanback.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
@@ -58,8 +57,6 @@ import com.example.android.tvleanback.presenter.CardPresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +104,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private Handler mHandler;
     private Runnable mRunnable;
     private Movie mSelectedMovie;
-    private PicassoPlaybackControlsRowTarget mPlaybackControlsRowTarget;
     private int mFfwRwdSpeed = INITIAL_SPEED;
     private Timer mClickTrackingTimer;
     private int mClickCount;
@@ -316,9 +312,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             item.setStudio(mItems.get(mCurrentItem).getStudio());
         }
         if (SHOW_IMAGE) {
-            mPlaybackControlsRowTarget = new PicassoPlaybackControlsRowTarget(mPlaybackControlsRow);
-            Movie movie = mItems.get(mCurrentItem);
-            updateVideoImage(movie.getCardImageURI());
+            updateVideoImage(mItems.get(mCurrentItem).getCardImageUrl());
         }
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
         mPlaybackControlsRow.setTotalTime(getDuration());
@@ -425,13 +419,28 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         super.onStop();
     }
 
-    protected void updateVideoImage(URI uri) {
-        String uriStr = uri.toString();
+    protected void updateVideoImage(String uri) {
         Picasso.with(sContext)
-                .load(uriStr)
-                .resize(Utils.convertDpToPixel(sContext, CARD_WIDTH),
-                        Utils.convertDpToPixel(sContext, CARD_HEIGHT))
-                .into(mPlaybackControlsRowTarget);
+                .load(uri)
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        mPlaybackControlsRow.setImageBitmap(getActivity(), bitmap);
+                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        mPlaybackControlsRow.setImageDrawable(errorDrawable);
+                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        mPlaybackControlsRow.setImageDrawable(placeHolderDrawable);
+                        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                    }
+                });
     }
 
     private void startClickTrackingTimer() {
@@ -458,30 +467,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         protected void onBindDescription(ViewHolder viewHolder, Object item) {
             viewHolder.getTitle().setText(((Movie) item).getTitle());
             viewHolder.getSubtitle().setText(((Movie) item).getStudio());
-        }
-    }
-
-    public static class PicassoPlaybackControlsRowTarget implements Target {
-        PlaybackControlsRow mPlaybackControlsRow;
-
-        public PicassoPlaybackControlsRowTarget(PlaybackControlsRow playbackControlsRow) {
-            mPlaybackControlsRow = playbackControlsRow;
-        }
-
-        @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
-            Drawable bitmapDrawable = new BitmapDrawable(sContext.getResources(), bitmap);
-            mPlaybackControlsRow.setImageDrawable(bitmapDrawable);
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable drawable) {
-            mPlaybackControlsRow.setImageDrawable(drawable);
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable drawable) {
-            // Do nothing, default_background manager has its own transitions
         }
     }
 
