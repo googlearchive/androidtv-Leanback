@@ -28,8 +28,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
 
 import java.util.HashMap;
