@@ -38,8 +38,7 @@ public class PlaybackOverlayActivity extends Activity implements
     private static final double MEDIA_RIGHT_MARGIN = 0.025;
     private static final double MEDIA_BOTTOM_MARGIN = 0.025;
     private static final double MEDIA_LEFT_MARGIN = 0.025;
-
-
+    //private PlaybackOverlayFragment mPlaybackOverlayFragment;
     private VideoView mVideoView;
     private PlaybackState mPlaybackState = PlaybackState.IDLE;
 
@@ -51,7 +50,8 @@ public class PlaybackOverlayActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playback_controls);
         loadViews();
-        overScan();
+        //Example for handling resizing view for overscan
+        //overScan();
     }
 
     @Override
@@ -102,6 +102,10 @@ public class PlaybackOverlayActivity extends Activity implements
         mVideoView = (VideoView) findViewById(R.id.videoView);
     }
 
+    /**
+     * Example for handling resizing content for overscan.  Typically you won't need to resize which
+     * is why overScan(); is commented out.
+     */
     private void overScan() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);

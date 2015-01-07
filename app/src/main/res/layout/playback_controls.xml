@@ -20,12 +20,12 @@
     android:layout_height="match_parent" >
 
     <VideoView android:id="@+id/videoView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_centerInParent="true">
     </VideoView>
