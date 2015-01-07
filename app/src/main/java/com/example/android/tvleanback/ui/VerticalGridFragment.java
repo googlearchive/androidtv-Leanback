@@ -29,8 +29,8 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
 
 import java.util.Collections;
