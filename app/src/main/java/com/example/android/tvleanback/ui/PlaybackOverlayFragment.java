@@ -48,6 +48,7 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.util.Log;
+import android.view.View;
 
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.Utils;
@@ -58,6 +59,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,6 +172,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             throw new ClassCastException(activity.toString()
                     + " must implement OnPlayPauseClickedListener");
         }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
     }
 
     private void setupRows() {
@@ -310,7 +317,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         if (SHOW_IMAGE) {
             mPlaybackControlsRowTarget = new PicassoPlaybackControlsRowTarget(mPlaybackControlsRow);
-            updateVideoImage(mItems.get(mCurrentItem).getCardImageURI());
+            Movie movie = mItems.get(mCurrentItem);
+            updateVideoImage(movie.getCardImageURI());
         }
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
         mPlaybackControlsRow.setTotalTime(getDuration());
@@ -418,8 +426,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     protected void updateVideoImage(URI uri) {
+        String uriStr = uri.toString();
         Picasso.with(sContext)
-                .load(uri.toString())
+                .load(uriStr)
                 .resize(Utils.convertDpToPixel(sContext, CARD_WIDTH),
                         Utils.convertDpToPixel(sContext, CARD_HEIGHT))
                 .into(mPlaybackControlsRowTarget);
