@@ -32,7 +32,7 @@ import com.example.android.tvleanback.model.Movie;
 public class CardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
 
-    private static Context mContext;
+    private Context mContext;
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
     private Drawable mDefaultCardImage;
