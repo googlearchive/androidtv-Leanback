@@ -70,7 +70,7 @@ public class CardPresenter extends Presenter {
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getStudio());
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            Glide.with(mContext)
+            Glide.with(viewHolder.view.getContext())
                     .load(movie.getCardImageUrl())
                     .centerCrop()
                     .error(mDefaultCardImage)
