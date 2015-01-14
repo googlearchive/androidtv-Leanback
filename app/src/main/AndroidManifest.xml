@@ -28,6 +28,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- The android.hardware.microphone feature requirement is implied by the RECORD_AUDIO permission but isn't available on every Android TV devices. -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
