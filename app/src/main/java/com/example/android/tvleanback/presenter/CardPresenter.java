@@ -14,7 +14,6 @@
 
 package com.example.android.tvleanback.presenter;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
@@ -32,7 +31,6 @@ import com.example.android.tvleanback.model.Movie;
 public class CardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
 
-    private Context mContext;
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
     private Drawable mDefaultCardImage;
@@ -40,15 +38,14 @@ public class CardPresenter extends Presenter {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         Log.d(TAG, "onCreateViewHolder");
-        mContext = parent.getContext();
 
-        mDefaultCardImage = mContext.getResources().getDrawable(R.drawable.movie);
+        mDefaultCardImage = parent.getResources().getDrawable(R.drawable.movie);
 
-        ImageCardView cardView = new ImageCardView(mContext) {
+        ImageCardView cardView = new ImageCardView(parent.getContext()) {
             @Override
             public void setSelected(boolean selected) {
-                int selected_background = mContext.getResources().getColor(R.color.detail_background);
-                int default_background = mContext.getResources().getColor(R.color.default_background);
+                int selected_background = getResources().getColor(R.color.detail_background);
+                int default_background = getResources().getColor(R.color.default_background);
                 int color = selected ? selected_background : default_background;
                 findViewById(R.id.info_field).setBackgroundColor(color);
                 super.setSelected(selected);
