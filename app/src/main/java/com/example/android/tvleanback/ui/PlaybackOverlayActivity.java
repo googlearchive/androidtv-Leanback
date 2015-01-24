@@ -97,7 +97,7 @@ public class PlaybackOverlayActivity extends Activity implements
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             mVideoView.pause();
         }
-        updatePlaybackState();
+        updatePlaybackState(position);
         updateMetadata(movie);
     }
 
@@ -116,14 +116,14 @@ public class PlaybackOverlayActivity extends Activity implements
         }
     }
 
-    private void updatePlaybackState() {
+    private void updatePlaybackState(int position) {
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
         int state = PlaybackState.STATE_PLAYING;
         if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
             state = PlaybackState.STATE_PAUSED;
         }
-        stateBuilder.setState(state, 0, 1.0f);
+        stateBuilder.setState(state, position, 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
     }
 
@@ -142,18 +142,17 @@ public class PlaybackOverlayActivity extends Activity implements
     private void updateMetadata(final Movie movie) {
         final MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
 
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
-                movie.getTitle());
+        String title = movie.getTitle().replace("_", " -");
+
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
                 movie.getDescription());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
                 movie.getCardImageUrl());
 
         // And at minimum the title and artist for legacy support
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE,
-                movie.getTitle());
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST,
-                movie.getStudio());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, title);
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, movie.getStudio());
 
         Glide.with(this)
             .load(Uri.parse(movie.getCardImageUrl()))
