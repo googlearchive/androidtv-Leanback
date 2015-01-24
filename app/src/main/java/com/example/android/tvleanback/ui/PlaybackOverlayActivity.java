@@ -15,13 +15,21 @@ package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.model.Movie;
 
@@ -39,7 +47,8 @@ public class PlaybackOverlayActivity extends Activity implements
     private static final double MEDIA_BOTTOM_MARGIN = 0.025;
     private static final double MEDIA_LEFT_MARGIN = 0.025;
     private VideoView mVideoView;
-    private PlaybackState mPlaybackState = PlaybackState.IDLE;
+    private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
+    private MediaSession mSession;
 
     /**
      * Called when the activity is first created.
@@ -51,6 +60,14 @@ public class PlaybackOverlayActivity extends Activity implements
         loadViews();
         //Example for handling resizing view for overscan
         //overScan();
+
+        mSession = new MediaSession (this, "LeanbackSampleApp");
+        mSession.setCallback(new MediaSessionCallback());
+        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mSession.setActive(true);
+
     }
 
     @Override
@@ -65,21 +82,23 @@ public class PlaybackOverlayActivity extends Activity implements
     public void onFragmentPlayPause(Movie movie, int position, Boolean playPause) {
         mVideoView.setVideoPath(movie.getVideoUrl());
 
-        if (position == 0 || mPlaybackState == PlaybackState.IDLE) {
+        if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();
-            mPlaybackState = PlaybackState.IDLE;
+            mPlaybackState = LeanbackPlaybackState.IDLE;
         }
 
-        if (playPause && mPlaybackState != PlaybackState.PLAYING) {
-            mPlaybackState = PlaybackState.PLAYING;
+        if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) {
+            mPlaybackState = LeanbackPlaybackState.PLAYING;
             if (position > 0) {
                 mVideoView.seekTo(position);
                 mVideoView.start();
             }
         } else {
-            mPlaybackState = PlaybackState.PAUSED;
+            mPlaybackState = LeanbackPlaybackState.PAUSED;
             mVideoView.pause();
         }
+        updatePlaybackState();
+        updateMetadata(movie);
     }
 
     /**
@@ -89,12 +108,63 @@ public class PlaybackOverlayActivity extends Activity implements
         mVideoView.setVideoPath(movie.getVideoUrl());
 
         Log.d(TAG, "seek current time: " + position);
-        if (mPlaybackState == PlaybackState.PLAYING) {
+        if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
             if (position > 0) {
                 mVideoView.seekTo(position);
                 mVideoView.start();
             }
         }
+    }
+
+    private void updatePlaybackState() {
+        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+                .setActions(getAvailableActions());
+        int state = PlaybackState.STATE_PLAYING;
+        if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
+            state = PlaybackState.STATE_PAUSED;
+        }
+        stateBuilder.setState(state, 0, 1.0f);
+        mSession.setPlaybackState(stateBuilder.build());
+    }
+
+    private long getAvailableActions() {
+        long actions = PlaybackState.ACTION_PLAY |
+                PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
+                PlaybackState.ACTION_PLAY_FROM_SEARCH;
+
+        if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
+            actions |= PlaybackState.ACTION_PAUSE;
+        }
+
+        return actions;
+    }
+
+    private void updateMetadata(final Movie movie) {
+        final MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
+
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
+                movie.getTitle());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+                movie.getDescription());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
+                movie.getCardImageUrl());
+
+        // And at minimum the title and artist for legacy support
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE,
+                movie.getTitle());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST,
+                movie.getStudio());
+
+        Glide.with(this)
+            .load(Uri.parse(movie.getCardImageUrl()))
+            .asBitmap()
+            .into(new SimpleTarget<Bitmap>(500, 500) {
+                @Override
+                public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                    metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
+                    mSession.setMetadata(metadataBuilder.build());
+                }
+            });
     }
 
     private void loadViews() {
@@ -134,7 +204,7 @@ public class PlaybackOverlayActivity extends Activity implements
                     msg = getString(R.string.video_error_unknown_error);
                 }
                 mVideoView.stopPlayback();
-                mPlaybackState = PlaybackState.IDLE;
+                mPlaybackState = LeanbackPlaybackState.IDLE;
                 return false;
             }
         });
@@ -143,7 +213,7 @@ public class PlaybackOverlayActivity extends Activity implements
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                if (mPlaybackState == PlaybackState.PLAYING) {
+                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
                     mVideoView.start();
                 }
             }
@@ -153,7 +223,7 @@ public class PlaybackOverlayActivity extends Activity implements
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mPlaybackState = PlaybackState.IDLE;
+                mPlaybackState = LeanbackPlaybackState.IDLE;
             }
         });
 
@@ -178,6 +248,12 @@ public class PlaybackOverlayActivity extends Activity implements
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        mSession.release();
+    }
+
+    @Override
     public void onVisibleBehindCanceled() {
         super.onVisibleBehindCanceled();
         stopPlayback();
@@ -198,7 +274,10 @@ public class PlaybackOverlayActivity extends Activity implements
     /*
      * List of various states that we can be in
      */
-    public static enum PlaybackState {
+    public static enum LeanbackPlaybackState {
         PLAYING, PAUSED, BUFFERING, IDLE;
+    }
+
+    private class MediaSessionCallback extends MediaSession.Callback {
     }
 }
