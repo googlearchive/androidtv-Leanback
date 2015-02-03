@@ -33,28 +33,38 @@ public class CardPresenter extends Presenter {
 
     private static int CARD_WIDTH = 313;
     private static int CARD_HEIGHT = 176;
+    private static int sSelectedBackgroundColor;
+    private static int sDefaultBackgroundColor;
     private Drawable mDefaultCardImage;
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         Log.d(TAG, "onCreateViewHolder");
 
+        sDefaultBackgroundColor = parent.getResources().getColor(R.color.default_background);
+        sSelectedBackgroundColor = parent.getResources().getColor(R.color.selected_background);
         mDefaultCardImage = parent.getResources().getDrawable(R.drawable.movie);
 
         ImageCardView cardView = new ImageCardView(parent.getContext()) {
             @Override
             public void setSelected(boolean selected) {
-                int selected_background = getResources().getColor(R.color.detail_background);
-                int default_background = getResources().getColor(R.color.default_background);
-                int color = selected ? selected_background : default_background;
-                findViewById(R.id.info_field).setBackgroundColor(color);
+                updateCardBackgroundColor(this, selected);
                 super.setSelected(selected);
             }
         };
 
         cardView.setFocusable(true);
         cardView.setFocusableInTouchMode(true);
+        updateCardBackgroundColor(cardView, false);
         return new ViewHolder(cardView);
+    }
+
+    private static void updateCardBackgroundColor(ImageCardView view, boolean selected) {
+        int color = selected ? sSelectedBackgroundColor : sDefaultBackgroundColor;
+        // Both background colors should be set because the view's background is temporarily visible
+        // during animations.
+        view.setBackgroundColor(color);
+        view.findViewById(R.id.info_field).setBackgroundColor(color);
     }
 
     @Override
