@@ -110,7 +110,7 @@
         <provider
             android:name=".recommendation.RecommendationContentProvider"
             android:authorities="com.example.android.tvleanback.provider"
-            android:exported="false"/>
+            android:exported="true"/>
 
     </application>
 
