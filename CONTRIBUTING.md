@@ -45,12 +45,12 @@ accept your pull requests.
 
 1. Create your sample app in this repo.
     * Be sure to clone the README.md, CONTRIBUTING.md and LICENSE files from the
-      googlecast repo.
+      googlesamples repo.
     * Ensure that your code is clear and comprehensible.
     * Ensure that your code has an appropriate set of unit tests which all pass.
     * Instructional value is the top priority when evaluating new app proposals for
       this collection of repos.
-1. Submit a request to fork your repo in googlecast organization.
+1. Submit a request to fork your repo in googlesamples organization.
 1. The repo owner will review your request. If it is approved, the sample will
    be merged. If it needs additional work, the repo owner will respond with 
    useful comments.

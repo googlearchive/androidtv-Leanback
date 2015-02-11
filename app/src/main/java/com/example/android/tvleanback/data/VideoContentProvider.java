@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.data;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -25,8 +25,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
-
-import java.io.FileNotFoundException;
 
 /**
  * Provides access to the video database.

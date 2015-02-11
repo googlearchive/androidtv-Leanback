@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.0.2"
+    buildToolsVersion "21.1.2"
     defaultConfig {
         applicationId "com.example.android.tvleanback"
         minSdkVersion 21
@@ -23,5 +23,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:+'
     compile 'com.android.support:leanback-v17:+'
     compile 'com.android.support:appcompat-v7:+'
-    compile 'com.squareup.picasso:picasso:2.3.2'
+    compile 'com.github.bumptech.glide:glide:3.4.+'
+    compile 'com.android.support:support-v4:+'
 }

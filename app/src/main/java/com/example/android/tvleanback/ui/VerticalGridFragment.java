@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.example.android.tvleanback;
+package com.example.android.tvleanback.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,6 +27,11 @@ import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.view.View;
+
+import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.data.VideoProvider;
+import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.presenter.CardPresenter;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -110,13 +115,13 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.MOVIE, movie);
+                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             }
         }
