@@ -15,6 +15,7 @@ package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.ControlButtonPresenterSelector;
 import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
@@ -44,6 +46,7 @@ import android.support.v17.leanback.widget.PlaybackControlsRowPresenter;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -67,7 +70,7 @@ import java.util.TimerTask;
  * Class for video playback with media control
  */
 public class PlaybackOverlayFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment {
-    private static final String TAG = "PlaybackControlsFragment";
+    private static final String TAG = "PlaybackOverlayFragment";
     private static final boolean SHOW_DETAIL = true;
     private static final boolean HIDE_MORE_ACTIONS = false;
     private static final int PRIMARY_CONTROLS = 5;
@@ -146,13 +149,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 Log.i(TAG, "onItemSelected: " + item + " row " + row);
             }
         });
-        setOnItemViewClickedListener(new OnItemViewClickedListener() {
-            @Override
-            public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                      RowPresenter.ViewHolder rowViewHolder, Row row) {
-                Log.i(TAG, "onItemClicked: " + item + " row " + row);
-            }
-        });
+        setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
     @Override
@@ -477,4 +474,25 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             });
         }
     }
+
+    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
+                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+
+            if (item instanceof Movie) {
+                Movie movie = (Movie) item;
+                Log.d(TAG, "Item: " + item.toString());
+                Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
+
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        getActivity(),
+                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                getActivity().startActivity(intent, bundle);
+            }
+        }
+    }
+
 }
