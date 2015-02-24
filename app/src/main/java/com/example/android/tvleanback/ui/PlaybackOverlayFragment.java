@@ -76,7 +76,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private static final int PRIMARY_CONTROLS = 5;
     private static final boolean SHOW_IMAGE = PRIMARY_CONTROLS <= 5;
     private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
-    private static final int CARD_WIDTH = 200;
+    private static final int CARD_WIDTH = 150;
     private static final int CARD_HEIGHT = 240;
     private static final int DEFAULT_UPDATE_PERIOD = 1000;
     private static final int UPDATE_PERIOD = 16;
@@ -418,6 +418,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     protected void updateVideoImage(String uri) {
         Glide.with(sContext)
                 .load(uri)
+                .centerCrop()
                 .into(new SimpleTarget<GlideDrawable>(CARD_WIDTH, CARD_HEIGHT) {
                     @Override
                     public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
