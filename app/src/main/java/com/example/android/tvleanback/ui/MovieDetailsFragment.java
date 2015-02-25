@@ -90,9 +90,8 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
         prepareBackgroundManager();
 
         mSelectedMovie = (Movie) getActivity().getIntent()
-                .getSerializableExtra(MovieDetailsActivity.MOVIE);
-        if (null != mSelectedMovie || checkGlobalSearchIntent()) {
-            Log.d(TAG, "DetailsActivity movie: " + mSelectedMovie.toString());
+                .getParcelableExtra(MovieDetailsActivity.MOVIE);
+        if (mSelectedMovie != null || checkGlobalSearchIntent()) {
             removeNotification(getActivity().getIntent()
                     .getIntExtra(MovieDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             setupAdapter();

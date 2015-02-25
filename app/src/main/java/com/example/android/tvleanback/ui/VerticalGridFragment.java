@@ -80,21 +80,6 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
         setAdapter(mAdapter);
 
-        setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
-            @Override
-            public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                       RowPresenter.ViewHolder rowViewHolder, Row row) {
-                Log.i(TAG, "onItemSelected: " + item + " row " + row);
-            }
-        });
-
-        setOnItemViewClickedListener(new OnItemViewClickedListener() {
-            @Override
-            public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                      RowPresenter.ViewHolder rowViewHolder, Row row) {
-                Log.i(TAG, "onItemClicked: " + item + " row " + row);
-            }
-        });
         setOnSearchClickedListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -118,18 +118,21 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
         mItems = new ArrayList<Movie>();
         mSelectedMovie = (Movie) getActivity()
-                .getIntent().getSerializableExtra(MovieDetailsActivity.MOVIE);
+                .getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
-        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-            if (mSelectedMovie.getCategory().contains(entry.getKey())) {
-                List<Movie> list = entry.getValue();
-                for (int j = 0; j < list.size(); j++) {
-                    mItems.add(list.get(j));
-                    if (mSelectedMovie.getTitle().contentEquals(list.get(j).getTitle())) {
-                        mCurrentItem = j;
+        if(movies != null) {
+            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
+                if (mSelectedMovie.getCategory().contains(entry.getKey())) {
+                    List<Movie> list = entry.getValue();
+                    if(list != null && !list.isEmpty()) {
+                        for (int j = 0; j < list.size(); j++) {
+                            mItems.add(list.get(j));
+                            if (mSelectedMovie.getTitle().contentEquals(list.get(j).getTitle())) {
+                                mCurrentItem = j;
+                            }
+                        }
                     }
                 }
             }
