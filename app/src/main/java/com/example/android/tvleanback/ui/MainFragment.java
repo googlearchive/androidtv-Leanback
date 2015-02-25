@@ -262,7 +262,7 @@ public class MainFragment extends BrowseFragment implements
 
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
-                Log.d(TAG, "Item: " + item.toString());
+                Log.d(TAG, "Movie: " + movie.toString());
                 Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
                 intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 

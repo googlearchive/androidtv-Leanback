@@ -16,132 +16,164 @@
 
 package com.example.android.tvleanback.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 /*
- * Movie class represents video entity with title, description, image thumbs and video url. 
- * 
+ * Movie class represents video entity with title, description, image thumbs and video url.
  */
-public class Movie implements Serializable {
-    static final long serialVersionUID = 727566175075960653L;
+public class Movie implements Parcelable {
     private static final String TAG = "Movie";
-    private static long count = 0;
-    private long id;
-    private String title;
-    private String description;
-    private String bgImageUrl;
-    private String cardImageUrl;
-    private String videoUrl;
-    private String studio;
-    private String category;
+    static final long serialVersionUID = 727566175075960653L;
+    private static int sCount = 0;
+    private String mId;
+    private String mTitle;
+    private String mDescription;
+    private String mBgImageUrl;
+    private String mCardImageUrl;
+    private String mVideoUrl;
+    private String mStudio;
+    private String mCategory;
 
     public Movie() {
+
     }
 
-    public static long getCount() {
-        return count;
+    public Movie(Parcel in){
+        String[] data = new String[8];
+
+        in.readStringArray(data);
+        mId = data[0];
+        mTitle = data[1];
+        mDescription = data[2];
+        mBgImageUrl = data[3];
+        mCardImageUrl = data[4];
+        mVideoUrl = data[5];
+        mStudio = data[6];
+        mCategory = data[7];
     }
 
-    public static void incCount() {
-        count++;
+    public static String getCount() {
+        return Integer.toString(sCount);
     }
 
-    public long getId() {
-        return id;
+    public static void incrementCount() {
+        sCount++;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        mTitle = title;
     }
 
     public String getDescription() {
-        return description;
+        return mDescription;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        mDescription = description;
     }
 
     public String getStudio() {
-        return studio;
+        return mStudio;
     }
 
     public void setStudio(String studio) {
-        this.studio = studio;
+        mStudio = studio;
     }
 
     public String getVideoUrl() {
-        return videoUrl;
+        return mVideoUrl;
     }
 
     public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+        mVideoUrl = videoUrl;
     }
 
     public String getBackgroundImageUrl() {
-        return bgImageUrl;
+        return mBgImageUrl;
     }
 
     public void setBackgroundImageUrl(String bgImageUrl) {
-        this.bgImageUrl = bgImageUrl;
+        mBgImageUrl = bgImageUrl;
     }
 
     public String getCardImageUrl() {
-        return cardImageUrl;
+        return mCardImageUrl;
     }
 
     public void setCardImageUrl(String cardImageUrl) {
-        this.cardImageUrl = cardImageUrl;
+        mCardImageUrl = cardImageUrl;
     }
 
     public String getCategory() {
-        return category;
+        return mCategory;
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        mCategory = category;
     }
 
     public URI getBackgroundImageURI() {
         try {
-            Log.d("BACK MOVIE: ", bgImageUrl);
             return new URI(getBackgroundImageUrl());
         } catch (URISyntaxException e) {
-            Log.d("URI exception: ", bgImageUrl);
             return null;
         }
     }
 
-    public URI getCardImageURI() {
-        try {
-            String cardImageUrl = getCardImageUrl();
-            return new URI(cardImageUrl);
-        } catch (URISyntaxException e) {
-            return null;
-        }
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {mId,
+                mTitle,
+                mDescription,
+                mBgImageUrl,
+                mCardImageUrl,
+                mVideoUrl,
+                mStudio,
+                mCategory});
     }
 
     @Override
     public String toString() {
-        return "Movie{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", videoUrl='" + videoUrl + '\'' +
-                ", backgroundImageUrl='" + bgImageUrl + '\'' +
-                ", backgroundImageURI='" + getBackgroundImageURI().toString() + '\'' +
-                ", cardImageUrl='" + cardImageUrl + '\'' +
-                '}';
+        StringBuilder sb = new StringBuilder(200);
+        sb.append("Movie{");
+        sb.append("mId=" + mId);
+        sb.append(", mTitle='" + mTitle + '\'');
+        sb.append(", mVideoUrl='" + mVideoUrl + '\'');
+        sb.append(", backgroundImageUrl='" + mBgImageUrl + '\'');
+        sb.append(", backgroundImageURI='" + getBackgroundImageURI().toString() + '\'');
+        sb.append(", mCardImageUrl='" + mCardImageUrl + '\'');
+        sb.append('}');
+        return sb.toString();
     }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 }

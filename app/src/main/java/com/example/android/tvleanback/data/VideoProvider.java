@@ -124,7 +124,7 @@ public class VideoProvider {
                                         String bgImageUrl) {
         Movie movie = new Movie();
         movie.setId(Movie.getCount());
-        Movie.incCount();
+        Movie.incrementCount();
         movie.setTitle(title);
         movie.setDescription(description);
         movie.setStudio(studio);

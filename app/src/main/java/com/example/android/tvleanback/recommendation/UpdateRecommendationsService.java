@@ -42,16 +42,16 @@ import java.util.concurrent.ExecutionException;
  * when they're clicked from Recommendations section on Home screen
  */
 public class UpdateRecommendationsService extends IntentService {
-    private static final String TAG = "UpdateRecommendationsService";
+    private static final String TAG = "RecommendationsService";
     private static final int MAX_RECOMMENDATIONS = 3;
 
-    private static int CARD_WIDTH = 313;
-    private static int CARD_HEIGHT = 176;
+    private static final int CARD_WIDTH = 313;
+    private static final int CARD_HEIGHT = 176;
 
     private NotificationManager mNotificationManager;
 
     public UpdateRecommendationsService() {
-        super("RecommendationService");
+        super(TAG);
     }
 
     @Override
@@ -117,9 +117,8 @@ public class UpdateRecommendationsService extends IntentService {
         stackBuilder.addNextIntent(detailsIntent);
         // Ensure a unique PendingIntents, otherwise all recommendations end up with the same
         // PendingIntent
-        detailsIntent.setAction(Long.toString(movie.getId()));
+        detailsIntent.setAction(movie.getId());
 
-        PendingIntent intent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        return intent;
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
