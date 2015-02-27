@@ -32,6 +32,8 @@ import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.ui.MovieDetailsActivity;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,38 +73,38 @@ public class UpdateRecommendationsService extends IntentService {
                 .setContext(getApplicationContext())
                 .setSmallIcon(R.drawable.videos_by_google_icon);
 
-        int count = 0;
+        // flatten to list
+        List flattenedRecommendations = new ArrayList();
         for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
             for (Movie movie : entry.getValue()) {
                 Log.d(TAG, "Recommendation - " + movie.getTitle());
+                flattenedRecommendations.add(movie);
+            }
+        }
 
-                final int id = count + 1;
-                final RecommendationBuilder notificationBuilder = builder
-                        .setBackground(movie.getCardImageUrl())
-                        .setId(id)
-                        .setPriority(MAX_RECOMMENDATIONS - count)
-                        .setTitle(movie.getTitle())
-                        .setDescription(getString(R.string.popular_header))
-                        .setIntent(buildPendingIntent(movie, id));
+        Collections.shuffle(flattenedRecommendations);
+        Movie movie;
+        for (int i = 0; i < flattenedRecommendations.size() && i < MAX_RECOMMENDATIONS; i++) {
+            movie = (Movie) flattenedRecommendations.get(i);
+            final RecommendationBuilder notificationBuilder = builder
+                    .setBackground(movie.getCardImageUrl())
+                    .setId(i+1)
+                    .setPriority(MAX_RECOMMENDATIONS - i - 1)
+                    .setTitle(movie.getTitle())
+                    .setDescription(getString(R.string.popular_header))
+                    .setIntent(buildPendingIntent(movie, i + 1));
 
-                try {
-                    Bitmap bitmap = Glide.with(getApplicationContext())
-                            .load(movie.getCardImageUrl())
-                            .asBitmap()
-                            .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
-                            .get();
-                    notificationBuilder.setBitmap(bitmap);
-                    Notification notification = notificationBuilder.build();
-                    mNotificationManager.notify(id, notification);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Could not create recommendation: " + e);
-                } catch (ExecutionException e) {
-                    Log.e(TAG, "Could not create recommendation: " + e);
-                }
-
-                if (++count >= MAX_RECOMMENDATIONS) {
-                    break;
-                }
+            try {
+                Bitmap bitmap = Glide.with(getApplicationContext())
+                        .load(movie.getCardImageUrl())
+                        .asBitmap()
+                        .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
+                        .get();
+                notificationBuilder.setBitmap(bitmap);
+                Notification notification = notificationBuilder.build();
+                mNotificationManager.notify(i + 1, notification);
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "Could not create recommendation: " + e);
             }
         }
     }
