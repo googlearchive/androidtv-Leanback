@@ -33,15 +33,9 @@ public class VideoContentProvider extends ContentProvider {
     private static String TAG = "VideoContentProvider";
     public static String AUTHORITY = "com.example.android.tvleanback";
 
-    // MIME types used for searching words or looking up a single definition
-    public static final String WORDS_MIME_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
-            "/vnd.example.android.leanback.VideoContentProvider";
-    public static final String DEFINITION_MIME_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE +
-            "/vnd.example.android.leanback.VideoContentProvider";
     // UriMatcher stuff
-    private static final int SEARCH_WORDS = 0;
-    private static final int SEARCH_SUGGEST = 2;
-    private static final int REFRESH_SHORTCUT = 3;
+    private static final int SEARCH_SUGGEST = 0;
+    private static final int REFRESH_SHORTCUT = 1;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
 
     private VideoDatabase mVideoDatabase;
@@ -120,8 +114,6 @@ public class VideoContentProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (URI_MATCHER.match(uri)) {
-            case SEARCH_WORDS:
-                return WORDS_MIME_TYPE;
             case SEARCH_SUGGEST:
                 return SearchManager.SUGGEST_MIME_TYPE;
             case REFRESH_SHORTCUT:

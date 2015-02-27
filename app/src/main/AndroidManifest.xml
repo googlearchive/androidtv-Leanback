@@ -94,6 +94,9 @@
             android:authorities="com.example.android.tvleanback"
             android:exported="true" />
 
+        <provider android:name=".recommendation.RecommendationBuilder$RecommendationBackgroundContentProvider"
+            android:authorities="com.example.android.tvleanback.recommendation"
+            android:exported="true" />
         <receiver
             android:name=".recommendation.BootupActivity"
             android:enabled="true"
