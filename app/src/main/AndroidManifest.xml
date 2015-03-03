@@ -106,6 +106,12 @@
         <service
             android:name=".recommendation.UpdateRecommendationsService"
             android:enabled="true" />
+
+        <provider
+            android:name=".recommendation.RecommendationContentProvider"
+            android:authorities="com.example.android.tvleanback.provider"
+            android:exported="true"/>
+
     </application>
 
 </manifest>

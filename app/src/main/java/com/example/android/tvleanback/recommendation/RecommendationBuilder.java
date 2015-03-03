@@ -26,6 +26,11 @@ import android.util.Log;
 
 import com.example.android.tvleanback.R;
 
+import org.apache.http.protocol.HTTP;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /*
  * This class builds recommendations as notifications with videos as inputs.
  */
@@ -98,7 +103,10 @@ public class RecommendationBuilder {
         Bundle extras = new Bundle();
         if (mBackgroundUri != null) {
             Log.d(TAG, "Background - " + mBackgroundUri);
-            extras.putString(Notification.EXTRA_BACKGROUND_IMAGE_URI, mBackgroundUri);
+            try {
+                extras.putString(Notification.EXTRA_BACKGROUND_IMAGE_URI, RecommendationContentProvider.CONTENT_URI + URLEncoder.encode(mBackgroundUri, HTTP.UTF_8));
+            } catch (UnsupportedEncodingException ignore) {
+            }
         }
 
         Notification notification = new NotificationCompat.BigPictureStyle(
