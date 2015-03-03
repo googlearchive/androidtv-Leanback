@@ -214,7 +214,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
         // Set detail background and style.
         DetailsOverviewRowPresenter detailsPresenter =
                 new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
-        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.detail_background));
+        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background));
         detailsPresenter.setStyleLarge(true);
 
         // Hook up transition element.
