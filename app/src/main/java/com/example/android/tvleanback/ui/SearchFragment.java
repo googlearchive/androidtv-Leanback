@@ -19,13 +19,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
+import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.ObjectAdapter;
-import android.support.v17.leanback.widget.OnItemClickedListener;
+import android.support.v17.leanback.widget.OnItemViewClickedListener;
+import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
+import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoProvider;
@@ -43,11 +48,12 @@ import java.util.Map;
 public class SearchFragment extends android.support.v17.leanback.app.SearchFragment
         implements android.support.v17.leanback.app.SearchFragment.SearchResultProvider {
     private static final String TAG = "SearchFragment";
-    private static final int SEARCH_DELAY_MS = 300;
+    private static final int SEARCH_DELAY_MS = 1000;
 
     private ArrayObjectAdapter mRowsAdapter;
     private Handler mHandler = new Handler();
     private SearchRunnable mDelayedLoad;
+    private String mQuery;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +61,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         setSearchResultProvider(this);
-        setOnItemClickedListener(getDefaultItemClickedListener());
+        setOnItemViewClickedListener(new ItemViewClickedListener());
         mDelayedLoad = new SearchRunnable();
     }
 
@@ -64,27 +70,28 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         return mRowsAdapter;
     }
 
-    private void queryByWords(String words) {
-        mRowsAdapter.clear();
-        if (!TextUtils.isEmpty(words)) {
-            mDelayedLoad.setSearchQuery(words);
-            mHandler.removeCallbacks(mDelayedLoad);
-            mHandler.postDelayed(mDelayedLoad, SEARCH_DELAY_MS);
-        }
-    }
-
     @Override
     public boolean onQueryTextChange(String newQuery) {
         Log.i(TAG, String.format("Search Query Text Change %s", newQuery));
-        queryByWords(newQuery);
+        loadQuery(newQuery);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
         Log.i(TAG, String.format("Search Query Text Submit %s", query));
-        queryByWords(query);
+        loadQuery(query);
         return true;
+    }
+
+    private void loadQuery(String query) {
+        mQuery = query;
+        mRowsAdapter.clear();
+        mHandler.removeCallbacks(mDelayedLoad);
+        if (!TextUtils.isEmpty(query) && !query.equals("nil")) {
+            mDelayedLoad.setSearchQuery(query);
+            mHandler.postDelayed(mDelayedLoad, SEARCH_DELAY_MS);
+        }
     }
 
     private void loadRows(String query) {
@@ -93,30 +100,17 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
             for (Movie movie : entry.getValue()) {
                 if (movie.getTitle().toLowerCase(Locale.ENGLISH)
-                        .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0
+                        .contains(query.toLowerCase(Locale.ENGLISH))
                         || movie.getDescription().toLowerCase(Locale.ENGLISH)
-                        .indexOf(query.toLowerCase(Locale.ENGLISH)) >= 0) {
+                        .contains(query.toLowerCase(Locale.ENGLISH))) {
                     listRowAdapter.add(movie);
                 }
             }
         }
-        HeaderItem header = new HeaderItem(0, getResources().getString(R.string.search_results),
+        HeaderItem header = new HeaderItem(0, getResources().getString(R.string.search_results)
+                + " '" + mQuery + "'",
                 null);
         mRowsAdapter.add(new ListRow(header, listRowAdapter));
-    }
-
-    protected OnItemClickedListener getDefaultItemClickedListener() {
-        return new OnItemClickedListener() {
-            @Override
-            public void onItemClicked(Object item, Row row) {
-                if (item instanceof Movie) {
-                    Movie movie = (Movie) item;
-                    Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                    intent.putExtra(MovieDetailsActivity.MOVIE, movie);
-                    startActivity(intent);
-                }
-            }
-        };
     }
 
     private class SearchRunnable implements Runnable {
@@ -134,4 +128,29 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
             this.searchQuery = value;
         }
     }
+
+    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+        @Override
+        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
+                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+
+            if (item instanceof Movie) {
+                Movie movie = (Movie) item;
+                Log.d(TAG, "Movie: " + movie.toString());
+                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
+
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        getActivity(),
+                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                getActivity().startActivity(intent, bundle);
+            } else {
+                Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+    }
+
+
 }
