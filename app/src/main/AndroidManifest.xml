@@ -26,9 +26,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <!-- The android.hardware.microphone feature requirement is implied by the RECORD_AUDIO permission but isn't available on every Android TV devices. -->
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
@@ -94,9 +92,11 @@
             android:authorities="com.example.android.tvleanback"
             android:exported="true" />
 
-        <provider android:name=".recommendation.RecommendationBuilder$RecommendationBackgroundContentProvider"
+        <provider
+            android:name=".recommendation.RecommendationBuilder$RecommendationBackgroundContentProvider"
             android:authorities="com.example.android.tvleanback.recommendation"
             android:exported="true" />
+
         <receiver
             android:name=".recommendation.BootupActivity"
             android:enabled="true"
