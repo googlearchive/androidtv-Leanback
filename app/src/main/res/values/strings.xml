@@ -44,7 +44,7 @@
     <string name="movie_index">MovieIndex</string>
     <string name="should_start">shouldStart</string>
     <string name="start_position">startPosition</string>
-    <string name="search_results">Search Results</string>
+    <string name="search_results">Search Results \'%1$s\'</string>
     <string name="catalog_url">http://commondatastorage.googleapis.com/android-tv/android_tv_videos.json</string>
     <string name="prefix_url">http://commondatastorage.googleapis.com/android-tv/Sample%20videos/</string>
 
