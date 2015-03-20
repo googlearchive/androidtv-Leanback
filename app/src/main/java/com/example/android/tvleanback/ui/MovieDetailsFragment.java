@@ -249,7 +249,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
                 }
             }
         }
-        HeaderItem header = new HeaderItem(0, subcategories[0], null);
+        HeaderItem header = new HeaderItem(0, subcategories[0]);
         mAdapter.add(new ListRow(header, listRowAdapter));
     }
 

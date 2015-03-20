@@ -168,13 +168,12 @@ public class MainFragment extends BrowseFragment implements
             for (int j = 0; j < list.size(); j++) {
                 listRowAdapter.add(list.get(j));
             }
-            HeaderItem header = new HeaderItem(i, entry.getKey(), null);
+            HeaderItem header = new HeaderItem(i, entry.getKey());
             i++;
             mRowsAdapter.add(new ListRow(header, listRowAdapter));
         }
 
-        HeaderItem gridHeader = new HeaderItem(i, getString(R.string.more_samples),
-                null);
+        HeaderItem gridHeader = new HeaderItem(i, getString(R.string.more_samples));
 
         GridItemPresenter gridPresenter = new GridItemPresenter(this);
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
