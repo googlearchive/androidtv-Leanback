@@ -108,8 +108,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
             }
         }
         HeaderItem header = new HeaderItem(0, getResources().getString(R.string.search_results)
-                + " '" + mQuery + "'",
-                null);
+                + " '" + mQuery + "'");
         mRowsAdapter.add(new ListRow(header, listRowAdapter));
     }
 
