@@ -73,7 +73,7 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <activity android:name=".ui.PlaybackOverlayActivity"
+        <activity android:name=".ui.PlaybackActivity"
             android:exported="true" />
 
         <activity
