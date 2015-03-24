@@ -487,7 +487,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                Intent intent = new Intent(getActivity(), PlaybackActivity.class);
                 intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(

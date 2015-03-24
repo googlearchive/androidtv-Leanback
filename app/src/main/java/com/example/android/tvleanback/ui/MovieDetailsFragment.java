@@ -225,7 +225,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
-                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                    Intent intent = new Intent(getActivity(), PlaybackActivity.class);
                     intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
                     startActivity(intent);
                 } else {
