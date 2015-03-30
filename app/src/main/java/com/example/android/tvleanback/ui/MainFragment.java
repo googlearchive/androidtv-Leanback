@@ -30,6 +30,7 @@ import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.PresenterSelector;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -50,6 +51,7 @@ import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
 import com.example.android.tvleanback.presenter.GridItemPresenter;
+import com.example.android.tvleanback.presenter.IconHeaderItemPresenter;
 import com.example.android.tvleanback.recommendation.UpdateRecommendationsService;
 
 import java.net.URI;
@@ -114,6 +116,13 @@ public class MainFragment extends BrowseFragment implements
         setBrandColor(getResources().getColor(R.color.fastlane_background));
         // set search icon color
         setSearchAffordanceColor(getResources().getColor(R.color.search_opaque));
+
+        setHeaderPresenterSelector(new PresenterSelector() {
+            @Override
+            public Presenter getPresenter(Object o) {
+                return new IconHeaderItemPresenter();
+            }
+        });
     }
 
     private void loadVideoData() {
