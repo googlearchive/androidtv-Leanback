@@ -24,7 +24,7 @@ icon: androidtv-Leanback/app/src/main/res/drawable/app_icon_quantum.png
 # names that are unique for the product in question. Examples:
 #
 # Android -    android:<class-name>
-api_refs:
+apiRefs:
     - android:com.android.support.leanback-v17
     - android:com.android.support.recyclerview-v7
 
