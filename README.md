@@ -28,7 +28,7 @@ Getting Started
 Screenshots
 -----------
 
-![Screenshot](app/src/main/res/drawable/androidtv-leanback-sample.png)
+![Screenshot](app/src/main/androidtv-leanback-sample.png)
 
 Support
 -------
