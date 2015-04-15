@@ -188,17 +188,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         playbackControlsRowPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             public void onActionClicked(Action action) {
                 if (action.getId() == mPlayPauseAction.getId()) {
-                    if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
-                        startProgressAutomation();
-                        setFadingEnabled(true);
-                        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem),
-                                mPlaybackControlsRow.getCurrentTime(), true);
-                    } else {
-                        stopProgressAutomation();
-                        setFadingEnabled(false);
-                        mCallback.onFragmentPlayPause(mItems.get(mCurrentItem),
-                                mPlaybackControlsRow.getCurrentTime(), false);
-                    }
+                    togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY);
                 } else if (action.getId() == mSkipNextAction.getId()) {
                     next();
                 } else if (action.getId() == mSkipPreviousAction.getId()) {
@@ -224,6 +214,23 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         addOtherRows();
 
         setAdapter(mRowsAdapter);
+    }
+
+    public void togglePlayback(boolean playPause) {
+        if (playPause) {
+            startProgressAutomation();
+            setFadingEnabled(true);
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem),
+                    mPlaybackControlsRow.getCurrentTime(), true);
+            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
+        } else {
+            stopProgressAutomation();
+            setFadingEnabled(false);
+            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem),
+                    mPlaybackControlsRow.getCurrentTime(), false);
+            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
+        }
+        notifyChanged(mPlayPauseAction);
     }
 
     private int getDuration() {
