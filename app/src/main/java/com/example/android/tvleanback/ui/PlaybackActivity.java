@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
 
@@ -261,6 +262,28 @@ public class PlaybackActivity extends Activity implements
     private void stopPlayback() {
         if (mVideoView != null) {
             mVideoView.stopPlayback();
+        }
+    }
+
+    @Override
+     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        PlaybackOverlayFragment playbackOverlayFragment = (PlaybackOverlayFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+                playbackOverlayFragment.togglePlayback(false);
+                return true;
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                playbackOverlayFragment.togglePlayback(false);
+                return true;
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
+                    playbackOverlayFragment.togglePlayback(false);
+                } else {
+                    playbackOverlayFragment.togglePlayback(true);
+                }
+                return true;
+            default:
+                return super.onKeyUp(keyCode, event);
         }
     }
 
