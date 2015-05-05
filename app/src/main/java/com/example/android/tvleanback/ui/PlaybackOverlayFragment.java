@@ -58,7 +58,6 @@ import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -122,11 +121,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
-        if(movies != null) {
+        if (movies != null) {
             for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
                 if (mSelectedMovie.getCategory().contains(entry.getKey())) {
                     List<Movie> list = entry.getValue();
-                    if(list != null && !list.isEmpty()) {
+                    if (list != null && !list.isEmpty()) {
                         for (int j = 0; j < list.size(); j++) {
                             mItems.add(list.get(j));
                             if (mSelectedMovie.getTitle().contentEquals(list.get(j).getTitle())) {
@@ -170,7 +169,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
     }
 

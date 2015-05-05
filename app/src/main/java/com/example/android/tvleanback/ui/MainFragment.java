@@ -14,6 +14,7 @@
 
 package com.example.android.tvleanback.ui;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
@@ -187,6 +188,7 @@ public class MainFragment extends BrowseFragment implements
         GridItemPresenter gridPresenter = new GridItemPresenter(this);
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
         gridRowAdapter.add(getString(R.string.grid_view));
+        gridRowAdapter.add(getString(R.string.guidedstep_first_title));
         gridRowAdapter.add(getString(R.string.error_fragment));
         gridRowAdapter.add(getString(R.string.personal_settings));
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
@@ -282,6 +284,10 @@ public class MainFragment extends BrowseFragment implements
             } else if (item instanceof String) {
                 if (((String) item).indexOf(getString(R.string.grid_view)) >= 0) {
                     Intent intent = new Intent(getActivity(), VerticalGridActivity.class);
+                    startActivity(intent);
+                } else if (((String) item)
+                        .indexOf(getString(R.string.guidedstep_first_title)) >= 0) {
+                    Intent intent = new Intent(getActivity(), GuidedStepActivity.class);
                     startActivity(intent);
                 } else if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
