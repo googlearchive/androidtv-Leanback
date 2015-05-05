@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
+import android.support.v17.leanback.widget.RowHeaderPresenter;
 import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.RowHeaderView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,19 +15,10 @@ import android.widget.TextView;
 
 import com.example.android.tvleanback.R;
 
-public class IconHeaderItemPresenter extends Presenter {
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup) {
-        LayoutInflater inflater = (LayoutInflater) viewGroup.getContext()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View view = inflater.inflate(R.layout.icon_header_item, null);
-
-        return new ViewHolder(view);
-    }
+public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, Object o) {
+    public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object o) {
         HeaderItem headerItem = ((ListRow) o).getHeaderItem();
         View rootView = viewHolder.view;
 
@@ -38,7 +31,28 @@ public class IconHeaderItemPresenter extends Presenter {
     }
 
     @Override
-    public void onUnbindViewHolder(ViewHolder viewHolder) {
+    public Presenter.ViewHolder onCreateViewHolder(ViewGroup viewGroup) {
+        View view = LayoutInflater.from(viewGroup.getContext())
+                .inflate(R.layout.icon_header_item, null);
+
+        // incompatible expectation of the super.onCreateViewHolder():
+//        RowHeaderView headerView = (RowHeaderView) LayoutInflater.from(parent.getContext())
+//                .inflate(R.layout.icon_header_item, parent, false);
+
+        return new ViewHolder(view);
+    }
+
+
+    @Override
+    public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
         // no op
+    }
+
+    // TODO: TEMP - remove me when leanback onCreateViewHolder no longer sets the mUnselectAlpha, AND
+    // also assumes the xml inflation will return a RowHeaderView
+    @Override
+    protected void onSelectLevelChanged(ViewHolder holder) {
+        holder.view.setAlpha(0.5f + holder.getSelectLevel() *
+                (1f - 0.5f));
     }
 }
