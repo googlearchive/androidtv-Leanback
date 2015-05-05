@@ -115,4 +115,26 @@
         day when an invading army of humans threatens the harmony of the land.
     </string>
 
+    <!-- Strings related to guided sequence activity -->
+    <string name="guidedstep_first_title">Guided Step First Page</string>
+    <string name="guidedstep_first_description">First step of guided sequence</string>
+    <string name="guidedstep_first_breadcrumb">Guided Steps: 1</string>
+    <string name="guidedstep_second_title">Guided Step Second Page</string>
+    <string name="guidedstep_second_description">Showcasing different action configurations</string>
+    <string name="guidedstep_second_breadcrumb">Guided Steps: 2</string>
+    <string name="guidedstep_third_title">Guided Step Third Page</string>
+    <string name="guidedstep_third_description">Third step of guided sequence</string>
+    <string name="guidedstep_third_breadcrumb">Guided Steps: 3</string>
+    <string name="guidedstep_third_command">You chose: </string>
+    <string name="guidedstep_action_description">The description can be quite long as well.
+        Just be sure to set multilineDescription to true in the GuidedAction.
+    </string>
+    <string name="guidedstep_action_title">
+        Note that Guided Actions can have titles that are quite long.
+    </string>
+    <string name="guidedstep_continue">Continue</string>
+    <string name="guidedstep_letsdoit">Let\'s do it</string>
+    <string name="guidedstep_nevermind">Never mind</string>
+    <string name="guidedstep_cancel">Cancel</string>
+
 </resources>

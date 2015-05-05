@@ -21,8 +21,8 @@
     android:versionName="1.1" >
 
     <uses-sdk
-        android:minSdkVersion="19"
-        android:targetSdkVersion="21" />
+        android:minSdkVersion="21"
+        android:targetSdkVersion="22" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -73,19 +73,19 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <activity android:name=".ui.PlaybackActivity"
-            android:exported="true" />
+        <activity android:name=".ui.PlaybackActivity" />
 
         <activity
             android:name=".ui.VerticalGridActivity"
             android:exported="true"
             android:parentActivityName=".ui.MainActivity" />
         <activity
-            android:name=".ui.SearchActivity"
-            android:exported="true" />
+            android:name=".ui.SearchActivity" />
 
-        <activity android:name=".ui.BrowseErrorActivity"
-            android:exported="true" />
+        <activity android:name=".ui.BrowseErrorActivity" />
+
+        <activity android:name=".ui.GuidedStepActivity"
+            android:theme="@style/Theme.Example.Leanback.GuidedStep" />
 
         <!-- Provides search suggestions for keywords against video meta data. -->
         <provider android:name=".data.VideoContentProvider"
