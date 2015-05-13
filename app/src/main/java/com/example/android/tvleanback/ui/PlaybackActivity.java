@@ -169,6 +169,8 @@ public class PlaybackActivity extends Activity implements
 
     private void loadViews() {
         mVideoView = (VideoView) findViewById(R.id.videoView);
+        mVideoView.setFocusable(false);
+        mVideoView.setFocusableInTouchMode(false);
     }
 
     /**
