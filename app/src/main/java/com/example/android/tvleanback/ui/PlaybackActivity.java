@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
@@ -57,10 +58,6 @@ public class PlaybackActivity extends Activity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.playback_controls);
-        loadViews();
-        //Example for handling resizing view for overscan
-        //overScan();
 
         mSession = new MediaSession (this, "LeanbackSampleApp");
         mSession.setCallback(new MediaSessionCallback());
@@ -69,6 +66,12 @@ public class PlaybackActivity extends Activity implements
 
         mSession.setActive(true);
 
+        setMediaController(new MediaController(this, mSession.getSessionToken()));
+
+        setContentView(R.layout.playback_controls);
+        loadViews();
+        //Example for handling resizing view for overscan
+        //overScan();
     }
 
     @Override
@@ -81,6 +84,10 @@ public class PlaybackActivity extends Activity implements
      * Implementation of OnPlayPauseClickedListener
      */
     public void onFragmentPlayPause(Movie movie, int position, Boolean playPause) {
+        play(movie, position, playPause);
+    }
+
+    private void play(Movie movie, int position, Boolean playPause) {
         mVideoView.setVideoPath(movie.getVideoUrl());
 
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
