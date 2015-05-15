@@ -38,8 +38,7 @@ import com.example.android.tvleanback.model.Movie;
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
-public class PlaybackActivity extends Activity implements
-        PlaybackOverlayFragment.OnPlayPauseClickedListener {
+public class PlaybackActivity extends Activity {
     private static final String TAG = "PlaybackOverlayActivity";
 
     private static final double MEDIA_HEIGHT = 0.95;
@@ -80,58 +79,32 @@ public class PlaybackActivity extends Activity implements
         mVideoView.suspend();
     }
 
-    /**
-     * Implementation of OnPlayPauseClickedListener
-     */
-    public void onFragmentPlayPause(Movie movie, int position, Boolean playPause) {
-        play(movie, position, playPause);
-    }
 
-    private void play(Movie movie, int position, Boolean playPause) {
-        mVideoView.setVideoPath(movie.getVideoUrl());
-
-        if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
+    private void playPause(Boolean doPlay) {
+        if (mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();
-            mPlaybackState = LeanbackPlaybackState.IDLE;
         }
 
-        if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) {
+        if (doPlay && mPlaybackState != LeanbackPlaybackState.PLAYING) {
             mPlaybackState = LeanbackPlaybackState.PLAYING;
-            if (position > 0) {
-                mVideoView.seekTo(position);
-                mVideoView.start();
-            }
+            Log.d(TAG, "getCurrentPosition: " + mVideoView.getCurrentPosition());
+            mVideoView.start();
         } else {
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             mVideoView.pause();
         }
-        updatePlaybackState(position);
-        updateMetadata(movie);
+        updatePlaybackState();
     }
 
-    /**
-     * Implementation of OnPlayPauseClickedListener
-     */
-    public void onFragmentFfwRwd(Movie movie, int position) {
-        mVideoView.setVideoPath(movie.getVideoUrl());
 
-        Log.d(TAG, "seek current time: " + position);
-        if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-            if (position > 0) {
-                mVideoView.seekTo(position);
-                mVideoView.start();
-            }
-        }
-    }
-
-    private void updatePlaybackState(int position) {
+    private void updatePlaybackState() {
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
         int state = PlaybackState.STATE_PLAYING;
         if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
             state = PlaybackState.STATE_PAUSED;
         }
-        stateBuilder.setState(state, position, 1.0f);
+        stateBuilder.setState(state, mVideoView.getCurrentPosition(), 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
     }
 
@@ -178,6 +151,10 @@ public class PlaybackActivity extends Activity implements
         mVideoView = (VideoView) findViewById(R.id.videoView);
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
+
+        Movie movie = (Movie)getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
+        mVideoView.setVideoPath(movie.getVideoUrl());
+        updateMetadata(movie);
     }
 
     /**
@@ -310,5 +287,27 @@ public class PlaybackActivity extends Activity implements
     }
 
     private class MediaSessionCallback extends MediaSession.Callback {
+        @Override
+        public void onPlay() {
+            playPause(true);
+        }
+        @Override
+        public void onPause() {
+            playPause(false);
+        }
+
+        @Override
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            boolean isPlaying = mVideoView.isPlaying();
+            mVideoView.setVideoPath(mediaId);
+            mPlaybackState = LeanbackPlaybackState.PAUSED;
+            playPause(isPlaying);
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            mVideoView.seekTo((int)pos);
+            updatePlaybackState();
+        }
     }
 }
