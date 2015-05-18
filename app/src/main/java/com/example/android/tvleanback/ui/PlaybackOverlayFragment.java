@@ -13,7 +13,6 @@
  */
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
@@ -117,6 +116,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
+
         sContext = getActivity();
 
         mItems = new ArrayList<Movie>();
@@ -158,27 +158,25 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
 
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mMediaController = activity.getMediaController();
-            mMediaController.registerCallback(mMediaControllerCallback);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnPlayPauseClickedListener");
-        }
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        mMediaController = getActivity().getMediaController();
+        Log.d(TAG, "register callback of mediaController");
+        mMediaController.registerCallback(mMediaControllerCallback);
     }
 
+
     @Override
-    public void onDetach() {
+    public void onStop() {
+        stopProgressAutomation();
         if (mMediaController != null) {
+            Log.d(TAG, "unregister callback of mediaController");
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
-        super.onDetach();
+        super.onStop();
     }
 
     @Override
@@ -372,7 +370,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         if (++mCurrentItem >= mItems.size()) {
             mCurrentItem = 0;
         }
-        mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getVideoUrl(), null);
+        mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getId(), null);
         mFfwRwdSpeed = INITIAL_SPEED;
         updatePlaybackRow(mCurrentItem);
     }
@@ -381,7 +379,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         if (--mCurrentItem < 0) {
             mCurrentItem = mItems.size() - 1;
         }
-        mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getVideoUrl(), null);
+        mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getId(), null);
         mFfwRwdSpeed = INITIAL_SPEED;
         updatePlaybackRow(mCurrentItem);
     }
@@ -409,12 +407,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             mHandler.removeCallbacks(mRunnable);
             mRunnable = null;
         }
-    }
-
-    @Override
-    public void onStop() {
-        stopProgressAutomation();
-        super.onStop();
     }
 
     protected void updateVideoImage(String uri) {
@@ -494,6 +486,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private class MediaControllerCallback extends MediaController.Callback {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
+            Log.d(TAG, "playback state changed: " + state.getState());
             if (state.getState() == PlaybackState.STATE_PLAYING) {
                 startProgressAutomation();
                 setFadingEnabled(true);
