@@ -16,10 +16,8 @@ package com.example.android.tvleanback.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
-import android.media.MediaMetadataRetriever;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
@@ -56,6 +54,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
@@ -235,15 +234,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     private int getDuration() {
-        Movie movie = mItems.get(mCurrentItem);
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            mmr.setDataSource(movie.getVideoUrl(), new HashMap<String, String>());
-        } else {
-            mmr.setDataSource(movie.getVideoUrl());
-        }
-        String time = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        mDuration = Long.parseLong(time);
+        mDuration = Utils.getDuration(mItems.get(mCurrentItem).getVideoUrl());
         return (int) mDuration;
     }
 
@@ -255,7 +246,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         mRowsAdapter.add(mPlaybackControlsRow);
 
-        updatePlaybackRow(mCurrentItem);
+        updatePlaybackRow();
 
         ControlButtonPresenterSelector presenterSelector = new ControlButtonPresenterSelector();
         mPrimaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
@@ -312,20 +303,21 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
     }
 
-    private void updatePlaybackRow(int index) {
-        updateMovieView(mItems.get(mCurrentItem).getTitle(), mItems.get(mCurrentItem).getStudio(), mItems.get(mCurrentItem).getCardImageUrl());
+    private void updatePlaybackRow() {
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
-        mPlaybackControlsRow.setTotalTime(getDuration());
         mPlaybackControlsRow.setCurrentTime(0);
         mPlaybackControlsRow.setBufferedProgress(0);
     }
 
-    private void updateMovieView(String title, String studio, String cardImageUrl) {
+    private void updateMovieView(String title, String studio, String cardImageUrl, long duration) {
         if (mPlaybackControlsRow.getItem() != null) {
             Movie item = (Movie) mPlaybackControlsRow.getItem();
             item.setTitle(title);
             item.setStudio(studio);
         }
+        mDuration = duration;
+        mPlaybackControlsRow.setTotalTime((int) duration);
+
         if (SHOW_IMAGE) {
             updateVideoImage(cardImageUrl);
         }
@@ -389,20 +381,12 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     private void fastForward() {
         startClickTrackingTimer();
-        int currentTime = mPlaybackControlsRow.getCurrentTime() + mFfwRwdSpeed;
-        if (currentTime > (int) mDuration) {
-            currentTime = (int) mDuration;
-        }
-        mMediaController.getTransportControls().seekTo(currentTime);
+        mMediaController.getTransportControls().fastForward();
     }
 
     private void fastRewind() {
         startClickTrackingTimer();
-        int currentTime = mPlaybackControlsRow.getCurrentTime() - mFfwRwdSpeed;
-        if (currentTime < 0 || currentTime > (int) mDuration) {
-            currentTime = 0;
-        }
-        mMediaController.getTransportControls().seekTo(currentTime);
+        mMediaController.getTransportControls().rewind();
     }
 
     private void stopProgressAutomation() {
@@ -505,6 +489,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             }
 
             int currentTime = (int)state.getPosition();
+            Log.d(TAG, "retrieved currentTime from MediaSession state: " + currentTime);
             mPlaybackControlsRow.setCurrentTime(currentTime);
             mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
         }
@@ -513,9 +498,10 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         public void onMetadataChanged(MediaMetadata metadata) {
             Log.d(TAG, "received update of media metadata");
             updateMovieView(
-                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE),
-                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE),
-                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI)
+                    metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE),
+                    metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE),
+                    metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_DURATION)
             );
         }
     }
