@@ -32,6 +32,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 
@@ -53,6 +54,8 @@ public class PlaybackActivity extends Activity {
     private VideoView mVideoView;
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
     private MediaSession mSession;
+    private String mCurrentVideoPath;
+    private long mDuration = -1;
 
     /**
      * Called when the activity is first created.
@@ -101,7 +104,6 @@ public class PlaybackActivity extends Activity {
 
         if (doPlay && mPlaybackState != LeanbackPlaybackState.PLAYING) {
             mPlaybackState = LeanbackPlaybackState.PLAYING;
-            Log.d(TAG, "getCurrentPosition: " + mVideoView.getCurrentPosition());
             mVideoView.start();
         } else {
             mPlaybackState = LeanbackPlaybackState.PAUSED;
@@ -147,6 +149,7 @@ public class PlaybackActivity extends Activity {
                 movie.getDescription());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
                 movie.getCardImageUrl());
+        metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, mDuration);
 
         // And at minimum the title and artist for legacy support
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, title);
@@ -170,7 +173,7 @@ public class PlaybackActivity extends Activity {
         mVideoView.setFocusableInTouchMode(false);
 
         Movie movie = (Movie)getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
-        mVideoView.setVideoPath(movie.getVideoUrl());
+        setVideoPath(movie.getVideoUrl());
         updateMetadata(movie);
     }
 
@@ -309,7 +312,7 @@ public class PlaybackActivity extends Activity {
 
             Movie movie = getMovieById(mediaId);
 
-            mVideoView.setVideoPath(movie.getVideoUrl());
+            setVideoPath(movie.getVideoUrl());
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             updateMetadata(movie);
             playPause(isPlaying);
@@ -317,9 +320,38 @@ public class PlaybackActivity extends Activity {
 
         @Override
         public void onSeekTo(long pos) {
-            mVideoView.seekTo((int)pos);
+            mVideoView.seekTo((int) pos);
             updatePlaybackState();
         }
+
+        @Override
+        public void onFastForward() {
+            if (mDuration != -1) {
+                int newPosition = mVideoView.getCurrentPosition() + (10 * 1000);
+                if (newPosition > mDuration) {
+                    newPosition = (int) mDuration;
+                }
+                mVideoView.seekTo(newPosition);
+                updatePlaybackState();
+            }
+        }
+
+        @Override
+        public void onRewind() {
+            Log.d(TAG, "received fastForward in MediaSession.Callback");
+            int newPosition = mVideoView.getCurrentPosition() - (10 * 1000);
+            if (newPosition < 0) {
+                newPosition = 0;
+            }
+            mVideoView.seekTo(newPosition);
+            updatePlaybackState();
+        }
+    }
+
+    private void setVideoPath(String videoUrl) {
+        mVideoView.setVideoPath(videoUrl);
+        mCurrentVideoPath = videoUrl;
+        mDuration = Utils.getDuration(videoUrl);
     }
 
     private Movie getMovieById(String mediaId) {
