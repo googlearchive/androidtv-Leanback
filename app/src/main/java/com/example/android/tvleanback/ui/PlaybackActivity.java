@@ -51,6 +51,7 @@ public class PlaybackActivity extends Activity {
     private static final double MEDIA_RIGHT_MARGIN = 0.025;
     private static final double MEDIA_BOTTOM_MARGIN = 0.025;
     private static final double MEDIA_LEFT_MARGIN = 0.025;
+    public static final String AUTO_PLAY = "auto_play";
     private VideoView mVideoView;
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
     private MediaSession mSession;
@@ -117,7 +118,7 @@ public class PlaybackActivity extends Activity {
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions());
         int state = PlaybackState.STATE_PLAYING;
-        if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
+        if (mPlaybackState == LeanbackPlaybackState.PAUSED || mPlaybackState == LeanbackPlaybackState.IDLE) {
             state = PlaybackState.STATE_PAUSED;
         }
         stateBuilder.setState(state, mVideoView.getCurrentPosition(), 1.0f);
@@ -307,15 +308,13 @@ public class PlaybackActivity extends Activity {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            // must be called before setting the new video path on mVideoView
-            boolean isPlaying = mVideoView.isPlaying();
-
             Movie movie = getMovieById(mediaId);
 
             setVideoPath(movie.getVideoUrl());
+
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             updateMetadata(movie);
-            playPause(isPlaying);
+            playPause(extras.getBoolean(AUTO_PLAY));
         }
 
         @Override
