@@ -33,7 +33,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
+import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
@@ -58,15 +62,6 @@ public class PlaybackActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSession = new MediaSession (this, "LeanbackSampleApp");
-        mSession.setCallback(new MediaSessionCallback());
-        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-
-        mSession.setActive(true);
-
-        setMediaController(new MediaController(this, mSession.getSessionToken()));
-
         setContentView(R.layout.playback_controls);
         loadViews();
         //Example for handling resizing view for overscan
@@ -74,11 +69,31 @@ public class PlaybackActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        createMediaSession();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mVideoView.suspend();
+        mSession.release();
     }
 
+
+    private void createMediaSession() {
+        if (mSession == null) {
+            mSession = new MediaSession(this, "LeanbackSampleApp");
+            mSession.setCallback(new MediaSessionCallback());
+            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+                    MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+            mSession.setActive(true);
+
+            setMediaController(new MediaController(this, mSession.getSessionToken()));
+        }
+    }
 
     private void playPause(Boolean doPlay) {
         if (mPlaybackState == LeanbackPlaybackState.IDLE) {
@@ -236,13 +251,24 @@ public class PlaybackActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        mSession.release();
+        Log.d(TAG, "pausing playback in onStop");
+        pausePlayback();
+
     }
+
+
 
     @Override
     public void onVisibleBehindCanceled() {
+        Log.d(TAG, "pausing playback in onVisibleBehindCanceled");
+        pausePlayback();
         super.onVisibleBehindCanceled();
-        stopPlayback();
+    }
+
+    private void pausePlayback() {
+        mVideoView.pause();
+        mPlaybackState = LeanbackPlaybackState.PAUSED;
+        updatePlaybackState();
     }
 
     private void stopPlayback() {
@@ -298,8 +324,12 @@ public class PlaybackActivity extends Activity {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            // must be called before setting the new video path on mVideoView
             boolean isPlaying = mVideoView.isPlaying();
-            mVideoView.setVideoPath(mediaId);
+
+            Movie movie = getMovieById(mediaId);
+
+            mVideoView.setVideoPath(movie.getVideoUrl());
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             playPause(isPlaying);
         }
@@ -309,5 +339,17 @@ public class PlaybackActivity extends Activity {
             mVideoView.seekTo((int)pos);
             updatePlaybackState();
         }
+    }
+
+    private Movie getMovieById(String mediaId) {
+        Collection<List<Movie>> movies = VideoProvider.getMovieList().values();
+        for (List<Movie> category :movies) {
+            for (Movie movie: category) {
+                if (movie.getId().equals(mediaId)) {
+                    return movie;
+                }
+            }
+        }
+        return null;
     }
 }
