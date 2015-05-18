@@ -15,6 +15,7 @@ package com.example.android.tvleanback.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
@@ -312,18 +313,22 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     private void updatePlaybackRow(int index) {
-        if (mPlaybackControlsRow.getItem() != null) {
-            Movie item = (Movie) mPlaybackControlsRow.getItem();
-            item.setTitle(mItems.get(mCurrentItem).getTitle());
-            item.setStudio(mItems.get(mCurrentItem).getStudio());
-        }
-        if (SHOW_IMAGE) {
-            updateVideoImage(mItems.get(mCurrentItem).getCardImageUrl());
-        }
+        updateMovieView(mItems.get(mCurrentItem).getTitle(), mItems.get(mCurrentItem).getStudio(), mItems.get(mCurrentItem).getCardImageUrl());
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
         mPlaybackControlsRow.setTotalTime(getDuration());
         mPlaybackControlsRow.setCurrentTime(0);
         mPlaybackControlsRow.setBufferedProgress(0);
+    }
+
+    private void updateMovieView(String title, String studio, String cardImageUrl) {
+        if (mPlaybackControlsRow.getItem() != null) {
+            Movie item = (Movie) mPlaybackControlsRow.getItem();
+            item.setTitle(title);
+            item.setStudio(studio);
+        }
+        if (SHOW_IMAGE) {
+            updateVideoImage(cardImageUrl);
+        }
     }
 
     private void addOtherRows() {
@@ -372,7 +377,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getId(), null);
         mFfwRwdSpeed = INITIAL_SPEED;
-        updatePlaybackRow(mCurrentItem);
     }
 
     private void prev() {
@@ -381,7 +385,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         mMediaController.getTransportControls().playFromMediaId(mItems.get(mCurrentItem).getId(), null);
         mFfwRwdSpeed = INITIAL_SPEED;
-        updatePlaybackRow(mCurrentItem);
     }
 
     private void fastForward() {
@@ -504,6 +507,16 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             int currentTime = (int)state.getPosition();
             mPlaybackControlsRow.setCurrentTime(currentTime);
             mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            Log.d(TAG, "received update of media metadata");
+            updateMovieView(
+                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE),
+                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE),
+                metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI)
+            );
         }
     }
 }

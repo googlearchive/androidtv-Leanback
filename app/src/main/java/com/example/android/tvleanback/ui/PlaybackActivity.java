@@ -140,8 +140,11 @@ public class PlaybackActivity extends Activity {
 
         String title = movie.getTitle().replace("_", " -");
 
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_MEDIA_ID, movie.getId());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+                movie.getStudio());
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
                 movie.getDescription());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
                 movie.getCardImageUrl());
@@ -331,6 +334,7 @@ public class PlaybackActivity extends Activity {
 
             mVideoView.setVideoPath(movie.getVideoUrl());
             mPlaybackState = LeanbackPlaybackState.PAUSED;
+            updateMetadata(movie);
             playPause(isPlaying);
         }
 
