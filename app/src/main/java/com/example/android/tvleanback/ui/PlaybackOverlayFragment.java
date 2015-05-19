@@ -14,7 +14,6 @@
 package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -85,7 +84,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private static final int CLICK_TRACKING_DELAY = 1000;
     private static final int INITIAL_SPEED = 10000;
 
-    private static Context sContext;
     private final Handler mClickTrackingHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private ArrayObjectAdapter mPrimaryActionsAdapter;
@@ -118,9 +116,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-
-        sContext = getActivity();
-
+        
         mItems = new ArrayList<Movie>();
         mSelectedMovie = (Movie) getActivity()
                 .getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
@@ -265,15 +261,15 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mPlaybackControlsRow.setPrimaryActionsAdapter(mPrimaryActionsAdapter);
         mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
 
-        mPlayPauseAction = new PlayPauseAction(sContext);
-        mRepeatAction = new RepeatAction(sContext);
-        mThumbsUpAction = new ThumbsUpAction(sContext);
-        mThumbsDownAction = new ThumbsDownAction(sContext);
-        mShuffleAction = new ShuffleAction(sContext);
-        mSkipNextAction = new PlaybackControlsRow.SkipNextAction(sContext);
-        mSkipPreviousAction = new PlaybackControlsRow.SkipPreviousAction(sContext);
-        mFastForwardAction = new PlaybackControlsRow.FastForwardAction(sContext);
-        mRewindAction = new PlaybackControlsRow.RewindAction(sContext);
+        mPlayPauseAction = new PlayPauseAction(getActivity());
+        mRepeatAction = new RepeatAction(getActivity());
+        mThumbsUpAction = new ThumbsUpAction(getActivity());
+        mThumbsDownAction = new ThumbsDownAction(getActivity());
+        mShuffleAction = new ShuffleAction(getActivity());
+        mSkipNextAction = new PlaybackControlsRow.SkipNextAction(getActivity());
+        mSkipPreviousAction = new PlaybackControlsRow.SkipPreviousAction(getActivity());
+        mFastForwardAction = new PlaybackControlsRow.FastForwardAction(getActivity());
+        mRewindAction = new PlaybackControlsRow.RewindAction(getActivity());
 
         if (PRIMARY_CONTROLS > 5) {
             mPrimaryActionsAdapter.add(mThumbsUpAction);
@@ -282,11 +278,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         mPrimaryActionsAdapter.add(mSkipPreviousAction);
         if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(new PlaybackControlsRow.RewindAction(sContext));
+            mPrimaryActionsAdapter.add(new PlaybackControlsRow.RewindAction(getActivity()));
         }
         mPrimaryActionsAdapter.add(mPlayPauseAction);
         if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(new PlaybackControlsRow.FastForwardAction(sContext));
+            mPrimaryActionsAdapter.add(new PlaybackControlsRow.FastForwardAction(getActivity()));
         }
         mPrimaryActionsAdapter.add(mSkipNextAction);
 
@@ -297,8 +293,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         } else {
             mSecondaryActionsAdapter.add(mThumbsDownAction);
         }
-        mSecondaryActionsAdapter.add(new PlaybackControlsRow.HighQualityAction(sContext));
-        mSecondaryActionsAdapter.add(new PlaybackControlsRow.ClosedCaptioningAction(sContext));
+        mSecondaryActionsAdapter.add(new PlaybackControlsRow.HighQualityAction(getActivity()));
+        mSecondaryActionsAdapter.add(new PlaybackControlsRow.ClosedCaptioningAction(getActivity()));
     }
 
     private void notifyChanged(Action action) {
@@ -418,7 +414,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     protected void updateVideoImage(String uri) {
-        Glide.with(sContext)
+        Glide.with(getActivity())
                 .load(uri)
                 .centerCrop()
                 .into(new SimpleTarget<GlideDrawable>(CARD_WIDTH, CARD_HEIGHT) {
