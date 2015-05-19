@@ -13,6 +13,7 @@
  */
 package com.example.android.tvleanback.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
@@ -159,26 +160,35 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mMediaController = getActivity().getMediaController();
+        Log.d(TAG, "register callback of mediaController");
+        mMediaController.registerCallback(mMediaControllerCallback);
+    }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        mMediaController = getActivity().getMediaController();
-        Log.d(TAG, "register callback of mediaController");
-        mMediaController.registerCallback(mMediaControllerCallback);
     }
 
 
     @Override
     public void onStop() {
         stopProgressAutomation();
+        super.onStop();
+    }
+
+    @Override
+    public void onDetach() {
         if (mMediaController != null) {
             Log.d(TAG, "unregister callback of mediaController");
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
-        super.onStop();
+        super.onDetach();
     }
+
 
     @Override
     public void onResume() {
