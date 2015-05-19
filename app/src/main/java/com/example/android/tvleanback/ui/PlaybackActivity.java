@@ -65,6 +65,8 @@ public class PlaybackActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        createMediaSession();
+
         setContentView(R.layout.playback_controls);
         loadViews();
         //Example for handling resizing view for overscan
@@ -74,7 +76,6 @@ public class PlaybackActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        createMediaSession();
     }
 
     @Override
