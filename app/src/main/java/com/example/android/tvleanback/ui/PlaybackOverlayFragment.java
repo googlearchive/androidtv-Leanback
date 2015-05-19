@@ -111,7 +111,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private int mClickCount;
 
     private MediaController mMediaController;
-    private android.media.session.MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
+    private MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
     private int mCurrentPlaybackState;
 
     @Override
