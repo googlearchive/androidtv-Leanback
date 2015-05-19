@@ -99,7 +99,7 @@ public class PlaybackActivity extends Activity {
         }
     }
 
-    private void playPause(Boolean doPlay) {
+    private void playPause(boolean doPlay) {
         if (mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();
         }
@@ -260,7 +260,6 @@ public class PlaybackActivity extends Activity {
         super.onStop();
         Log.d(TAG, "pausing playback in onStop");
         pausePlayback();
-
     }
 
 
@@ -327,6 +326,7 @@ public class PlaybackActivity extends Activity {
         @Override
         public void onFastForward() {
             if (mDuration != -1) {
+                // Fast forward 10 seconds.
                 int newPosition = mVideoView.getCurrentPosition() + (10 * 1000);
                 if (newPosition > mDuration) {
                     newPosition = (int) mDuration;
@@ -339,6 +339,7 @@ public class PlaybackActivity extends Activity {
         @Override
         public void onRewind() {
             Log.d(TAG, "received fastForward in MediaSession.Callback");
+            // rewind 10 seconds
             int newPosition = mVideoView.getCurrentPosition() - (10 * 1000);
             if (newPosition < 0) {
                 newPosition = 0;
