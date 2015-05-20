@@ -54,7 +54,6 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
@@ -100,7 +99,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private PlaybackControlsRow mPlaybackControlsRow;
     private ArrayList<Movie> mItems = new ArrayList<Movie>();
     private int mCurrentItem;
-    private long mDuration;
     private Handler mHandler;
     private Runnable mRunnable;
     private Movie mSelectedMovie;
@@ -117,8 +115,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         
-        mItems = new ArrayList<Movie>();
-        mSelectedMovie = (Movie) getActivity()
+        mItems = new ArrayList<>();
+        mSelectedMovie = getActivity()
                 .getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
 
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
@@ -240,11 +238,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
     }
 
-    private int getDuration() {
-        mDuration = Utils.getDuration(mItems.get(mCurrentItem).getVideoUrl());
-        return (int) mDuration;
-    }
-
     private void addPlaybackControlsRow() {
         if (SHOW_DETAIL) {
             mPlaybackControlsRow = new PlaybackControlsRow(mSelectedMovie);
@@ -322,7 +315,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             item.setTitle(title);
             item.setStudio(studio);
         }
-        mDuration = duration;
         mPlaybackControlsRow.setTotalTime((int) duration);
 
         if (SHOW_IMAGE) {
