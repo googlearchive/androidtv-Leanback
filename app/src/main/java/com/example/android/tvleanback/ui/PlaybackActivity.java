@@ -23,9 +23,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.FrameLayout;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
@@ -43,19 +41,14 @@ import java.util.List;
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
 public class PlaybackActivity extends Activity {
-    private static final String TAG = "PlaybackOverlayActivity";
 
-    private static final double MEDIA_HEIGHT = 0.95;
-    private static final double MEDIA_WIDTH = 0.95;
-    private static final double MEDIA_TOP_MARGIN = 0.025;
-    private static final double MEDIA_RIGHT_MARGIN = 0.025;
-    private static final double MEDIA_BOTTOM_MARGIN = 0.025;
-    private static final double MEDIA_LEFT_MARGIN = 0.025;
     public static final String AUTO_PLAY = "auto_play";
+    private static final String TAG = PlaybackActivity.class.getSimpleName();
     private VideoView mVideoView;
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
     private MediaSession mSession;
-    private String mCurrentVideoPath;
+    private int mPosition = 0;
+    private long mStartTimeMillis;
     private long mDuration = -1;
 
     /**
@@ -70,21 +63,29 @@ public class PlaybackActivity extends Activity {
         setContentView(R.layout.playback_controls);
         loadViews();
         //Example for handling resizing view for overscan
-        //overScan();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
+        //Utils.overScan(this, mVideoView);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopPlayback();
         mVideoView.suspend();
         mSession.release();
     }
 
+    private void setPosition(int position) {
+        if (position > mDuration) {
+            mPosition = (int) mDuration;
+        } else if (position < 0) {
+            mPosition = 0;
+            mStartTimeMillis = System.currentTimeMillis();
+        } else {
+            mPosition = position;
+        }
+        mStartTimeMillis = System.currentTimeMillis();
+        Log.d(TAG, "position set to " + mPosition);
+    }
 
     private void createMediaSession() {
         if (mSession == null) {
@@ -106,9 +107,15 @@ public class PlaybackActivity extends Activity {
 
         if (doPlay && mPlaybackState != LeanbackPlaybackState.PLAYING) {
             mPlaybackState = LeanbackPlaybackState.PLAYING;
+            if (mPosition > 0) {
+                mVideoView.seekTo(mPosition);
+            }
             mVideoView.start();
+            mStartTimeMillis = System.currentTimeMillis();
         } else {
             mPlaybackState = LeanbackPlaybackState.PAUSED;
+            int timeElapsedSinceStart = (int)(System.currentTimeMillis() - mStartTimeMillis);
+            setPosition(mPosition + timeElapsedSinceStart);
             mVideoView.pause();
         }
         updatePlaybackState();
@@ -122,7 +129,7 @@ public class PlaybackActivity extends Activity {
         if (mPlaybackState == LeanbackPlaybackState.PAUSED || mPlaybackState == LeanbackPlaybackState.IDLE) {
             state = PlaybackState.STATE_PAUSED;
         }
-        stateBuilder.setState(state, mVideoView.getCurrentPosition(), 1.0f);
+        stateBuilder.setState(state, mPosition, 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
     }
 
@@ -174,27 +181,9 @@ public class PlaybackActivity extends Activity {
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
 
-        Movie movie = (Movie)getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
+        Movie movie = getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
         setVideoPath(movie.getVideoUrl());
         updateMetadata(movie);
-    }
-
-    /**
-     * Example for handling resizing content for overscan.  Typically you won't need to resize which
-     * is why overScan(); is commented out.
-     */
-    private void overScan() {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int w = (int) (metrics.widthPixels * MEDIA_WIDTH);
-        int h = (int) (metrics.heightPixels * MEDIA_HEIGHT);
-        int marginLeft = (int) (metrics.widthPixels * MEDIA_LEFT_MARGIN);
-        int marginTop = (int) (metrics.heightPixels * MEDIA_TOP_MARGIN);
-        int marginRight = (int) (metrics.widthPixels * MEDIA_RIGHT_MARGIN);
-        int marginBottom = (int) (metrics.heightPixels * MEDIA_BOTTOM_MARGIN);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(w, h);
-        lp.setMargins(marginLeft, marginTop, marginRight, marginBottom);
-        mVideoView.setLayoutParams(lp);
     }
 
     private void setupCallbacks() {
@@ -203,14 +192,6 @@ public class PlaybackActivity extends Activity {
 
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                String msg = "";
-                if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
-                    msg = getString(R.string.video_error_media_load_timeout);
-                } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                    msg = getString(R.string.video_error_server_inaccessible);
-                } else {
-                    msg = getString(R.string.video_error_unknown_error);
-                }
                 mVideoView.stopPlayback();
                 mPlaybackState = LeanbackPlaybackState.IDLE;
                 return false;
@@ -238,17 +219,12 @@ public class PlaybackActivity extends Activity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         if (mVideoView.isPlaying()) {
             if (!requestVisibleBehind(true)) {
                 // Try to play behind launcher, but if it fails, stop playback.
-                stopPlayback();
+                playPause(false);
             }
         } else {
             requestVisibleBehind(false);
@@ -258,23 +234,15 @@ public class PlaybackActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "pausing playback in onStop");
-        pausePlayback();
+        playPause(false);
     }
 
 
 
     @Override
     public void onVisibleBehindCanceled() {
-        Log.d(TAG, "pausing playback in onVisibleBehindCanceled");
-        pausePlayback();
+        playPause(false);
         super.onVisibleBehindCanceled();
-    }
-
-    private void pausePlayback() {
-        mVideoView.pause();
-        mPlaybackState = LeanbackPlaybackState.PAUSED;
-        updatePlaybackState();
     }
 
     private void stopPlayback() {
@@ -292,8 +260,8 @@ public class PlaybackActivity extends Activity {
     /*
      * List of various states that we can be in
      */
-    public static enum LeanbackPlaybackState {
-        PLAYING, PAUSED, BUFFERING, IDLE;
+    public enum LeanbackPlaybackState {
+        PLAYING, PAUSED, IDLE
     }
 
     private class MediaSessionCallback extends MediaSession.Callback {
@@ -309,17 +277,18 @@ public class PlaybackActivity extends Activity {
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             Movie movie = getMovieById(mediaId);
-
-            setVideoPath(movie.getVideoUrl());
-
-            mPlaybackState = LeanbackPlaybackState.PAUSED;
-            updateMetadata(movie);
-            playPause(extras.getBoolean(AUTO_PLAY));
+            if (movie != null) {
+                setVideoPath(movie.getVideoUrl());
+                mPlaybackState = LeanbackPlaybackState.PAUSED;
+                updateMetadata(movie);
+                playPause(extras.getBoolean(AUTO_PLAY));
+            }
         }
 
         @Override
         public void onSeekTo(long pos) {
-            mVideoView.seekTo((int) pos);
+            setPosition((int) pos);
+            mVideoView.seekTo(mPosition);
             updatePlaybackState();
         }
 
@@ -327,31 +296,25 @@ public class PlaybackActivity extends Activity {
         public void onFastForward() {
             if (mDuration != -1) {
                 // Fast forward 10 seconds.
-                int newPosition = mVideoView.getCurrentPosition() + (10 * 1000);
-                if (newPosition > mDuration) {
-                    newPosition = (int) mDuration;
-                }
-                mVideoView.seekTo(newPosition);
+                setPosition(mVideoView.getCurrentPosition() + (10 * 1000));
+                mVideoView.seekTo(mPosition);
                 updatePlaybackState();
             }
         }
 
         @Override
         public void onRewind() {
-            Log.d(TAG, "received fastForward in MediaSession.Callback");
             // rewind 10 seconds
-            int newPosition = mVideoView.getCurrentPosition() - (10 * 1000);
-            if (newPosition < 0) {
-                newPosition = 0;
-            }
-            mVideoView.seekTo(newPosition);
+            setPosition(mVideoView.getCurrentPosition() - (10 * 1000));
+            mVideoView.seekTo(mPosition);
             updatePlaybackState();
         }
     }
 
     private void setVideoPath(String videoUrl) {
+        setPosition(0);
         mVideoView.setVideoPath(videoUrl);
-        mCurrentVideoPath = videoUrl;
+        mStartTimeMillis = 0;
         mDuration = Utils.getDuration(videoUrl);
     }
 
