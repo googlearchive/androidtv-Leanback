@@ -276,7 +276,7 @@ public class PlaybackActivity extends Activity {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            Movie movie = getMovieById(mediaId);
+            Movie movie = VideoProvider.getMovieById(mediaId);
             if (movie != null) {
                 setVideoPath(movie.getVideoUrl());
                 mPlaybackState = LeanbackPlaybackState.PAUSED;
@@ -316,17 +316,5 @@ public class PlaybackActivity extends Activity {
         mVideoView.setVideoPath(videoUrl);
         mStartTimeMillis = 0;
         mDuration = Utils.getDuration(videoUrl);
-    }
-
-    private Movie getMovieById(String mediaId) {
-        Collection<List<Movie>> movies = VideoProvider.getMovieList().values();
-        for (List<Movie> category :movies) {
-            for (Movie movie: category) {
-                if (movie.getId().equals(mediaId)) {
-                    return movie;
-                }
-            }
-        }
-        return null;
     }
 }
