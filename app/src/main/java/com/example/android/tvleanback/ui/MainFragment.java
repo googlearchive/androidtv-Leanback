@@ -14,10 +14,10 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,7 +42,6 @@ import android.widget.Toast;
 
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
@@ -93,11 +92,19 @@ public class MainFragment extends BrowseFragment implements
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (null != mBackgroundTimer) {
             Log.d(TAG, "onDestroy: " + mBackgroundTimer.toString());
             mBackgroundTimer.cancel();
+            mBackgroundTimer = null;
         }
+        mBackgroundManager = null;
+        super.onDestroy();
+    }
+
+    @Override
+    public void onStop() {
+        mBackgroundManager.release();
+        super.onStop();
     }
 
     private void prepareBackgroundManager() {
@@ -203,38 +210,23 @@ public class MainFragment extends BrowseFragment implements
         mRowsAdapter.clear();
     }
 
-    protected void setDefaultBackground(Drawable background) {
-        mDefaultBackground = background;
-    }
-
-    protected void setDefaultBackground(int resourceId) {
-        mDefaultBackground = getResources().getDrawable(resourceId);
-    }
-
     protected void updateBackground(String uri) {
         int width = mMetrics.widthPixels;
         int height = mMetrics.heightPixels;
         Glide.with(getActivity())
                 .load(uri)
+                .asBitmap()
                 .centerCrop()
                 .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
+                .into(new SimpleTarget<Bitmap>(width, height) {
                     @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
+                    public void onResourceReady(Bitmap resource,
+                                                GlideAnimation<? super Bitmap>
                                                         glideAnimation) {
-                        mBackgroundManager.setDrawable(resource);
+                        mBackgroundManager.setBitmap(resource);
                     }
                 });
         mBackgroundTimer.cancel();
-    }
-
-    protected void updateBackground(Drawable drawable) {
-        BackgroundManager.getInstance(getActivity()).setDrawable(drawable);
-    }
-
-    protected void clearBackground() {
-        BackgroundManager.getInstance(getActivity()).setDrawable(mDefaultBackground);
     }
 
     private void startBackgroundTimer() {
