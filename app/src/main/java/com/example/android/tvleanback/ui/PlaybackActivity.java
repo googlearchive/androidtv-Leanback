@@ -72,6 +72,7 @@ public class PlaybackActivity extends Activity {
         super.onDestroy();
         stopPlayback();
         mVideoView.suspend();
+        mVideoView.setVideoPath(null);
         mSession.release();
     }
 

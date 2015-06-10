@@ -17,6 +17,7 @@ package com.example.android.tvleanback.ui;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -117,6 +119,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
 
     @Override
     public void onStop() {
+        mBackgroundManager.release();
         super.onStop();
     }
 
@@ -161,12 +164,13 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
     protected void updateBackground(String uri) {
         Glide.with(getActivity())
                 .load(uri)
+                .asBitmap()
                 .centerCrop()
                 .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(mMetrics.widthPixels, mMetrics.heightPixels) {
+                .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                        mBackgroundManager.setDrawable(resource);
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        mBackgroundManager.setBitmap(resource);
                     }
                 });
     }
@@ -185,6 +189,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
                 .getApplicationContext(), DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity()
                 .getApplicationContext(), DETAIL_THUMB_HEIGHT);
+
         Glide.with(getActivity())
                 .load(mSelectedMovie.getCardImageUrl())
                 .centerCrop()
@@ -200,12 +205,17 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
                     }
                 });
 
-        row.addAction(new Action(ACTION_WATCH_TRAILER, getResources().getString(
-                R.string.watch_trailer_1), getResources().getString(R.string.watch_trailer_2)));
-        row.addAction(new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
+
+        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
+
+        adapter.set(ACTION_WATCH_TRAILER, new Action(ACTION_WATCH_TRAILER, getResources()
+                .getString(R.string.watch_trailer_1),
+                getResources().getString(R.string.watch_trailer_2)));
+        adapter.set(ACTION_RENT, new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
                 getResources().getString(R.string.rent_2)));
-        row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
+        adapter.set(ACTION_BUY, new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
                 getResources().getString(R.string.buy_2)));
+        row.setActionsAdapter(adapter);
 
         mAdapter.add(row);
     }

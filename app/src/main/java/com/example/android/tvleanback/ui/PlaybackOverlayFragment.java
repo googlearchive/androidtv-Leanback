@@ -171,6 +171,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     @Override
     public void onStop() {
         stopProgressAutomation();
+        mRowsAdapter = null;
         super.onStop();
     }
 
