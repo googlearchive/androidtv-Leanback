@@ -153,16 +153,27 @@ public class GuidedStepActivity extends Activity {
         @Override
         public void onGuidedActionClicked(GuidedAction action) {
             FragmentManager fm = getFragmentManager();
-            GuidedStepFragment.add(fm, new ThirdStepFragment(getSelectedActionPosition()-1));
+            GuidedStepFragment.add(fm, createThirdStepFragment());
         }
 
+        private ThirdStepFragment createThirdStepFragment() {
+            ThirdStepFragment thirdStepFragment = new ThirdStepFragment();
+            Bundle argumentBundle = new Bundle();
+            argumentBundle.putInt("option", getSelectedActionPosition()-1);
+            thirdStepFragment.setArguments(argumentBundle);
+            return thirdStepFragment;
+        }
     }
 
     public static class ThirdStepFragment extends GuidedStepFragment {
-        private final int mOption;
+        private int mOption;
 
-        public ThirdStepFragment(int option) {
-            mOption = option;
+        public ThirdStepFragment() {
+        }
+
+        @Override
+        public void setArguments(Bundle args) {
+            mOption = args.getInt("option");
         }
 
         @Override
