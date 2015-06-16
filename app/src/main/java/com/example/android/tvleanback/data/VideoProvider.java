@@ -165,15 +165,18 @@ public class VideoProvider {
     protected JSONObject parseUrl(String urlString) {
         Log.d(TAG, "Parse URL: " + urlString);
         InputStream is = null;
+        InputStream stream = null;
 
         sPrefixUrl = sContext.getResources().getString(R.string.prefix_url);
 
         try {
             java.net.URL url = new java.net.URL(urlString);
             URLConnection urlConnection = url.openConnection();
-            is = new BufferedInputStream(urlConnection.getInputStream());
+            stream = urlConnection.getInputStream();
+            is = new BufferedInputStream(stream);
+
             BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    urlConnection.getInputStream(), "iso-8859-1"), 8);
+                    stream, "iso-8859-1"), 8);
             StringBuilder sb = new StringBuilder();
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -190,6 +193,14 @@ public class VideoProvider {
                     is.close();
                 } catch (IOException e) {
                     Log.d(TAG, "JSON feed closed", e);
+                }
+            }
+
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    Log.d(TAG, "Input stream closed", e);
                 }
             }
         }
