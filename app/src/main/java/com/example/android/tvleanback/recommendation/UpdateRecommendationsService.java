@@ -74,7 +74,7 @@ public class UpdateRecommendationsService extends IntentService {
                 .setSmallIcon(R.drawable.videos_by_google_icon);
 
         // flatten to list
-        List flattenedRecommendations = new ArrayList();
+        List<Movie> flattenedRecommendations = new ArrayList<>();
         for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
             for (Movie movie : entry.getValue()) {
                 Log.d(TAG, "Recommendation - " + movie.getTitle());
@@ -85,7 +85,7 @@ public class UpdateRecommendationsService extends IntentService {
         Collections.shuffle(flattenedRecommendations);
         Movie movie;
         for (int i = 0; i < flattenedRecommendations.size() && i < MAX_RECOMMENDATIONS; i++) {
-            movie = (Movie) flattenedRecommendations.get(i);
+            movie = flattenedRecommendations.get(i);
             final RecommendationBuilder notificationBuilder = builder
                     .setBackground(movie.getCardImageUrl())
                     .setId(i+1)
