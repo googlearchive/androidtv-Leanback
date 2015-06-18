@@ -17,6 +17,8 @@
 package com.example.android.tvleanback.data;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.util.Log;
 
 import com.example.android.tvleanback.R;
@@ -26,14 +28,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -56,12 +57,13 @@ public class VideoProvider {
     private static HashMap<String, List<Movie>> sMovieList;
     private static HashMap<String, Movie> sMovieListById;
 
-    private static Context sContext;
-    private static String sPrefixUrl;
+    private static Resources sResources;
+    private static Uri sPrefixUrl;
 
     public static void setContext(Context context) {
-        if (sContext == null)
-            sContext = context;
+        if (null == sResources) {
+            sResources = context.getResources();
+        }
     }
 
     public static Movie getMovieById(String mediaId) {
@@ -83,42 +85,44 @@ public class VideoProvider {
         JSONObject jsonObj = new VideoProvider().parseUrl(url);
         JSONArray categories = jsonObj.getJSONArray(TAG_GOOGLE_VIDEOS);
         if (null != categories) {
-            Log.d(TAG, "category #: " + categories.length());
-            String title = new String();
-            String videoUrl = new String();
-            String bgImageUrl = new String();
-            String cardImageUrl = new String();
-            String studio = new String();
-            for (int i = 0; i < categories.length(); i++) {
-                JSONObject category = categories.getJSONObject(i);
-                String category_name = category.getString(TAG_CATEGORY);
+            final int categoryLength = categories.length();
+            Log.d(TAG, "category #: " + categoryLength);
+            String title;
+            String videoUrl;
+            String bgImageUrl;
+            String cardImageUrl;
+            String studio;
+            for (int catIdx = 0; catIdx < categoryLength; catIdx++) {
+                JSONObject category = categories.getJSONObject(catIdx);
+                String categoryName = category.getString(TAG_CATEGORY);
                 JSONArray videos = category.getJSONArray(TAG_MEDIA);
                 Log.d(TAG,
-                        "category: " + i + " Name:" + category_name + " video length: "
-                                + videos.length());
+                        "category: " + catIdx + " Name:" + categoryName + " video length: "
+                                + (null != videos ? videos.length() : 0));
                 List<Movie> categoryList = new ArrayList<Movie>();
+                Movie movie;
                 if (null != videos) {
-                    for (int j = 0; j < videos.length(); j++) {
-                        JSONObject video = videos.getJSONObject(j);
+                    for (int vidIdx = 0, vidSize = videos.length(); vidIdx < vidSize; vidIdx++) {
+                        JSONObject video = videos.getJSONObject(vidIdx);
                         String description = video.getString(TAG_DESCRIPTION);
                         JSONArray videoUrls = video.getJSONArray(TAG_SOURCES);
                         if (null == videoUrls || videoUrls.length() == 0) {
                             continue;
                         }
                         title = video.getString(TAG_TITLE);
-                        videoUrl = getVideoPrefix(category_name, videoUrls.getString(0));
-                        bgImageUrl = getThumbPrefix(category_name, title,
+                        videoUrl = getVideoPrefix(categoryName, getVideoSourceUrl(videoUrls));
+                        bgImageUrl = getThumbPrefix(categoryName, title,
                                 video.getString(TAG_BACKGROUND));
-                        cardImageUrl = getThumbPrefix(category_name, title,
+                        cardImageUrl = getThumbPrefix(categoryName, title,
                                 video.getString(TAG_CARD_THUMB));
                         studio = video.getString(TAG_STUDIO);
 
-                        Movie movie = buildMovieInfo(category_name, title, description, studio,
+                        movie = buildMovieInfo(categoryName, title, description, studio,
                                 videoUrl, cardImageUrl, bgImageUrl);
                         sMovieListById.put(movie.getId(), movie);
                         categoryList.add(movie);
                     }
-                    sMovieList.put(category_name, categoryList);
+                    sMovieList.put(categoryName, categoryList);
                 }
             }
         }
@@ -146,39 +150,44 @@ public class VideoProvider {
         return movie;
     }
 
+    // workaround for partially pre-encoded sample data
+    private static String getVideoSourceUrl(final JSONArray videos) throws JSONException {
+        try {
+            final String url = videos.getString(0);
+            return (-1) == url.indexOf('%') ? url : URLDecoder.decode(url, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new JSONException("Broken VM: no UTF-8");
+        }
+    }
+
     private static String getVideoPrefix(String category, String videoUrl) {
-        String ret = "";
-        ret = sPrefixUrl + category.replace(" ", "%20") + '/' +
-                videoUrl.replace(" ", "%20");
-        return ret;
+        return sPrefixUrl.buildUpon()
+                .appendPath(category)
+                .appendPath(videoUrl)
+                .toString();
     }
 
     private static String getThumbPrefix(String category, String title, String imageUrl) {
-        String ret = "";
-
-        ret = sPrefixUrl + category.replace(" ", "%20") + '/' +
-                title.replace(" ", "%20") + '/' +
-                imageUrl.replace(" ", "%20");
-        return ret;
+        return sPrefixUrl.buildUpon()
+                .appendPath(category)
+                .appendPath(title)
+                .appendPath(imageUrl)
+                .toString();
     }
 
     protected JSONObject parseUrl(String urlString) {
         Log.d(TAG, "Parse URL: " + urlString);
-        InputStream is = null;
-        InputStream stream = null;
+        BufferedReader reader = null;
 
-        sPrefixUrl = sContext.getResources().getString(R.string.prefix_url);
+        sPrefixUrl = Uri.parse(sResources.getString(R.string.prefix_url));
 
         try {
             java.net.URL url = new java.net.URL(urlString);
             URLConnection urlConnection = url.openConnection();
-            stream = urlConnection.getInputStream();
-            is = new BufferedInputStream(stream);
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    stream, "iso-8859-1"), 8);
+            reader = new BufferedReader(new InputStreamReader(
+                    urlConnection.getInputStream(), "iso-8859-1"));
             StringBuilder sb = new StringBuilder();
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
@@ -188,19 +197,11 @@ public class VideoProvider {
             Log.d(TAG, "Failed to parse the json for media list", e);
             return null;
         } finally {
-            if (null != is) {
+            if (null != reader) {
                 try {
-                    is.close();
+                    reader.close();
                 } catch (IOException e) {
                     Log.d(TAG, "JSON feed closed", e);
-                }
-            }
-
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    Log.d(TAG, "Input stream closed", e);
                 }
             }
         }

@@ -157,12 +157,12 @@ public class Movie implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder(200);
         sb.append("Movie{");
-        sb.append("mId=" + mId);
-        sb.append(", mTitle='" + mTitle + '\'');
-        sb.append(", mVideoUrl='" + mVideoUrl + '\'');
-        sb.append(", backgroundImageUrl='" + mBgImageUrl + '\'');
-        sb.append(", backgroundImageURI='" + getBackgroundImageURI().toString() + '\'');
-        sb.append(", mCardImageUrl='" + mCardImageUrl + '\'');
+        sb.append("mId=").append(mId);
+        sb.append(", mTitle='").append(mTitle).append('\'');
+        sb.append(", mVideoUrl='").append(mVideoUrl).append('\'');
+        sb.append(", backgroundImageUrl='").append(mBgImageUrl).append('\'');
+        sb.append(", backgroundImageURI='").append(getBackgroundImageURI().toString()).append('\'');
+        sb.append(", mCardImageUrl='").append(mCardImageUrl).append('\'');
         sb.append('}');
         return sb.toString();
     }
