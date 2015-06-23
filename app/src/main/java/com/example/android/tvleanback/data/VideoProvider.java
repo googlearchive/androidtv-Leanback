@@ -83,7 +83,14 @@ public class VideoProvider {
         sMovieListById = new HashMap<>();
 
         JSONObject jsonObj = new VideoProvider().parseUrl(url);
+
+        if (null == jsonObj) {
+            Log.e(TAG, "An error occurred fetching videos.");
+            return sMovieList;
+        }
+
         JSONArray categories = jsonObj.getJSONArray(TAG_GOOGLE_VIDEOS);
+
         if (null != categories) {
             final int categoryLength = categories.length();
             Log.d(TAG, "category #: " + categoryLength);
