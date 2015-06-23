@@ -34,9 +34,6 @@ import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
@@ -116,13 +113,12 @@ public class PlaybackActivity extends Activity {
             mStartTimeMillis = System.currentTimeMillis();
         } else {
             mPlaybackState = LeanbackPlaybackState.PAUSED;
-            int timeElapsedSinceStart = (int)(System.currentTimeMillis() - mStartTimeMillis);
+            int timeElapsedSinceStart = (int) (System.currentTimeMillis() - mStartTimeMillis);
             setPosition(mPosition + timeElapsedSinceStart);
             mVideoView.pause();
         }
         updatePlaybackState();
     }
-
 
     private void updatePlaybackState() {
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
@@ -167,15 +163,15 @@ public class PlaybackActivity extends Activity {
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, movie.getStudio());
 
         Glide.with(this)
-            .load(Uri.parse(movie.getCardImageUrl()))
-            .asBitmap()
-            .into(new SimpleTarget<Bitmap>(500, 500) {
-                @Override
-                public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                    metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
-                    mSession.setMetadata(metadataBuilder.build());
-                }
-            });
+                .load(Uri.parse(movie.getCardImageUrl()))
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>(500, 500) {
+                    @Override
+                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                        metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
+                        mSession.setMetadata(metadataBuilder.build());
+                    }
+                });
     }
 
     private void loadViews() {
@@ -200,7 +196,6 @@ public class PlaybackActivity extends Activity {
             }
         });
 
-
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -209,7 +204,6 @@ public class PlaybackActivity extends Activity {
                 }
             }
         });
-
 
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -238,8 +232,6 @@ public class PlaybackActivity extends Activity {
         super.onStop();
         playPause(false);
     }
-
-
 
     @Override
     public void onVisibleBehindCanceled() {
@@ -271,6 +263,7 @@ public class PlaybackActivity extends Activity {
         public void onPlay() {
             playPause(true);
         }
+
         @Override
         public void onPause() {
             playPause(false);

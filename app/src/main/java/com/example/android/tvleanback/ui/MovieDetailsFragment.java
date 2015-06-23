@@ -42,12 +42,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
@@ -91,7 +89,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
 
         prepareBackgroundManager();
 
-        mSelectedMovie = (Movie) getActivity().getIntent()
+        mSelectedMovie = getActivity().getIntent()
                 .getParcelableExtra(MovieDetailsActivity.MOVIE);
         if (mSelectedMovie != null || checkGlobalSearchIntent()) {
             removeNotification(getActivity().getIntent()
@@ -204,7 +202,6 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
                         mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
                     }
                 });
-
 
         SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
 

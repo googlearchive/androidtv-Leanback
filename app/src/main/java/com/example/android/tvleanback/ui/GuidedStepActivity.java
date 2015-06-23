@@ -38,12 +38,12 @@ public class GuidedStepActivity extends Activity {
     private static final int CONTINUE = 0;
     private static final int BACK = 1;
     private static final int OPTION_CHECK_SET_ID = 10;
-    private static final String[] OPTION_NAMES = { "Option A", "Option B", "Option C" };
-    private static final String[] OPTION_DESCRIPTIONS = { "Here's one thing you can do",
-            "Here's another thing you can do", "Here's one more thing you can do" };
-    private static final int[] OPTION_DRAWABLES = { R.drawable.ic_guidedstep_option_a,
-            R.drawable.ic_guidedstep_option_b, R.drawable.ic_guidedstep_option_c };
-    private static final boolean[] OPTION_CHECKED = { true, false, false };
+    private static final String[] OPTION_NAMES = {"Option A", "Option B", "Option C"};
+    private static final String[] OPTION_DESCRIPTIONS = {"Here's one thing you can do",
+            "Here's another thing you can do", "Here's one more thing you can do"};
+    private static final int[] OPTION_DRAWABLES = {R.drawable.ic_guidedstep_option_a,
+            R.drawable.ic_guidedstep_option_b, R.drawable.ic_guidedstep_option_c};
+    private static final boolean[] OPTION_CHECKED = {true, false, false};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class GuidedStepActivity extends Activity {
     }
 
     private static void addCheckedAction(List<GuidedAction> actions, int iconResId, Context context,
-            String title, String desc, boolean checked) {
+                                         String title, String desc, boolean checked) {
         GuidedAction guidedAction = new GuidedAction.Builder()
                 .title(title)
                 .description(desc)
@@ -153,7 +153,8 @@ public class GuidedStepActivity extends Activity {
         @Override
         public void onGuidedActionClicked(GuidedAction action) {
             FragmentManager fm = getFragmentManager();
-            GuidedStepFragment.add(fm, ThirdStepFragment.newInstance(getSelectedActionPosition()-1));
+            ThirdStepFragment next = ThirdStepFragment.newInstance(getSelectedActionPosition() - 1);
+            GuidedStepFragment.add(fm, next);
         }
 
     }
