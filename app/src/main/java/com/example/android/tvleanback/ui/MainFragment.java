@@ -174,21 +174,25 @@ public class MainFragment extends BrowseFragment implements
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
-        int i = 0;
+        int index = 0;
 
-        for (Map.Entry<String, List<Movie>> entry : data.entrySet()) {
-            ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-            List<Movie> list = entry.getValue();
+        if (null != data) {
+            for (Map.Entry<String, List<Movie>> entry : data.entrySet()) {
+                ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
+                List<Movie> list = entry.getValue();
 
-            for (int j = 0; j < list.size(); j++) {
-                listRowAdapter.add(list.get(j));
+                for (int j = 0; j < list.size(); j++) {
+                    listRowAdapter.add(list.get(j));
+                }
+                HeaderItem header = new HeaderItem(index, entry.getKey());
+                index++;
+                mRowsAdapter.add(new ListRow(header, listRowAdapter));
             }
-            HeaderItem header = new HeaderItem(i, entry.getKey());
-            i++;
-            mRowsAdapter.add(new ListRow(header, listRowAdapter));
+        } else {
+            Log.e(TAG, "An error occurred fetching videos");
         }
 
-        HeaderItem gridHeader = new HeaderItem(i, getString(R.string.more_samples));
+        HeaderItem gridHeader = new HeaderItem(index, getString(R.string.more_samples));
 
         GridItemPresenter gridPresenter = new GridItemPresenter(this);
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);

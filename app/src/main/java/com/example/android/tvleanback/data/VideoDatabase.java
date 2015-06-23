@@ -243,7 +243,7 @@ public class VideoDatabase {
         private void loadMovies() throws IOException {
             Log.d(TAG, "Loading movies...");
 
-            HashMap<String, List<Movie>> movies = null;
+            HashMap<String, List<Movie>> movies = new HashMap<>();
 
             try {
                 VideoProvider.setContext(mHelperContext);
