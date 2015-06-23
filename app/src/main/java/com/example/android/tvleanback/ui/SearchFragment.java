@@ -104,9 +104,11 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (DEBUG) Log.v(TAG, "onActivityResult requestCode=" + requestCode +
-                " resultCode=" + resultCode +
-                " data=" + data);
+        if (DEBUG) {
+            Log.v(TAG, "onActivityResult requestCode=" + requestCode +
+                    " resultCode=" + resultCode +
+                    " data=" + data);
+        }
         switch (requestCode) {
             case REQUEST_SPEECH:
                 switch (resultCode) {
@@ -130,6 +132,7 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
                 break;
         }
     }
+
     @Override
     public ObjectAdapter getResultsAdapter() {
         return mRowsAdapter;
@@ -226,6 +229,5 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
             }
         }
     }
-
 
 }

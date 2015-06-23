@@ -112,7 +112,6 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
         }
     }
 
-
     private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,

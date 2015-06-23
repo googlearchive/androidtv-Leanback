@@ -114,7 +114,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        
+
         mItems = new ArrayList<>();
         mSelectedMovie = getActivity()
                 .getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
@@ -167,7 +167,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         super.onStart();
     }
 
-
     @Override
     public void onStop() {
         stopProgressAutomation();
@@ -183,7 +182,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         super.onDetach();
     }
-
 
     @Override
     public void onResume() {
@@ -500,7 +498,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 notifyChanged(mPlayPauseAction);
             }
 
-            int currentTime = (int)state.getPosition();
+            int currentTime = (int) state.getPosition();
             mPlaybackControlsRow.setCurrentTime(currentTime);
             mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
         }

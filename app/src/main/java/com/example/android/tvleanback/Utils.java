@@ -82,7 +82,6 @@ public class Utils {
         return Math.round((float) dp * density);
     }
 
-
     /**
      * Example for handling resizing content for overscan.  Typically you won't need to resize
      * when using the Leanback support library.
@@ -100,7 +99,6 @@ public class Utils {
         lp.setMargins(marginLeft, marginTop, marginRight, marginBottom);
         videoView.setLayoutParams(lp);
     }
-
 
     public static long getDuration(String videoUrl) {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();

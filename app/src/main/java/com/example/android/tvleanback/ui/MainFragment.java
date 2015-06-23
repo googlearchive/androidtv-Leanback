@@ -40,11 +40,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoItemLoader;
 import com.example.android.tvleanback.data.VideoProvider;
@@ -291,7 +289,6 @@ public class MainFragment extends BrowseFragment implements
             }
         }
     }
-
 
     private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
         @Override

@@ -18,7 +18,6 @@ package com.example.android.tvleanback.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,11 +38,9 @@ public class Movie implements Parcelable {
     private String mStudio;
     private String mCategory;
 
-    public Movie() {
+    public Movie() {}
 
-    }
-
-    public Movie(Parcel in){
+    public Movie(Parcel in) {
         String[] data = new String[8];
 
         in.readStringArray(data);
@@ -143,7 +140,7 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringArray(new String[] {mId,
+        dest.writeStringArray(new String[]{mId,
                 mTitle,
                 mDescription,
                 mBgImageUrl,

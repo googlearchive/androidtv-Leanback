@@ -42,7 +42,7 @@ import java.util.Map;
  * load the video database table when it needs to be created.
  */
 public class VideoDatabase {
-    //The columns we'll include in the video database table
+    // The columns we'll include in the video database table
     public static final String KEY_NAME = SearchManager.SUGGEST_COLUMN_TEXT_1;
     public static final String KEY_DESCRIPTION = SearchManager.SUGGEST_COLUMN_TEXT_2;
     public static final String KEY_ICON = SearchManager.SUGGEST_COLUMN_RESULT_CARD_IMAGE;
@@ -244,12 +244,13 @@ public class VideoDatabase {
             Log.d(TAG, "Loading movies...");
 
             HashMap<String, List<Movie>> movies = null;
+
             try {
                 VideoProvider.setContext(mHelperContext);
                 movies = VideoProvider.buildMedia(mHelperContext,
                         mHelperContext.getResources().getString(R.string.catalog_url));
             } catch (JSONException e) {
-                Log.e(TAG, "JSon Exception when loading movie", e);
+                Log.e(TAG, "JSON Exception when loading movie", e);
             }
 
             for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
@@ -337,7 +338,6 @@ public class VideoDatabase {
             db.execSQL("DROP TABLE IF EXISTS " + FTS_VIRTUAL_TABLE);
             onCreate(db);
         }
-
 
     }
 

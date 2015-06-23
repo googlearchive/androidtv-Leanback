@@ -88,7 +88,7 @@ public class UpdateRecommendationsService extends IntentService {
             movie = flattenedRecommendations.get(i);
             final RecommendationBuilder notificationBuilder = builder
                     .setBackground(movie.getCardImageUrl())
-                    .setId(i+1)
+                    .setId(i + 1)
                     .setPriority(MAX_RECOMMENDATIONS - i - 1)
                     .setTitle(movie.getTitle())
                     .setDescription(getString(R.string.popular_header))
