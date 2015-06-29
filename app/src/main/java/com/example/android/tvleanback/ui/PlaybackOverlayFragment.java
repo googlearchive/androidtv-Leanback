@@ -75,8 +75,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private static final String TAG = "PlaybackOverlayFragment";
     private static final boolean SHOW_DETAIL = true;
     private static final boolean HIDE_MORE_ACTIONS = false;
-    private static final int PRIMARY_CONTROLS = 5;
-    private static final boolean SHOW_IMAGE = PRIMARY_CONTROLS <= 5;
     private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
     private static final int CARD_WIDTH = 150;
     private static final int CARD_HEIGHT = 240;
@@ -273,28 +271,18 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mClosedCaptioningAction = new ClosedCaptioningAction(activity);
         mMoreActions = new MoreActions(activity);
 
-        if (PRIMARY_CONTROLS > 5) {
-            mPrimaryActionsAdapter.add(mThumbsUpAction);
-        } else {
-            mSecondaryActionsAdapter.add(mThumbsUpAction);
-        }
+        // Add main controls to primary adapter.
         mPrimaryActionsAdapter.add(mSkipPreviousAction);
-        if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(mRewindAction);
-        }
+        mPrimaryActionsAdapter.add(mRewindAction);
         mPrimaryActionsAdapter.add(mPlayPauseAction);
-        if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(mFastForwardAction);
-        }
+        mPrimaryActionsAdapter.add(mFastForwardAction);
         mPrimaryActionsAdapter.add(mSkipNextAction);
 
+        // Add rest of controls to secondary adapter.
+        mSecondaryActionsAdapter.add(mThumbsUpAction);
         mSecondaryActionsAdapter.add(mRepeatAction);
         mSecondaryActionsAdapter.add(mShuffleAction);
-        if (PRIMARY_CONTROLS > 5) {
-            mPrimaryActionsAdapter.add(mThumbsDownAction);
-        } else {
-            mSecondaryActionsAdapter.add(mThumbsDownAction);
-        }
+        mSecondaryActionsAdapter.add(mThumbsDownAction);
         mSecondaryActionsAdapter.add(mHighQualityAction);
         mSecondaryActionsAdapter.add(mClosedCaptioningAction);
         mSecondaryActionsAdapter.add(mMoreActions);
@@ -327,9 +315,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
         mPlaybackControlsRow.setTotalTime((int) duration);
 
-        if (SHOW_IMAGE) {
-            updateVideoImage(cardImageUrl);
-        }
+        // Show the video card image if there is enough room in the UI for it.
+        // If you have many primary actions, you may not have enough room.
+        updateVideoImage(cardImageUrl);
     }
 
     private void addOtherRows() {
