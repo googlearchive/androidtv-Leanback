@@ -35,35 +35,35 @@ import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * PlaybackActivity for video playback that loads PlaybackOverlayFragment and handles
  * the MediaSession object used to maintain the state of the media playback.
  */
 public class PlaybackActivity extends Activity {
-
-    /*
-     * List of various states that we can be in
-     */
-    public enum LeanbackPlaybackState {
-        PLAYING, PAUSED, IDLE
-    }
-
     public static final String AUTO_PLAY = "auto_play";
     private static final String TAG = PlaybackActivity.class.getSimpleName();
     private VideoView mVideoView; // VideoView is used to play the video (media) in a view.
-    private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
     private MediaSession mSession; // MediaSession is used to hold the state of our media playback.
     private int mPosition = 0;
     private long mStartTimeMillis;
     private long mDuration = -1;
     private Movie mSelectedMovie;
-    private ArrayList<Movie> mItems = new ArrayList<Movie>();
-    private int mCurrentItem;
+
+    private int getPlaybackState() {
+        PlaybackState state = getMediaController().getPlaybackState();
+        if (state != null) {
+            return state.getState();
+        } else {
+            return PlaybackState.STATE_NONE;
+        }
+    }
+
+    private void setPlaybackState(int state) {
+        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+                .setActions(getAvailableActions(state));
+        stateBuilder.setState(state, mPosition, 1.0f);
+        mSession.setPlaybackState(stateBuilder.build());
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -89,25 +89,8 @@ public class PlaybackActivity extends Activity {
 
         setContentView(R.layout.playback_controls);
         loadViews();
-        mItems = new ArrayList<>();
 
-        HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-
-        if (movies != null) {
-            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-                if (mSelectedMovie.getCategory().contains(entry.getKey())) {
-                    List<Movie> list = entry.getValue();
-                    if (list != null && !list.isEmpty()) {
-                        for (int j = 0; j < list.size(); j++) {
-                            mItems.add(list.get(j));
-                            if (mSelectedMovie.getTitle().contentEquals(list.get(j).getTitle())) {
-                                mCurrentItem = j;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        VideoProvider.setQueue(mSelectedMovie);
 
         playPause(true);
         //Example for handling resizing view for overscan
@@ -147,49 +130,39 @@ public class PlaybackActivity extends Activity {
 
             // Set the Activity's MediaController used to invoke transport controls / adjust volume.
             setMediaController(new MediaController(this, mSession.getSessionToken()));
+            setPlaybackState(PlaybackState.STATE_NONE);
         }
     }
 
     private void playPause(boolean doPlay) {
-        if (mPlaybackState == LeanbackPlaybackState.IDLE) {
+        if (getPlaybackState() == PlaybackState.STATE_NONE) {
             setupCallbacks();
         }
 
-        if (doPlay && mPlaybackState != LeanbackPlaybackState.PLAYING) {
-            mPlaybackState = LeanbackPlaybackState.PLAYING;
+        if (doPlay && getPlaybackState() != PlaybackState.STATE_PLAYING) {
             if (mPosition > 0) {
                 mVideoView.seekTo(mPosition);
             }
             mVideoView.start();
             mStartTimeMillis = System.currentTimeMillis();
+            setPlaybackState(PlaybackState.STATE_PLAYING);
         } else {
-            mPlaybackState = LeanbackPlaybackState.PAUSED;
             int timeElapsedSinceStart = (int) (System.currentTimeMillis() - mStartTimeMillis);
             setPosition(mPosition + timeElapsedSinceStart);
             mVideoView.pause();
+            setPlaybackState(PlaybackState.STATE_PAUSED);
         }
-        updatePlaybackState();
     }
 
-    private void updatePlaybackState() {
-        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-                .setActions(getAvailableActions());
-        int state = PlaybackState.STATE_PLAYING;
-        if (mPlaybackState == LeanbackPlaybackState.PAUSED || mPlaybackState == LeanbackPlaybackState.IDLE) {
-            state = PlaybackState.STATE_PAUSED;
-        }
-        stateBuilder.setState(state, mPosition, 1.0f);
-        mSession.setPlaybackState(stateBuilder.build());
-    }
-
-    private long getAvailableActions() {
+    private long getAvailableActions(int nextState) {
         long actions = PlaybackState.ACTION_PLAY |
                 PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
                 PlaybackState.ACTION_PLAY_FROM_SEARCH |
                 PlaybackState.ACTION_SKIP_TO_NEXT |
-                PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+                PlaybackState.ACTION_SKIP_TO_PREVIOUS |
+                PlaybackState.ACTION_PAUSE;
 
-        if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
+        if (nextState == PlaybackState.STATE_PLAYING) {
             actions |= PlaybackState.ACTION_PAUSE;
         }
 
@@ -244,7 +217,7 @@ public class PlaybackActivity extends Activity {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 mVideoView.stopPlayback();
-                mPlaybackState = LeanbackPlaybackState.IDLE;
+                setPlaybackState(PlaybackState.STATE_STOPPED);
                 return false;
             }
         });
@@ -252,7 +225,7 @@ public class PlaybackActivity extends Activity {
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
+                if (getPlaybackState() == PlaybackState.STATE_PLAYING) {
                     mVideoView.start();
                 }
             }
@@ -261,7 +234,7 @@ public class PlaybackActivity extends Activity {
         mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mPlaybackState = LeanbackPlaybackState.IDLE;
+                setPlaybackState(PlaybackState.STATE_STOPPED);
             }
         });
 
@@ -323,7 +296,7 @@ public class PlaybackActivity extends Activity {
             Movie movie = VideoProvider.getMovieById(mediaId);
             if (movie != null) {
                 setVideoPath(movie.getVideoUrl());
-                mPlaybackState = LeanbackPlaybackState.PAUSED;
+                setPlaybackState(PlaybackState.STATE_PAUSED);
                 updateMetadata(movie);
                 playPause(extras.getBoolean(AUTO_PLAY));
             }
@@ -332,36 +305,26 @@ public class PlaybackActivity extends Activity {
         @Override
         public void onSkipToNext() {
             // Update the media to skip to the next video.
-            PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-                    .setActions(getAvailableActions());
-            stateBuilder.setState(PlaybackState.STATE_SKIPPING_TO_NEXT, 0, 1.0f);
-            mSession.setPlaybackState(stateBuilder.build());
+            mPosition = 0;
+            setPlaybackState(PlaybackState.STATE_SKIPPING_TO_NEXT);
 
-            if (++mCurrentItem >= mItems.size()) {
-                mCurrentItem = 0;
-            }
             Bundle bundle = new Bundle();
             bundle.putBoolean(PlaybackActivity.AUTO_PLAY, true);
 
-            String nextId = mItems.get(mCurrentItem).getId();
+            String nextId = VideoProvider.nextVideoId();
             getMediaController().getTransportControls().playFromMediaId(nextId, bundle);
         }
 
         @Override
         public void onSkipToPrevious() {
             // Update the media to skip to the previous video.
-            PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-                    .setActions(getAvailableActions());
-            stateBuilder.setState(PlaybackState.STATE_SKIPPING_TO_PREVIOUS, 0, 1.0f);
-            mSession.setPlaybackState(stateBuilder.build());
+            mPosition = 0;
+            setPlaybackState(PlaybackState.STATE_SKIPPING_TO_PREVIOUS);
 
-            if (--mCurrentItem < 0) {
-                mCurrentItem = mItems.size() - 1;
-            }
             Bundle bundle = new Bundle();
             bundle.putBoolean(PlaybackActivity.AUTO_PLAY, true);
 
-            String prevId = mItems.get(mCurrentItem).getId();
+            String prevId = VideoProvider.prevVideoId();
             getMediaController().getTransportControls().playFromMediaId(prevId, bundle);
         }
 
@@ -369,25 +332,28 @@ public class PlaybackActivity extends Activity {
         public void onSeekTo(long pos) {
             setPosition((int) pos);
             mVideoView.seekTo(mPosition);
-            updatePlaybackState();
         }
 
         @Override
         public void onFastForward() {
             if (mDuration != -1) {
                 // Fast forward 10 seconds.
+                int prevState = getPlaybackState();
+                setPlaybackState(PlaybackState.STATE_FAST_FORWARDING);
                 setPosition(mVideoView.getCurrentPosition() + (10 * 1000));
                 mVideoView.seekTo(mPosition);
-                updatePlaybackState();
+                setPlaybackState(prevState);
             }
         }
 
         @Override
         public void onRewind() {
-            // rewind 10 seconds
+            // Rewind 10 seconds.
+            int prevState = getPlaybackState();
+            setPlaybackState(PlaybackState.STATE_REWINDING);
             setPosition(mVideoView.getCurrentPosition() - (10 * 1000));
             mVideoView.seekTo(mPosition);
-            updatePlaybackState();
+            setPlaybackState(prevState);
         }
     }
 

@@ -61,10 +61,6 @@ import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -104,8 +100,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private ThumbsDownAction mThumbsDownAction;
     private ThumbsUpAction mThumbsUpAction;
     private PlaybackControlsRow mPlaybackControlsRow;
-    private ArrayList<Movie> mItems = new ArrayList<Movie>();
-    private int mCurrentItem;
     private Handler mHandler;
     private Runnable mRunnable;
     private Movie mSelectedMovie;
@@ -115,34 +109,16 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     private MediaController mMediaController;
     private MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
-    private int mCurrentPlaybackState;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        mItems = new ArrayList<>();
         mSelectedMovie = getActivity()
                 .getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
 
-        HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-
-        if (movies != null) {
-            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-                if (mSelectedMovie.getCategory().contains(entry.getKey())) {
-                    List<Movie> list = entry.getValue();
-                    if (list != null && !list.isEmpty()) {
-                        for (int j = 0; j < list.size(); j++) {
-                            mItems.add(list.get(j));
-                            if (mSelectedMovie.getTitle().contentEquals(list.get(j).getTitle())) {
-                                mCurrentItem = j;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        VideoProvider.setQueue(mSelectedMovie);
 
         mHandler = new Handler();
 
@@ -170,11 +146,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onStop() {
         stopProgressAutomation();
         mRowsAdapter = null;
@@ -188,11 +159,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
         super.onDetach();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     private void setupRows() {
@@ -324,7 +290,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     private void addOtherRows() {
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (Movie movie : mItems) {
+        for (Movie movie : VideoProvider.getCurrentQueue()) {
             listRowAdapter.add(movie);
         }
         HeaderItem header = new HeaderItem(0, getString(R.string.related_movies));
@@ -467,29 +433,27 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         public void onPlaybackStateChanged(PlaybackState state) {
             // The playback state has changed, so update your UI accordingly.
             // This should not update any media player / state!
-            Log.d(TAG, "playback state changed: " + state.getState());
+            Log.d(TAG, "Playback state changed: " + state.getState());
 
-            if (state.getState() == PlaybackState.STATE_PLAYING && mCurrentPlaybackState != PlaybackState.STATE_PLAYING) {
-                mCurrentPlaybackState = PlaybackState.STATE_PLAYING;
+            int nextState = state.getState();
+
+            if (nextState == PlaybackState.STATE_PLAYING) {
                 startProgressAutomation();
                 setFadingEnabled(true);
                 mPlayPauseAction.setIndex(PlayPauseAction.PAUSE);
                 mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
                 notifyChanged(mPlayPauseAction);
-            } else if (state.getState() == PlaybackState.STATE_PAUSED && mCurrentPlaybackState != PlaybackState.STATE_PAUSED) {
-                mCurrentPlaybackState = PlaybackState.STATE_PAUSED;
+            } else if (nextState == PlaybackState.STATE_PAUSED) {
                 stopProgressAutomation();
                 setFadingEnabled(false);
                 mPlayPauseAction.setIndex(PlayPauseAction.PLAY);
                 mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
                 notifyChanged(mPlayPauseAction);
-            } else if (state.getState() == PlaybackState.STATE_SKIPPING_TO_NEXT) {
-                mCurrentPlaybackState = PlaybackState.STATE_SKIPPING_TO_NEXT;
+            } else if (nextState == PlaybackState.STATE_SKIPPING_TO_NEXT) {
                 startProgressAutomation();
                 setFadingEnabled(true);
                 notifyChanged(mSkipNextAction);
-            } else if (state.getState() == PlaybackState.STATE_SKIPPING_TO_PREVIOUS) {
-                mCurrentPlaybackState = PlaybackState.STATE_SKIPPING_TO_PREVIOUS;
+            } else if (nextState == PlaybackState.STATE_SKIPPING_TO_PREVIOUS) {
                 startProgressAutomation();
                 setFadingEnabled(true);
                 notifyChanged(mSkipPreviousAction);
