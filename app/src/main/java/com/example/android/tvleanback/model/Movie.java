@@ -54,6 +54,14 @@ public class Movie implements Parcelable {
         mCategory = data[7];
     }
 
+    @Override
+    public boolean equals(Object m) {
+        if (m instanceof Movie) {
+            return mId.equals(((Movie) m).getId());
+        }
+        return false;
+    }
+
     public static String getCount() {
         return Integer.toString(sCount);
     }

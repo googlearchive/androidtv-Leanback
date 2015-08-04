@@ -37,6 +37,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /*
  * This class loads videos from a backend and saves them into a HashMap
@@ -56,6 +57,8 @@ public class VideoProvider {
 
     private static HashMap<String, List<Movie>> sMovieList;
     private static HashMap<String, Movie> sMovieListById;
+    private static List<Movie> sCurrentQueue;
+    private static int sCurrentMovieIndex;
 
     private static Resources sResources;
     private static Uri sPrefixUrl;
@@ -74,6 +77,50 @@ public class VideoProvider {
         return sMovieList;
     }
 
+    public static List<Movie> getCurrentQueue() {
+        return sCurrentQueue;
+    }
+
+    public static String prevVideoId() {
+        if (--sCurrentMovieIndex < 0) {
+            sCurrentMovieIndex = sCurrentQueue.size() - 1;
+        }
+
+        return sCurrentQueue.get(sCurrentMovieIndex).getId();
+    }
+
+    public static String nextVideoId() {
+        if (++sCurrentMovieIndex >= sCurrentQueue.size()) {
+            sCurrentMovieIndex = 0;
+        }
+
+        return sCurrentQueue.get(sCurrentMovieIndex).getId();
+    }
+
+    /**
+     * Set the current queue to the list of Movies in the given Movie's category.
+     *
+     * @param selectedMovie Movie whose category will be used to determine queue to be set.
+     */
+    public static void setQueue(Movie selectedMovie) {
+        if (sMovieList == null) {
+            sCurrentQueue = null;
+            sCurrentMovieIndex = -1;
+            return;
+        }
+
+        for (Map.Entry<String, List<Movie>> entry : sMovieList.entrySet()) {
+            if (selectedMovie.getCategory().equals(entry.getKey())) {
+                List<Movie> list = entry.getValue();
+                if (list != null && !list.isEmpty()) {
+                    sCurrentQueue = list;
+                    sCurrentMovieIndex = list.indexOf(selectedMovie);
+                    return;
+                }
+            }
+        }
+    }
+
     public static HashMap<String, List<Movie>> buildMedia(Context ctx, String url)
             throws JSONException {
         if (null != sMovieList) {
@@ -82,7 +129,7 @@ public class VideoProvider {
         sMovieList = new HashMap<>();
         sMovieListById = new HashMap<>();
 
-        JSONObject jsonObj = new VideoProvider().parseUrl(url);
+        JSONObject jsonObj = new VideoProvider().fetchJSON(url);
 
         if (null == jsonObj) {
             Log.e(TAG, "An error occurred fetching videos.");
@@ -182,7 +229,7 @@ public class VideoProvider {
                 .toString();
     }
 
-    protected JSONObject parseUrl(String urlString) {
+    protected JSONObject fetchJSON(String urlString) {
         Log.d(TAG, "Parse URL: " + urlString);
         BufferedReader reader = null;
 
