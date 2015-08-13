@@ -176,7 +176,7 @@ public class MainFragment extends BrowseFragment implements
 
         int index = 0;
 
-        if (null != data) {
+        if (null != data && !data.isEmpty()) {
             for (Map.Entry<String, List<Movie>> entry : data.entrySet()) {
                 ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
                 List<Movie> list = entry.getValue();
@@ -190,6 +190,7 @@ public class MainFragment extends BrowseFragment implements
             }
         } else {
             Log.e(TAG, "An error occurred fetching videos");
+            Toast.makeText(getActivity(), R.string.videos_loading_error, Toast.LENGTH_LONG).show();
         }
 
         HeaderItem gridHeader = new HeaderItem(index, getString(R.string.more_samples));
