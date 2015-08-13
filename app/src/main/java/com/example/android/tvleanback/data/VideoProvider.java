@@ -201,7 +201,7 @@ public class VideoProvider {
             String json = sb.toString();
             return new JSONObject(json);
         } catch (Exception e) {
-            Log.d(TAG, "Failed to parse the json for media list", e);
+            Log.e(TAG, "Failed to parse the json for media list", e);
             return null;
         } finally {
             if (null != reader) {

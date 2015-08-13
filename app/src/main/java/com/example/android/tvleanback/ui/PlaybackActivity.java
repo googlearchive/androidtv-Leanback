@@ -23,7 +23,6 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.VideoView;
