@@ -25,6 +25,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.util.Arrays;
+
 /**
  * Provides access to the video database.
  */
@@ -71,8 +73,8 @@ public class VideoContentProvider extends ContentProvider {
         // Use the UriMatcher to see what kind of query we have and format the db query accordingly
         switch (URI_MATCHER.match(uri)) {
             case SEARCH_SUGGEST:
-                Log.d(TAG, "search suggest: " + selectionArgs[0] + " URI: " + uri);
-                if (selectionArgs == null) {
+                Log.d(TAG, "search suggest: " + Arrays.toString(selectionArgs) + " URI: " + uri);
+                if (selectionArgs == null || 0 == selectionArgs.length) {
                     throw new IllegalArgumentException(
                             "selectionArgs must be provided for the Uri: " + uri);
                 }
