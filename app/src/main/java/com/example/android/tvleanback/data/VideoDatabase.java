@@ -170,16 +170,8 @@ public class VideoDatabase {
         builder.setTables(FTS_VIRTUAL_TABLE);
         builder.setProjectionMap(COLUMN_MAP);
 
-        Cursor cursor = new PaginatedCursor(builder.query(mDatabaseOpenHelper.getReadableDatabase(),
-                columns, selection, selectionArgs, null, null, null));
-
-        if (cursor == null) {
-            return null;
-        } else if (!cursor.moveToFirst()) {
-            cursor.close();
-            return null;
-        }
-        return cursor;
+        return builder.query(mDatabaseOpenHelper.getReadableDatabase(),
+                columns, selection, selectionArgs, null, null, null);
     }
 
     /**
