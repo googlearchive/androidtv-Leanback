@@ -35,6 +35,7 @@ public class BrowseErrorActivity extends Activity {
     private static int SPINNER_WIDTH = 100;
     private static int SPINNER_HEIGHT = 100;
 
+    Handler mHandler;
     private ErrorFragment mErrorFragment;
     private SpinnerFragment mSpinnerFragment;
 
@@ -49,6 +50,12 @@ public class BrowseErrorActivity extends Activity {
         testError();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     private void testError() {
         mErrorFragment = new ErrorFragment();
         getFragmentManager().beginTransaction().add(R.id.main_frame, mErrorFragment).commit();
@@ -56,8 +63,8 @@ public class BrowseErrorActivity extends Activity {
         mSpinnerFragment = new SpinnerFragment();
         getFragmentManager().beginTransaction().add(R.id.main_frame, mSpinnerFragment).commit();
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
