@@ -249,7 +249,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
 
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-            if (mSelectedMovie.getCategory().indexOf(entry.getKey()) >= 0) {
+            if (mSelectedMovie.getCategory().contains(entry.getKey())) {
                 List<Movie> list = entry.getValue();
                 for (int j = 0; j < list.size(); j++) {
                     listRowAdapter.add(list.get(j));

@@ -277,14 +277,13 @@ public class MainFragment extends BrowseFragment implements
                         MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             } else if (item instanceof String) {
-                if (((String) item).indexOf(getString(R.string.grid_view)) >= 0) {
+                if (((String) item).contains(getString(R.string.grid_view))) {
                     Intent intent = new Intent(getActivity(), VerticalGridActivity.class);
                     startActivity(intent);
-                } else if (((String) item)
-                        .indexOf(getString(R.string.guidedstep_first_title)) >= 0) {
+                } else if (((String) item).contains(getString(R.string.guidedstep_first_title))) {
                     Intent intent = new Intent(getActivity(), GuidedStepActivity.class);
                     startActivity(intent);
-                } else if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
+                } else if (((String) item).contains(getString(R.string.error_fragment))) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
                     startActivity(intent);
                 } else {
