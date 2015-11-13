@@ -49,7 +49,7 @@ public class GuidedStepActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (null == savedInstanceState) {
-            GuidedStepFragment.add(getFragmentManager(), new FirstStepFragment());
+            GuidedStepFragment.addAsRoot(this, new FirstStepFragment(), android.R.id.content);
         }
     }
 
