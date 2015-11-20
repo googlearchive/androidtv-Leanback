@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.util.Log;
 
 /*
- * This class extends BroadCastReceiver and publishes recommendations on bootup 
+ * This class extends BroadcastReceiver and publishes Recommendations on bootup.
  */
 public class BootupActivity extends BroadcastReceiver {
     private static final String TAG = "BootupActivity";
