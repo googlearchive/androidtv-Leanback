@@ -19,11 +19,10 @@ package com.example.android.tvleanback.recommendation;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.app.recommendation.ContentRecommendation;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -40,11 +39,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /*
- * This class builds up to MAX_RECOMMMENDATIONS of recommendations and defines what happens
- * when they're clicked from Recommendations section on Home screen
+ * This class builds up to MAX_RECOMMMENDATIONS of ContentRecommendations and defines what happens
+ * when they're selected from Recommendations section on the Home screen by creating an Intent.
  */
 public class UpdateRecommendationsService extends IntentService {
-    private static final String TAG = "RecommendationsService";
+    private static final String TAG = "RecommendationService";
     private static final int MAX_RECOMMENDATIONS = 3;
 
     private static final int CARD_WIDTH = 313;
@@ -69,39 +68,48 @@ public class UpdateRecommendationsService extends IntentService {
                     .getSystemService(Context.NOTIFICATION_SERVICE);
         }
 
-        RecommendationBuilder builder = new RecommendationBuilder()
-                .setContext(getApplicationContext())
-                .setSmallIcon(R.drawable.videos_by_google_icon);
+        // This will be used to build up an object for your content recommendation that will be
+        // shown on the TV home page along with other provider's recommendations.
+        ContentRecommendation.Builder builder = new ContentRecommendation.Builder()
+                .setBadgeIcon(R.drawable.videos_by_google_icon);
 
         // flatten to list
         List<Movie> flattenedRecommendations = new ArrayList<>();
         for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
             for (Movie movie : entry.getValue()) {
-                Log.d(TAG, "Recommendation - " + movie.getTitle());
                 flattenedRecommendations.add(movie);
             }
         }
 
+        // Our naive approach to deciding what content to recommend involves simply shuffling all
+        // the videos in our app and picking up to MAX_RECOMMENDATIONS of them.
         Collections.shuffle(flattenedRecommendations);
+
         Movie movie;
         for (int i = 0; i < flattenedRecommendations.size() && i < MAX_RECOMMENDATIONS; i++) {
             movie = flattenedRecommendations.get(i);
-            final RecommendationBuilder notificationBuilder = builder
-                    .setBackground(movie.getCardImageUrl())
-                    .setId(i + 1)
-                    .setPriority(MAX_RECOMMENDATIONS - i - 1)
+            builder.setIdTag("Video" + i + 1)
                     .setTitle(movie.getTitle())
-                    .setDescription(getString(R.string.popular_header))
-                    .setIntent(buildPendingIntent(movie, i + 1));
+                    .setText(getString(R.string.popular_header))
+                    .setContentIntentData(ContentRecommendation.INTENT_TYPE_ACTIVITY,
+                            buildPendingIntent(movie, i + 1), 0, null);
 
             try {
+                // No ContentRecommendation is complete without an image.
                 Bitmap bitmap = Glide.with(getApplicationContext())
                         .load(movie.getCardImageUrl())
                         .asBitmap()
                         .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
                         .get();
-                notificationBuilder.setBitmap(bitmap);
-                Notification notification = notificationBuilder.build();
+                builder.setContentImage(bitmap);
+
+                // Create an object holding all the information used to recommend the content.
+                ContentRecommendation rec = builder.build();
+                Notification notification = rec.getNotificationObject(getApplicationContext());
+
+                Log.d(TAG, "Recommending video");
+
+                // Recommend the content by publishing the notification.
                 mNotificationManager.notify(i + 1, notification);
             } catch (InterruptedException | ExecutionException e) {
                 Log.e(TAG, "Could not create recommendation: " + e);
@@ -109,18 +117,12 @@ public class UpdateRecommendationsService extends IntentService {
         }
     }
 
-    private PendingIntent buildPendingIntent(Movie movie, int id) {
+    private Intent buildPendingIntent(Movie movie, int id) {
         Intent detailsIntent = new Intent(this, MovieDetailsActivity.class);
         detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
         detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MovieDetailsActivity.class);
-        stackBuilder.addNextIntent(detailsIntent);
-        // Ensure a unique PendingIntents, otherwise all recommendations end up with the same
-        // PendingIntent
         detailsIntent.setAction(movie.getId());
 
-        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return detailsIntent;
     }
 }
