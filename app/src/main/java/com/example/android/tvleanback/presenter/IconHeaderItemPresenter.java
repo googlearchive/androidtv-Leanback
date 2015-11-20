@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.android.tvleanback.R;
 
 public class IconHeaderItemPresenter extends RowHeaderPresenter {
+
     private float mUnselectedAlpha;
 
     @Override
@@ -25,6 +26,7 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.icon_header_item, null);
+        view.setAlpha(mUnselectedAlpha); // Initialize icons to be at half-opacity.
 
         return new ViewHolder(view);
     }
@@ -47,11 +49,10 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
         // no op
     }
 
-    // TODO: TEMP - remove me when leanback onCreateViewHolder no longer sets the mUnselectAlpha,AND
-    // also assumes the xml inflation will return a RowHeaderView
+    // TODO: This is a temporary fix. Remove me when leanback onCreateViewHolder no longer sets the
+    // mUnselectAlpha, and also assumes the xml inflation will return a RowHeaderView.
     @Override
     protected void onSelectLevelChanged(RowHeaderPresenter.ViewHolder holder) {
-        // this is a temporary fix
         holder.view.setAlpha(mUnselectedAlpha + holder.getSelectLevel() *
                 (1.0f - mUnselectedAlpha));
     }
