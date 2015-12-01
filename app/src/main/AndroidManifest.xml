@@ -19,8 +19,15 @@
     package="com.example.android.tvleanback"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -35,24 +42,27 @@
         android:banner="@drawable/videos_by_google_banner"
         android:label="@string/app_name"
         android:logo="@drawable/videos_by_google_banner"
-        android:theme="@style/Theme.Example.Leanback">
+        android:theme="@style/Theme.Leanback">
+
         <activity
             android:name=".ui.MainActivity"
             android:icon="@drawable/videos_by_google_banner"
             android:label="@string/app_name"
             android:logo="@drawable/videos_by_google_banner"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.Leanback.Browse">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
             android:name=".ui.MovieDetailsActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Leanback.Details"
+            >
 
             <!-- Receives the search request. -->
             <intent-filter>
@@ -71,7 +81,9 @@
         <activity
             android:name=".ui.VerticalGridActivity"
             android:exported="true"
-            android:parentActivityName=".ui.MainActivity" />
+            android:parentActivityName=".ui.MainActivity"
+            android:theme="@style/Theme.Leanback.VerticalGrid"/>
+
         <activity
             android:name=".ui.SearchActivity" />
 

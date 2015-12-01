@@ -104,7 +104,7 @@ public class GuidedStepActivity extends Activity {
             if (action.getId() == CONTINUE) {
                 GuidedStepFragment.add(fm, new SecondStepFragment());
             } else {
-                getActivity().finish();
+                getActivity().finishAfterTransition();
             }
         }
     }
@@ -189,7 +189,7 @@ public class GuidedStepActivity extends Activity {
         @Override
         public void onGuidedActionClicked(GuidedAction action) {
             if (action.getId() == CONTINUE) {
-                getActivity().finish();
+                getActivity().finishAfterTransition();
             } else {
                 getFragmentManager().popBackStack();
             }

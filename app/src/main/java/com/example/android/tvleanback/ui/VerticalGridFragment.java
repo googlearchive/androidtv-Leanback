@@ -16,6 +16,7 @@ package com.example.android.tvleanback.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
@@ -56,6 +57,9 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
         setTitle(getString(R.string.vertical_grid_title));
 
+        if (savedInstanceState == null) {
+            prepareEntranceTransition();
+        }
         setupFragment();
     }
 
@@ -66,17 +70,20 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
 
         mAdapter = new ArrayObjectAdapter(new CardPresenter());
 
-        long seed = System.nanoTime();
-
-        HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-
-        for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-            List<Movie> list = entry.getValue();
-            Collections.shuffle(list, new Random(seed));
-            for (Movie movie : list) {
-                mAdapter.add(movie);
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                long seed = System.nanoTime();
+                HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
+                for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
+                    List<Movie> list = entry.getValue();
+                    Collections.shuffle(list, new Random(seed));
+                    for (Movie movie : list) {
+                        mAdapter.add(movie);
+                    }
+                }
+                startEntranceTransition();
             }
-        }
+        }, 500);
 
         setAdapter(mAdapter);
 
