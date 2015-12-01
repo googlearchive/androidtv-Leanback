@@ -43,17 +43,16 @@ import java.util.Map;
  * This class loads videos from a backend and saves them into a HashMap
  */
 public class VideoProvider {
-
     private static final String TAG = "VideoProvider";
-    private static String TAG_MEDIA = "videos";
-    private static String TAG_GOOGLE_VIDEOS = "googlevideos";
-    private static String TAG_CATEGORY = "category";
-    private static String TAG_STUDIO = "studio";
-    private static String TAG_SOURCES = "sources";
-    private static String TAG_DESCRIPTION = "description";
-    private static String TAG_CARD_THUMB = "card";
-    private static String TAG_BACKGROUND = "background";
-    private static String TAG_TITLE = "title";
+    private static final String TAG_MEDIA = "videos";
+    private static final String TAG_GOOGLE_VIDEOS = "googlevideos";
+    private static final String TAG_CATEGORY = "category";
+    private static final String TAG_STUDIO = "studio";
+    private static final String TAG_SOURCES = "sources";
+    private static final String TAG_DESCRIPTION = "description";
+    private static final String TAG_CARD_THUMB = "card";
+    private static final String TAG_BACKGROUND = "background";
+    private static final String TAG_TITLE = "title";
 
     private static HashMap<String, List<Movie>> sMovieList;
     private static HashMap<String, Movie> sMovieListById;
@@ -121,7 +120,7 @@ public class VideoProvider {
         }
     }
 
-    public static HashMap<String, List<Movie>> buildMedia(Context ctx, String url)
+    public static HashMap<String, List<Movie>> buildMedia(String url)
             throws JSONException {
         if (null != sMovieList) {
             return sMovieList;
@@ -141,11 +140,14 @@ public class VideoProvider {
         if (null != categories) {
             final int categoryLength = categories.length();
             Log.d(TAG, "category #: " + categoryLength);
+
+            String id;
             String title;
             String videoUrl;
             String bgImageUrl;
             String cardImageUrl;
             String studio;
+
             for (int catIdx = 0; catIdx < categoryLength; catIdx++) {
                 JSONObject category = categories.getJSONObject(catIdx);
                 String categoryName = category.getString(TAG_CATEGORY);
@@ -153,7 +155,7 @@ public class VideoProvider {
                 Log.d(TAG,
                         "category: " + catIdx + " Name:" + categoryName + " video length: "
                                 + (null != videos ? videos.length() : 0));
-                List<Movie> categoryList = new ArrayList<Movie>();
+                List<Movie> categoryList = new ArrayList<>();
                 Movie movie;
                 if (null != videos) {
                     for (int vidIdx = 0, vidSize = videos.length(); vidIdx < vidSize; vidIdx++) {
@@ -163,6 +165,8 @@ public class VideoProvider {
                         if (null == videoUrls || videoUrls.length() == 0) {
                             continue;
                         }
+
+                        id = "" + sMovieListById.size();
                         title = video.getString(TAG_TITLE);
                         videoUrl = getVideoPrefix(categoryName, getVideoSourceUrl(videoUrls));
                         bgImageUrl = getThumbPrefix(categoryName, title,
@@ -171,8 +175,11 @@ public class VideoProvider {
                                 video.getString(TAG_CARD_THUMB));
                         studio = video.getString(TAG_STUDIO);
 
-                        movie = buildMovieInfo(categoryName, title, description, studio,
+                        // Create Movie object.
+                        movie = buildMovieInfo(id, categoryName, title, description, studio,
                                 videoUrl, cardImageUrl, bgImageUrl);
+
+                        // Add it to the list.
                         sMovieListById.put(movie.getId(), movie);
                         categoryList.add(movie);
                     }
@@ -183,16 +190,17 @@ public class VideoProvider {
         return sMovieList;
     }
 
-    private static Movie buildMovieInfo(String category,
+    private static Movie buildMovieInfo(String id,
+                                        String category,
                                         String title,
                                         String description,
                                         String studio,
                                         String videoUrl,
                                         String cardImageUrl,
                                         String bgImageUrl) {
+
         Movie movie = new Movie();
-        movie.setId(Movie.getCount());
-        Movie.incrementCount();
+        movie.setId(id);
         movie.setTitle(title);
         movie.setDescription(description);
         movie.setStudio(studio);
@@ -229,7 +237,7 @@ public class VideoProvider {
                 .toString();
     }
 
-    protected JSONObject fetchJSON(String urlString) {
+    private JSONObject fetchJSON(String urlString) {
         Log.d(TAG, "Parse URL: " + urlString);
         BufferedReader reader = null;
 

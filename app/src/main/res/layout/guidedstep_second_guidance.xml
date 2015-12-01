@@ -18,29 +18,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
-        style="?attr/guidanceContainerStyle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/guidance_icon"
+        style="@style/Widget.Example.Leanback.SecondStepGuidanceIconStyle"
+        android:layout_width="188dp"
+        tools:ignore="ContentDescription" />
 
-        <ImageView
-            android:id="@+id/guidance_icon"
-            style="@style/Widget.Example.Leanback.SecondStepGuidanceIconStyle"
-            android:layout_width="188dp"
-            tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/guidance_title"
+        style="?attr/guidanceTitleStyle" />
 
-        <TextView
-            android:id="@+id/guidance_title"
-            style="?attr/guidanceTitleStyle" />
+    <TextView
+        android:id="@+id/guidance_breadcrumb"
+        style="?attr/guidanceBreadcrumbStyle" />
 
-        <TextView
-            android:id="@+id/guidance_breadcrumb"
-            style="?attr/guidanceBreadcrumbStyle" />
-
-        <TextView
-            android:id="@+id/guidance_description"
-            style="?attr/guidanceDescriptionStyle" />
-
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/guidance_description"
+        style="?attr/guidanceDescriptionStyle" />
 
 </FrameLayout>

@@ -26,9 +26,6 @@ import java.net.URISyntaxException;
  * Movie class represents video entity with title, description, image thumbs and video url.
  */
 public class Movie implements Parcelable {
-    private static final String TAG = "Movie";
-    static final long serialVersionUID = 727566175075960653L;
-    private static int sCount = 0;
     private String mId;
     private String mTitle;
     private String mDescription;
@@ -40,10 +37,10 @@ public class Movie implements Parcelable {
 
     public Movie() {}
 
-    public Movie(Parcel in) {
+    private Movie(Parcel in) {
         String[] data = new String[8];
-
         in.readStringArray(data);
+
         mId = data[0];
         mTitle = data[1];
         mDescription = data[2];
@@ -56,18 +53,7 @@ public class Movie implements Parcelable {
 
     @Override
     public boolean equals(Object m) {
-        if (m instanceof Movie) {
-            return mId.equals(((Movie) m).getId());
-        }
-        return false;
-    }
-
-    public static String getCount() {
-        return Integer.toString(sCount);
-    }
-
-    public static void incrementCount() {
-        sCount++;
+        return m instanceof Movie && mId.equals(((Movie) m).getId());
     }
 
     public String getId() {
@@ -160,16 +146,15 @@ public class Movie implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(200);
-        sb.append("Movie{");
-        sb.append("mId=").append(mId);
-        sb.append(", mTitle='").append(mTitle).append('\'');
-        sb.append(", mVideoUrl='").append(mVideoUrl).append('\'');
-        sb.append(", backgroundImageUrl='").append(mBgImageUrl).append('\'');
-        sb.append(", backgroundImageURI='").append(getBackgroundImageURI().toString()).append('\'');
-        sb.append(", mCardImageUrl='").append(mCardImageUrl).append('\'');
-        sb.append('}');
-        return sb.toString();
+        String s = "Movie{";
+        s += "mId=" + mId;
+        s += ", mTitle='" + mTitle + "'";
+        s += ", mVideoUrl='" + mVideoUrl + "'";
+        s += ", backgroundImageUrl='" + mBgImageUrl + "'";
+        s += ", backgroundImageURI='" + getBackgroundImageURI().toString() + "'";
+        s += ", mCardImageUrl='" + mCardImageUrl + "'";
+        s += "}";
+        return s;
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

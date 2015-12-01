@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /*
- * This class builds up to MAX_RECOMMMENDATIONS of ContentRecommendations and defines what happens
+ * This class builds up to MAX_RECOMMENDATIONS of ContentRecommendations and defines what happens
  * when they're selected from Recommendations section on the Home screen by creating an Intent.
  */
 public class UpdateRecommendationsService extends IntentService {

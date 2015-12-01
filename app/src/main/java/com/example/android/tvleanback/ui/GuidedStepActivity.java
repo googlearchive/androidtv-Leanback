@@ -21,6 +21,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.GuidedStepFragment;
 import android.support.v17.leanback.widget.GuidanceStylist;
 import android.support.v17.leanback.widget.GuidanceStylist.Guidance;
@@ -80,7 +81,8 @@ public class GuidedStepActivity extends Activity {
         }
 
         @Override
-        public Guidance onCreateGuidance(Bundle savedInstanceState) {
+        @NonNull
+        public Guidance onCreateGuidance(@NonNull Bundle savedInstanceState) {
             String title = getString(R.string.guidedstep_first_title);
             String breadcrumb = getString(R.string.guidedstep_first_breadcrumb);
             String description = getString(R.string.guidedstep_first_description);
@@ -89,7 +91,7 @@ public class GuidedStepActivity extends Activity {
         }
 
         @Override
-        public void onCreateActions(List<GuidedAction> actions, Bundle savedInstanceState) {
+        public void onCreateActions(@NonNull List<GuidedAction> actions, Bundle savedInstanceState) {
             addAction(actions, CONTINUE,
                     getResources().getString(R.string.guidedstep_continue),
                     getResources().getString(R.string.guidedstep_letsdoit));
@@ -112,6 +114,7 @@ public class GuidedStepActivity extends Activity {
     public static class SecondStepFragment extends GuidedStepFragment {
 
         @Override
+        @NonNull
         public Guidance onCreateGuidance(Bundle savedInstanceState) {
             String title = getString(R.string.guidedstep_second_title);
             String breadcrumb = getString(R.string.guidedstep_second_breadcrumb);
@@ -131,7 +134,7 @@ public class GuidedStepActivity extends Activity {
         }
 
         @Override
-        public void onCreateActions(List<GuidedAction> actions, Bundle savedInstanceState) {
+        public void onCreateActions(@NonNull List<GuidedAction> actions, Bundle savedInstanceState) {
             String desc = getResources().getString(R.string.guidedstep_action_description);
             actions.add(new GuidedAction.Builder()
                     .title(getResources().getString(R.string.guidedstep_action_title))
@@ -171,6 +174,7 @@ public class GuidedStepActivity extends Activity {
         }
 
         @Override
+        @NonNull
         public Guidance onCreateGuidance(Bundle savedInstanceState) {
             String title = getString(R.string.guidedstep_third_title);
             String breadcrumb = getString(R.string.guidedstep_third_breadcrumb);
@@ -181,7 +185,7 @@ public class GuidedStepActivity extends Activity {
         }
 
         @Override
-        public void onCreateActions(List<GuidedAction> actions, Bundle savedInstanceState) {
+        public void onCreateActions(@NonNull List<GuidedAction> actions, Bundle savedInstanceState) {
             addAction(actions, CONTINUE, "Done", "All finished");
             addAction(actions, BACK, "Back", "Forgot something...");
         }

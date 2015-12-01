@@ -31,11 +31,11 @@ import com.example.android.tvleanback.R;
  * BrowseErrorActivity shows how to use ErrorFragment
  */
 public class BrowseErrorActivity extends Activity {
-    private static int TIMER_DELAY = 3000;
-    private static int SPINNER_WIDTH = 100;
-    private static int SPINNER_HEIGHT = 100;
+    private static final int TIMER_DELAY = 3000;
+    private static final int SPINNER_WIDTH = 100;
+    private static final int SPINNER_HEIGHT = 100;
 
-    Handler mHandler;
+    private Handler mHandler;
     private ErrorFragment mErrorFragment;
     private SpinnerFragment mSpinnerFragment;
 
