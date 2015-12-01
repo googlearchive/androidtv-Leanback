@@ -32,18 +32,16 @@ public class VideoItemLoader extends AsyncTaskLoader<HashMap<String, List<Movie>
 
     private static final String TAG = "VideoItemLoader";
     private final String mUrl;
-    private Context mContext;
 
     public VideoItemLoader(Context context, String url) {
         super(context);
-        mContext = context;
         mUrl = url;
     }
 
     @Override
     public HashMap<String, List<Movie>> loadInBackground() {
         try {
-            return VideoProvider.buildMedia(mContext, mUrl);
+            return VideoProvider.buildMedia(mUrl);
         } catch (Exception e) {
             Log.e(TAG, "Failed to fetch media data", e);
             return null;

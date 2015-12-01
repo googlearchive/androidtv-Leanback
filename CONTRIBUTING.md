@@ -2,7 +2,7 @@
 
 ## Contributor License Agreements
 
-We'd love to accept your sample apps and patches! Before we can take them, we 
+We'd love to accept your sample apps and patches! Before we can take them, we
 have to jump a couple of legal hurdles.
 
 Please fill out either the individual or corporate Contributor License Agreement
@@ -37,7 +37,7 @@ accept your pull requests.
 1. Sign a Contributor License Agreement, if you have not yet done so (see
    details above).
 1. Create your own repo for your app following this naming convention:
-    * mirror-{app-name}-{language or plaform}
+    * mirror-{app-name}-{language or platform}
     * apps: quickstart, photohunt-server, photohunt-client
     * example:  mirror-quickstart-android
     * For multi-language apps, concatenate the primary languages like this:
@@ -52,5 +52,5 @@ accept your pull requests.
       this collection of repos.
 1. Submit a request to fork your repo in googlesamples organization.
 1. The repo owner will review your request. If it is approved, the sample will
-   be merged. If it needs additional work, the repo owner will respond with 
+   be merged. If it needs additional work, the repo owner will respond with
    useful comments.

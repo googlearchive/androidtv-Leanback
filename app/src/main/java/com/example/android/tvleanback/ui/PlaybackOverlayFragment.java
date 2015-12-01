@@ -14,12 +14,14 @@
 package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -108,7 +110,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private int mClickCount;
 
     private MediaController mMediaController;
-    private MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
+    private final MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,9 +140,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mMediaController = getActivity().getMediaController();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Activity activity = (Activity) context;
+        mMediaController = activity.getMediaController();
         Log.d(TAG, "register callback of mediaController");
         mMediaController.registerCallback(mMediaControllerCallback);
     }
@@ -202,7 +206,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         setAdapter(mRowsAdapter);
     }
 
-    public void togglePlayback(boolean playPause) {
+    private void togglePlayback(boolean playPause) {
         if (playPause) {
             mMediaController.getTransportControls().play();
         } else {
@@ -353,7 +357,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         }
     }
 
-    protected void updateVideoImage(String uri) {
+    private void updateVideoImage(String uri) {
         Glide.with(getActivity())
                 .load(uri)
                 .centerCrop()
@@ -378,7 +382,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mClickTrackingTimer.schedule(new UpdateFfwRwdSpeedTask(), CLICK_TRACKING_DELAY);
     }
 
-    static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {
+    private static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {
         @Override
         protected void onBindDescription(ViewHolder viewHolder, Object item) {
             viewHolder.getTitle().setText(((Movie) item).getTitle());
@@ -415,7 +419,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             if (item instanceof Movie) {
                 Movie movie = (Movie) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), PlaybackActivity.class);
+                Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
                 intent.putExtra(MovieDetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
@@ -430,7 +434,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private class MediaControllerCallback extends MediaController.Callback {
 
         @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
             // The playback state has changed, so update your UI accordingly.
             // This should not update any media player / state!
             Log.d(TAG, "Playback state changed: " + state.getState());

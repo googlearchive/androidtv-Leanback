@@ -23,6 +23,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -31,8 +32,8 @@ import java.util.Arrays;
  * Provides access to the video database.
  */
 public class VideoContentProvider extends ContentProvider {
-    private static String TAG = "VideoContentProvider";
-    public static String AUTHORITY = "com.example.android.tvleanback";
+    private static final String TAG = "VideoContentProvider";
+    private static final String AUTHORITY = "com.example.android.tvleanback";
 
     // UriMatcher stuff
     private static final int SEARCH_SUGGEST = 0;
@@ -68,7 +69,7 @@ public class VideoContentProvider extends ContentProvider {
      * All other arguments are ignored.
      */
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         // Use the UriMatcher to see what kind of query we have and format the db query accordingly
         switch (URI_MATCHER.match(uri)) {
@@ -113,7 +114,7 @@ public class VideoContentProvider extends ContentProvider {
      * It's also useful in our own query() method to determine the type of Uri received.
      */
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (URI_MATCHER.match(uri)) {
             case SEARCH_SUGGEST:
                 return SearchManager.SUGGEST_MIME_TYPE;
@@ -127,17 +128,17 @@ public class VideoContentProvider extends ContentProvider {
     // Other required implementations...
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException();
     }
 }
