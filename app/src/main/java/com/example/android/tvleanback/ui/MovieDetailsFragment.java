@@ -22,11 +22,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BackgroundManager;
+import android.support.v17.leanback.app.DetailsFragment;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
+import android.support.v17.leanback.widget.DetailsOverviewLogoPresenter;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
-import android.support.v17.leanback.widget.DetailsOverviewRowPresenter;
+import android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter;
+import android.support.v17.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
@@ -40,10 +43,13 @@ import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
@@ -61,7 +67,7 @@ import java.util.Map;
  * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its meta plus related videos.
  */
-public class MovieDetailsFragment extends android.support.v17.leanback.app.DetailsFragment {
+public class MovieDetailsFragment extends DetailsFragment {
     private static final String TAG = "DetailsFragment";
 
     private static final int ACTION_WATCH_TRAILER = 1;
@@ -81,6 +87,7 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
+    private FullWidthDetailsOverviewSharedElementHelper mHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,15 +98,16 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
 
         mSelectedMovie = getActivity().getIntent()
                 .getParcelableExtra(MovieDetailsActivity.MOVIE);
+
         if (mSelectedMovie != null || checkGlobalSearchIntent()) {
             removeNotification(getActivity().getIntent()
                     .getIntExtra(MovieDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             setupAdapter();
             setupDetailsOverviewRow();
-            setupDetailsOverviewRowPresenter();
             setupMovieListRow();
-            setupMovieListRowPresenter();
             updateBackground(mSelectedMovie.getBackgroundImageUrl());
+
+            // When a Related Movie item is clicked.
             setOnItemViewClickedListener(new ItemViewClickedListener());
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -174,15 +182,86 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
     }
 
     private void setupAdapter() {
+        // Set detail background and style.
+        FullWidthDetailsOverviewRowPresenter detailsPresenter =
+                new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter(),
+                        new MovieDetailsOverviewLogoPresenter());
+
+        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background));
+        detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
+
+        // Hook up transition element.
+        mHelper = new FullWidthDetailsOverviewSharedElementHelper();
+        mHelper.setSharedElementEnterTransition(getActivity(), MovieDetailsActivity.SHARED_ELEMENT_NAME);
+        detailsPresenter.setListener(mHelper);
+        detailsPresenter.setParticipatingEntranceTransition(false);
+        prepareEntranceTransition();
+
+        detailsPresenter.setOnActionClickedListener(new OnActionClickedListener() {
+            @Override
+            public void onActionClicked(Action action) {
+                if (action.getId() == ACTION_WATCH_TRAILER) {
+                    Intent intent = new Intent(getActivity(), PlaybackActivity.class);
+                    intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         mPresenterSelector = new ClassPresenterSelector();
+        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
     }
 
+    static class MovieDetailsOverviewLogoPresenter extends DetailsOverviewLogoPresenter {
+
+        static class ViewHolder extends DetailsOverviewLogoPresenter.ViewHolder {
+            public ViewHolder(View view) {
+                super(view);
+            }
+
+            public FullWidthDetailsOverviewRowPresenter getParentPresenter() {
+                return mParentPresenter;
+            }
+
+            public FullWidthDetailsOverviewRowPresenter.ViewHolder getParentViewHolder() {
+                return mParentViewHolder;
+            }
+        }
+
+        @Override
+        public Presenter.ViewHolder onCreateViewHolder(ViewGroup parent) {
+            ImageView imageView = (ImageView) LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.lb_fullwidth_details_overview_logo, parent, false);
+            int width = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_WIDTH);
+            int height = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_HEIGHT);
+            imageView.setLayoutParams(new ViewGroup.MarginLayoutParams(width, height));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            ViewHolder holder = new ViewHolder(imageView);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
+            DetailsOverviewRow row = (DetailsOverviewRow) item;
+            ImageView imageView = ((ImageView) viewHolder.view);
+            imageView.setImageDrawable(row.getImageDrawable());
+            if (isBoundToImage((ViewHolder) viewHolder, row)) {
+                MovieDetailsOverviewLogoPresenter.ViewHolder vh =
+                        (MovieDetailsOverviewLogoPresenter.ViewHolder) viewHolder;
+                vh.getParentPresenter().notifyOnBindLogo(vh.getParentViewHolder());
+            }
+        }
+    }
+
     private void setupDetailsOverviewRow() {
         Log.d(TAG, "doInBackground: " + mSelectedMovie.toString());
+
         final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedMovie);
-        row.setImageDrawable(getResources().getDrawable(R.drawable.default_background));
+
         int width = Utils.convertDpToPixel(getActivity()
                 .getApplicationContext(), DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity()
@@ -190,16 +269,16 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
 
         Glide.with(getActivity())
                 .load(mSelectedMovie.getCardImageUrl())
-                .centerCrop()
+                .asBitmap()
+                .dontAnimate()
                 .error(R.drawable.default_background)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
+                .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
-                                                        glideAnimation) {
+                    public void onResourceReady(final Bitmap resource,
+                                                GlideAnimation glideAnimation) {
                         Log.d(TAG, "details overview card image url ready: " + resource);
-                        row.setImageDrawable(resource);
-                        mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
+                        row.setImageBitmap(getActivity(), resource);
+                        startEntranceTransition();
                     }
                 });
 
@@ -217,36 +296,11 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
         mAdapter.add(row);
     }
 
-    private void setupDetailsOverviewRowPresenter() {
-        // Set detail background and style.
-        DetailsOverviewRowPresenter detailsPresenter =
-                new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
-        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background));
-        detailsPresenter.setStyleLarge(true);
-
-        // Hook up transition element.
-        detailsPresenter.setSharedElementEnterTransition(getActivity(),
-                MovieDetailsActivity.SHARED_ELEMENT_NAME);
-
-        detailsPresenter.setOnActionClickedListener(new OnActionClickedListener() {
-            @Override
-            public void onActionClicked(Action action) {
-                if (action.getId() == ACTION_WATCH_TRAILER) {
-                    Intent intent = new Intent(getActivity(), PlaybackActivity.class);
-                    intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
-    }
-
     private void setupMovieListRow() {
         String subcategories[] = {getString(R.string.related_movies)};
         HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
+        // Generating related video list.
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
         for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
             if (mSelectedMovie.getCategory().contains(entry.getKey())) {
@@ -256,12 +310,9 @@ public class MovieDetailsFragment extends android.support.v17.leanback.app.Detai
                 }
             }
         }
+
         HeaderItem header = new HeaderItem(0, subcategories[0]);
         mAdapter.add(new ListRow(header, listRowAdapter));
-    }
-
-    private void setupMovieListRowPresenter() {
-        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {

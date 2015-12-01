@@ -81,7 +81,6 @@ public class CardPresenter extends Presenter {
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
             Glide.with(viewHolder.view.getContext())
                     .load(movie.getCardImageUrl())
-                    .centerCrop()
                     .error(mDefaultCardImage)
                     .into(cardView.getMainImageView());
         }

@@ -86,6 +86,7 @@ public class MainFragment extends BrowseFragment implements
         prepareBackgroundManager();
         setupUIElements();
         setupEventListeners();
+        prepareEntranceTransition();
     }
 
     @Override
@@ -206,6 +207,7 @@ public class MainFragment extends BrowseFragment implements
         setAdapter(mRowsAdapter);
 
         updateRecommendations();
+        startEntranceTransition();
     }
 
     @Override
@@ -279,10 +281,14 @@ public class MainFragment extends BrowseFragment implements
             } else if (item instanceof String) {
                 if (((String) item).contains(getString(R.string.grid_view))) {
                     Intent intent = new Intent(getActivity(), VerticalGridActivity.class);
-                    startActivity(intent);
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity())
+                            .toBundle();
+                    startActivity(intent, bundle);
                 } else if (((String) item).contains(getString(R.string.guidedstep_first_title))) {
                     Intent intent = new Intent(getActivity(), GuidedStepActivity.class);
-                    startActivity(intent);
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity())
+                            .toBundle();
+                    startActivity(intent, bundle);
                 } else if (((String) item).contains(getString(R.string.error_fragment))) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
                     startActivity(intent);
