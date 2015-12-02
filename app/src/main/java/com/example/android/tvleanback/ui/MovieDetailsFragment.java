@@ -168,7 +168,7 @@ public class MovieDetailsFragment extends DetailsFragment {
     }
 
     private void updateBackground(String uri) {
-        Glide.with(getActivity())
+        Glide.with(this)
                 .load(uri)
                 .asBitmap()
                 .centerCrop()
@@ -209,6 +209,7 @@ public class MovieDetailsFragment extends DetailsFragment {
                 }
             }
         });
+
         mPresenterSelector = new ClassPresenterSelector();
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
         mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
@@ -263,7 +264,7 @@ public class MovieDetailsFragment extends DetailsFragment {
 
         final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedMovie);
 
-        Glide.with(getActivity())
+        Glide.with(this)
                 .load(mSelectedMovie.getCardImageUrl())
                 .asBitmap()
                 .dontAnimate()

@@ -176,8 +176,8 @@ public class VideoProvider {
                         studio = video.getString(TAG_STUDIO);
 
                         // Create Movie object.
-                        movie = buildMovieInfo(id, categoryName, title, description, studio,
-                                videoUrl, cardImageUrl, bgImageUrl);
+                        movie = buildMovieInfo(id, categoryName, title.replace("_", " -"),
+                                description, studio, videoUrl, cardImageUrl, bgImageUrl);
 
                         // Add it to the list.
                         sMovieListById.put(movie.getId(), movie);
