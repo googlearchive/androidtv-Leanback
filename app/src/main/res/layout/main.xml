@@ -14,8 +14,9 @@
      limitations under the License.
 -->
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
     android:id="@+id/main_frame"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -23,6 +24,6 @@
         android:id="@+id/main_browse_fragment"
         android:name="com.example.android.tvleanback.ui.MainFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
-</merge>
+</FrameLayout>
