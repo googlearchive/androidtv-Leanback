@@ -28,7 +28,7 @@ import android.widget.ProgressBar;
 import com.example.android.tvleanback.R;
 
 /*
- * BrowseErrorActivity shows how to use ErrorFragment
+ * BrowseErrorActivity shows how to use BrowseErrorFragment
  */
 public class BrowseErrorActivity extends Activity {
     private static final int TIMER_DELAY = 3000;
@@ -36,7 +36,7 @@ public class BrowseErrorActivity extends Activity {
     private static final int SPINNER_HEIGHT = 100;
 
     private Handler mHandler;
-    private ErrorFragment mErrorFragment;
+    private BrowseErrorFragment mBrowseErrorFragment;
     private SpinnerFragment mSpinnerFragment;
 
     /**
@@ -57,8 +57,8 @@ public class BrowseErrorActivity extends Activity {
     }
 
     private void testError() {
-        mErrorFragment = new ErrorFragment();
-        getFragmentManager().beginTransaction().add(R.id.main_frame, mErrorFragment).commit();
+        mBrowseErrorFragment = new BrowseErrorFragment();
+        getFragmentManager().beginTransaction().add(R.id.main_frame, mBrowseErrorFragment).commit();
 
         mSpinnerFragment = new SpinnerFragment();
         getFragmentManager().beginTransaction().add(R.id.main_frame, mSpinnerFragment).commit();
@@ -68,7 +68,7 @@ public class BrowseErrorActivity extends Activity {
             @Override
             public void run() {
                 getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
-                mErrorFragment.setErrorContent();
+                mBrowseErrorFragment.setErrorContent();
             }
         }, TIMER_DELAY);
     }

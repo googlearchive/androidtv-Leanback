@@ -20,10 +20,10 @@ import android.view.View;
 import com.example.android.tvleanback.R;
 
 /*
- * This class demonstrates how to extend ErrorFragment
+ * This class demonstrates how to extend BrowseErrorFragment
  */
-public class ErrorFragment extends android.support.v17.leanback.app.ErrorFragment {
-    private static final String TAG = "ErrorFragment";
+public class BrowseErrorFragment extends android.support.v17.leanback.app.ErrorFragment {
+    private static final String TAG = "BrowseErrorFragment";
     private static final boolean TRANSLUCENT = true;
 
     @Override
@@ -42,7 +42,7 @@ public class ErrorFragment extends android.support.v17.leanback.app.ErrorFragmen
         setButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                getFragmentManager().beginTransaction().remove(ErrorFragment.this).commit();
+                getFragmentManager().beginTransaction().remove(BrowseErrorFragment.this).commit();
             }
         });
     }
