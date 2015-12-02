@@ -48,7 +48,6 @@ import com.example.android.tvleanback.presenter.CardPresenter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /*
@@ -186,10 +185,10 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
                 HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
                 for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
                     for (Movie movie : entry.getValue()) {
-                        if (movie.getTitle().toLowerCase(Locale.ENGLISH)
-                                .contains(query.toLowerCase(Locale.ENGLISH))
-                                || movie.getDescription().toLowerCase(Locale.ENGLISH)
-                                .contains(query.toLowerCase(Locale.ENGLISH))) {
+                        if (movie.getTitle().toLowerCase()
+                                .contains(query.toLowerCase())
+                                || movie.getDescription().toLowerCase()
+                                .contains(query.toLowerCase())) {
                             result.add(movie);
                         }
                     }
