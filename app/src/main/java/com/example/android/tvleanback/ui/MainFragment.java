@@ -66,7 +66,7 @@ public class MainFragment extends BrowseFragment implements
         LoaderManager.LoaderCallbacks<HashMap<String, List<Movie>>> {
     private static final String TAG = "MainFragment";
 
-    private static int BACKGROUND_UPDATE_DELAY = 300;
+    private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static String mVideosUrl;
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -109,20 +109,22 @@ public class MainFragment extends BrowseFragment implements
     private void prepareBackgroundManager() {
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
-        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
+        mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
     private void setupUIElements() {
-        setBadgeDrawable(getActivity().getResources().getDrawable(R.drawable.videos_by_google_banner));
+        setBadgeDrawable(getActivity().getResources().getDrawable(R.drawable.videos_by_google_banner, null));
         setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent over title
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
-        // set fastLane (or headers) background color
-        setBrandColor(getResources().getColor(R.color.fastlane_background));
-        // set search icon color
-        setSearchAffordanceColor(getResources().getColor(R.color.search_opaque));
+
+        // Set fastLane (or headers) background color
+        setBrandColor(getResources().getColor(R.color.fastlane_background, null));
+
+        // Set search icon color.
+        setSearchAffordanceColor(getResources().getColor(R.color.search_opaque, null));
 
         setHeaderPresenterSelector(new PresenterSelector() {
             @Override
@@ -215,7 +217,7 @@ public class MainFragment extends BrowseFragment implements
         mRowsAdapter.clear();
     }
 
-    protected void updateBackground(String uri) {
+    private void updateBackground(String uri) {
         int width = mMetrics.widthPixels;
         int height = mMetrics.heightPixels;
         Glide.with(getActivity())
@@ -225,9 +227,8 @@ public class MainFragment extends BrowseFragment implements
                 .error(mDefaultBackground)
                 .into(new SimpleTarget<Bitmap>(width, height) {
                     @Override
-                    public void onResourceReady(Bitmap resource,
-                                                GlideAnimation<? super Bitmap>
-                                                        glideAnimation) {
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap>
+                            glideAnimation) {
                         mBackgroundManager.setBitmap(resource);
                     }
                 });

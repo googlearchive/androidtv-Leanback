@@ -36,12 +36,12 @@ import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 
 /**
- * PlaybackActivity for video playback that loads PlaybackOverlayFragment and handles
+ * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles
  * the MediaSession object used to maintain the state of the media playback.
  */
-public class PlaybackActivity extends Activity {
-    public static final String AUTO_PLAY = "auto_play";
-    private static final String TAG = PlaybackActivity.class.getSimpleName();
+public class PlaybackOverlayActivity extends Activity {
+    private static final String AUTO_PLAY = "auto_play";
+    private static final String TAG = PlaybackOverlayActivity.class.getSimpleName();
     private VideoView mVideoView; // VideoView is used to play the video (media) in a view.
     private MediaSession mSession; // MediaSession is used to hold the state of our media playback.
     private int mPosition = 0;
@@ -309,7 +309,7 @@ public class PlaybackActivity extends Activity {
             setPlaybackState(PlaybackState.STATE_SKIPPING_TO_NEXT);
 
             Bundle bundle = new Bundle();
-            bundle.putBoolean(PlaybackActivity.AUTO_PLAY, true);
+            bundle.putBoolean(PlaybackOverlayActivity.AUTO_PLAY, true);
 
             String nextId = VideoProvider.nextVideoId();
             getMediaController().getTransportControls().playFromMediaId(nextId, bundle);
@@ -322,7 +322,7 @@ public class PlaybackActivity extends Activity {
             setPlaybackState(PlaybackState.STATE_SKIPPING_TO_PREVIOUS);
 
             Bundle bundle = new Bundle();
-            bundle.putBoolean(PlaybackActivity.AUTO_PLAY, true);
+            bundle.putBoolean(PlaybackOverlayActivity.AUTO_PLAY, true);
 
             String prevId = VideoProvider.prevVideoId();
             getMediaController().getTransportControls().playFromMediaId(prevId, bundle);

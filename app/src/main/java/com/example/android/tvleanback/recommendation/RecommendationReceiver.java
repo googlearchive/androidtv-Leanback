@@ -24,17 +24,17 @@ import android.content.Intent;
 import android.util.Log;
 
 /*
- * This class extends BroadcastReceiver and publishes Recommendations on bootup.
+ * This class extends BroadcastReceiver and publishes Recommendations when received.
  */
-public class BootupActivity extends BroadcastReceiver {
-    private static final String TAG = "BootupActivity";
+public class RecommendationReceiver extends BroadcastReceiver {
+    private static final String TAG = "RecommendationReceiver";
 
     private static final long INITIAL_DELAY = 5000;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "BootupActivity initiated");
-        if (intent.getAction().endsWith(Intent.ACTION_BOOT_COMPLETED)) {
+        Log.d(TAG, "RecommendationReceiver initiated");
+        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             scheduleRecommendationUpdate(context);
         }
     }

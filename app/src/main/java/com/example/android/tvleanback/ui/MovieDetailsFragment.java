@@ -162,12 +162,12 @@ public class MovieDetailsFragment extends DetailsFragment {
     private void prepareBackgroundManager() {
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
-        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
+        mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
-    protected void updateBackground(String uri) {
+    private void updateBackground(String uri) {
         Glide.with(getActivity())
                 .load(uri)
                 .asBitmap()
@@ -187,7 +187,7 @@ public class MovieDetailsFragment extends DetailsFragment {
                 new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter(),
                         new MovieDetailsOverviewLogoPresenter());
 
-        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background));
+        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background, null));
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
 
         // Hook up transition element.
@@ -201,7 +201,7 @@ public class MovieDetailsFragment extends DetailsFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
-                    Intent intent = new Intent(getActivity(), PlaybackActivity.class);
+                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
                     intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
                     startActivity(intent);
                 } else {
@@ -236,12 +236,13 @@ public class MovieDetailsFragment extends DetailsFragment {
         public Presenter.ViewHolder onCreateViewHolder(ViewGroup parent) {
             ImageView imageView = (ImageView) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.lb_fullwidth_details_overview_logo, parent, false);
+
             int width = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_WIDTH);
             int height = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_HEIGHT);
             imageView.setLayoutParams(new ViewGroup.MarginLayoutParams(width, height));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            ViewHolder holder = new ViewHolder(imageView);
-            return holder;
+
+            return new ViewHolder(imageView);
         }
 
         @Override
@@ -261,11 +262,6 @@ public class MovieDetailsFragment extends DetailsFragment {
         Log.d(TAG, "doInBackground: " + mSelectedMovie.toString());
 
         final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedMovie);
-
-        int width = Utils.convertDpToPixel(getActivity()
-                .getApplicationContext(), DETAIL_THUMB_WIDTH);
-        int height = Utils.convertDpToPixel(getActivity()
-                .getApplicationContext(), DETAIL_THUMB_HEIGHT);
 
         Glide.with(getActivity())
                 .load(mSelectedMovie.getCardImageUrl())

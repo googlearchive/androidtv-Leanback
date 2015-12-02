@@ -17,7 +17,7 @@ github:       googlesamples/androidtv-Leanback
 # Values: BEGINNER | INTERMEDIATE | ADVANCED | EXPERT
 level:        INTERMEDIATE
 
-# Dimensions: 512x512, PNG fomrat
+# Dimensions: 512x512, PNG format
 icon: androidtv-Leanback/app/src/main/res/drawable/app_icon_quantum.png
 
 # List of APIs that this sample should be listed under. Use authoritive,

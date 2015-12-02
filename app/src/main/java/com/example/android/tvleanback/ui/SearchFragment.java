@@ -57,7 +57,7 @@ import java.util.Map;
 public class SearchFragment extends android.support.v17.leanback.app.SearchFragment
         implements android.support.v17.leanback.app.SearchFragment.SearchResultProvider {
     private static final String TAG = "SearchFragment";
-    private static final boolean DEBUG = true && BuildConfig.DEBUG;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
     private static final long SEARCH_DELAY_MS = 1000L;

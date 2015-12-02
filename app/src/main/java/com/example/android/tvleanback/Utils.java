@@ -25,7 +25,6 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.util.HashMap;
@@ -51,30 +50,18 @@ public class Utils {
     }
 
     /**
-     * Returns the screen/display size
+     * Returns the screen/display size.
      */
     public static Point getDisplaySize(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int width = size.x;
-        int height = size.y;
+
+        // You can get the height & width like such:
+        // int width = size.x;
+        // int height = size.y;
         return size;
-    }
-
-    /**
-     * Shows a (long) toast
-     */
-    public static void showToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * Shows a (long) toast.
-     */
-    public static void showToast(Context context, int resourceId) {
-        Toast.makeText(context, context.getString(resourceId), Toast.LENGTH_LONG).show();
     }
 
     public static int convertDpToPixel(Context ctx, int dp) {

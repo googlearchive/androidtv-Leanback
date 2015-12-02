@@ -26,10 +26,10 @@ import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.ui.MainFragment;
 
 public class GridItemPresenter extends Presenter {
-    private static int GRID_ITEM_WIDTH = 200;
-    private static int GRID_ITEM_HEIGHT = 200;
+    private static final int GRID_ITEM_WIDTH = 200;
+    private static final int GRID_ITEM_HEIGHT = 200;
 
-    private MainFragment mainFragment;
+    private final MainFragment mainFragment;
 
     public GridItemPresenter(MainFragment mainFragment) {
         this.mainFragment = mainFragment;
@@ -41,7 +41,7 @@ public class GridItemPresenter extends Presenter {
         view.setLayoutParams(new ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT));
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
-        view.setBackgroundColor(mainFragment.getResources().getColor(R.color.default_background));
+        view.setBackgroundColor(mainFragment.getResources().getColor(R.color.default_background, null));
         view.setTextColor(Color.WHITE);
         view.setGravity(Gravity.CENTER);
         return new ViewHolder(view);

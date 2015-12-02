@@ -64,8 +64,8 @@ public class VideoDatabase {
     private static final String FTS_VIRTUAL_TABLE = "Leanback_table";
     private static final int DATABASE_VERSION = 2;
     private static final HashMap<String, String> COLUMN_MAP = buildColumnMap();
-    private static int CARD_WIDTH = 313;
-    private static int CARD_HEIGHT = 176;
+    private static final int CARD_WIDTH = 313;
+    private static final int CARD_HEIGHT = 176;
     private final VideoDatabaseOpenHelper mDatabaseOpenHelper;
 
     /**
@@ -84,7 +84,7 @@ public class VideoDatabase {
      * columns w/o the need to know real column names and create the alias itself.
      */
     private static HashMap<String, String> buildColumnMap() {
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put(KEY_NAME, KEY_NAME);
         map.put(KEY_DESCRIPTION, KEY_DESCRIPTION);
         map.put(KEY_ICON, KEY_ICON);
@@ -233,13 +233,14 @@ public class VideoDatabase {
         }
 
         private void loadMovies() throws IOException {
-            Log.d(TAG, "Loading movies...");
-
+            long rowId;
             HashMap<String, List<Movie>> movies = new HashMap<>();
+
+            Log.d(TAG, "Loading movies...");
 
             try {
                 VideoProvider.setContext(mHelperContext);
-                movies = VideoProvider.buildMedia(mHelperContext,
+                movies = VideoProvider.buildMedia(
                         mHelperContext.getResources().getString(R.string.catalog_url));
             } catch (JSONException e) {
                 Log.e(TAG, "JSON Exception when loading movie", e);
@@ -254,24 +255,30 @@ public class VideoDatabase {
                     }
                 }
             }
-            // add dummy movies to illustrate action deep link in search detail
+
+            // Add dummy movies to illustrate action deep link in search detail
             // Android TV Search requires that the media’s title, MIME type, production year,
             // and duration all match exactly to those found from Google’s servers.
-            addMovieForDeepLink(mHelperContext.getString(R.string.noah_title),
+            rowId = addMovieForDeepLink(mHelperContext.getString(R.string.noah_title),
                     mHelperContext.getString(R.string.noah_description),
                     R.drawable.noah,
                     8280000,
                     "2014");
-            addMovieForDeepLink(mHelperContext.getString(R.string.dragon2_title),
+            Log.d(TAG, "Added movie for deep link with rowId " + rowId);
+
+            rowId = addMovieForDeepLink(mHelperContext.getString(R.string.dragon2_title),
                     mHelperContext.getString(R.string.dragon2_description),
                     R.drawable.dragon2,
                     6300000,
                     "2014");
-            addMovieForDeepLink(mHelperContext.getString(R.string.maleficent_title),
+            Log.d(TAG, "Added movie for deep link with rowId " + rowId);
+
+            rowId = addMovieForDeepLink(mHelperContext.getString(R.string.maleficent_title),
                     mHelperContext.getString(R.string.maleficent_description),
                     R.drawable.maleficent,
                     5820000,
                     "2014");
+            Log.d(TAG, "Added movie for deep link with rowId " + rowId);
         }
 
         /**
