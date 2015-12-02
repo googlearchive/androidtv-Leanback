@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.example.android.tvleanback.BuildConfig;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.model.Movie;
 
@@ -41,7 +42,7 @@ public class CardPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        Log.d(TAG, "onCreateViewHolder");
+        if (BuildConfig.DEBUG) Log.d(TAG, "onCreateViewHolder");
 
         sDefaultBackgroundColor = parent.getResources().getColor(R.color.default_background, null);
         sSelectedBackgroundColor = parent.getResources().getColor(R.color.selected_background, null);
@@ -75,7 +76,7 @@ public class CardPresenter extends Presenter {
         Movie movie = (Movie) item;
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
-        Log.d(TAG, "onBindViewHolder");
+        if (BuildConfig.DEBUG) Log.d(TAG, "onBindViewHolder");
         if (movie.getCardImageUrl() != null) {
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getStudio());
@@ -89,7 +90,7 @@ public class CardPresenter extends Presenter {
 
     @Override
     public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
-        Log.d(TAG, "onUnbindViewHolder");
+        if (BuildConfig.DEBUG) Log.d(TAG, "onUnbindViewHolder");
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         // Remove references to images so that the garbage collector can free up memory.
