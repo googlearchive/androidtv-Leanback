@@ -16,6 +16,7 @@ package com.example.android.tvleanback.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -32,8 +33,6 @@ import com.example.android.tvleanback.R;
  */
 public class BrowseErrorActivity extends Activity {
     private static final int TIMER_DELAY = 3000;
-    private static final int SPINNER_WIDTH = 100;
-    private static final int SPINNER_HEIGHT = 100;
 
     private Handler mHandler;
     private BrowseErrorFragment mBrowseErrorFragment;
@@ -85,8 +84,11 @@ public class BrowseErrorActivity extends Activity {
                                  Bundle savedInstanceState) {
             ProgressBar progressBar = new ProgressBar(container.getContext());
             if (container instanceof FrameLayout) {
+                Resources res = getResources();
+                int width = res.getDimensionPixelSize(R.dimen.spinner_width);
+                int height = res.getDimensionPixelSize(R.dimen.spinner_height);
                 FrameLayout.LayoutParams layoutParams =
-                        new FrameLayout.LayoutParams(SPINNER_WIDTH, SPINNER_HEIGHT, Gravity.CENTER);
+                        new FrameLayout.LayoutParams(width, height, Gravity.CENTER);
                 progressBar.setLayoutParams(layoutParams);
             }
             return progressBar;
