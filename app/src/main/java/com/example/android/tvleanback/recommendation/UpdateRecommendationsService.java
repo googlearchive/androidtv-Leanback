@@ -96,7 +96,7 @@ public class UpdateRecommendationsService extends IntentService {
 
             try {
                 // No ContentRecommendation is complete without an image.
-                Bitmap bitmap = Glide.with(getApplicationContext())
+                Bitmap bitmap = Glide.with(getApplication())
                         .load(movie.getCardImageUrl())
                         .asBitmap()
                         .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()

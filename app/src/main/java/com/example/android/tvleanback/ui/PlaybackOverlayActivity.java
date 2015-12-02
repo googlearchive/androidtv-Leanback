@@ -172,10 +172,8 @@ public class PlaybackOverlayActivity extends Activity {
     private void updateMetadata(final Movie movie) {
         final MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
 
-        String title = movie.getTitle().replace("_", " -");
-
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_MEDIA_ID, movie.getId());
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, movie.getTitle());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
                 movie.getStudio());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
@@ -185,7 +183,7 @@ public class PlaybackOverlayActivity extends Activity {
         metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, mDuration);
 
         // And at minimum the title and artist for legacy support
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, title);
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, movie.getTitle());
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, movie.getStudio());
 
         Glide.with(this)
