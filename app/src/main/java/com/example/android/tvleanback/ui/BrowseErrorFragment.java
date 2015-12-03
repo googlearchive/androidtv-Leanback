@@ -80,6 +80,7 @@ public class BrowseErrorFragment extends ErrorFragment {
             @Override
             public void onClick(View arg0) {
                 getFragmentManager().beginTransaction().remove(BrowseErrorFragment.this).commit();
+                getFragmentManager().popBackStack();
             }
         });
     }
