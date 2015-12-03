@@ -291,8 +291,9 @@ public class MainFragment extends BrowseFragment implements
                             .toBundle();
                     startActivity(intent, bundle);
                 } else if (((String) item).contains(getString(R.string.error_fragment))) {
-                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
-                    startActivity(intent);
+                    BrowseErrorFragment errorFragment = new BrowseErrorFragment();
+                    getFragmentManager().beginTransaction().replace(R.id.main_frame, errorFragment)
+                            .addToBackStack(null).commit();
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();

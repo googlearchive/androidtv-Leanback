@@ -84,8 +84,6 @@
 
         <activity android:name=".ui.SearchActivity" />
 
-        <activity android:name=".ui.BrowseErrorActivity" />
-
         <activity
             android:name=".ui.GuidedStepActivity"
             android:theme="@style/Theme.Example.Leanback.GuidedStep" />

@@ -35,7 +35,7 @@ public class MovieDetailsActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.details);
+        setContentView(R.layout.fragment_details);
     }
 
     @Override
