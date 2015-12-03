@@ -17,6 +17,7 @@ package com.example.android.tvleanback.ui;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -53,7 +54,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoProvider;
 import com.example.android.tvleanback.model.Movie;
 import com.example.android.tvleanback.presenter.CardPresenter;
@@ -70,14 +70,10 @@ import java.util.Map;
 public class MovieDetailsFragment extends DetailsFragment {
     private static final String TAG = "DetailsFragment";
 
+    private static final int NO_NOTIFICATION = -1;
     private static final int ACTION_WATCH_TRAILER = 1;
     private static final int ACTION_RENT = 2;
     private static final int ACTION_BUY = 3;
-
-    private static final int DETAIL_THUMB_WIDTH = 274;
-    private static final int DETAIL_THUMB_HEIGHT = 274;
-
-    private static final int NO_NOTIFICATION = -1;
 
     private Movie mSelectedMovie;
 
@@ -238,8 +234,9 @@ public class MovieDetailsFragment extends DetailsFragment {
             ImageView imageView = (ImageView) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.lb_fullwidth_details_overview_logo, parent, false);
 
-            int width = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_WIDTH);
-            int height = Utils.convertDpToPixel(parent.getContext(), DETAIL_THUMB_HEIGHT);
+            Resources res = parent.getResources();
+            int width = res.getDimensionPixelSize(R.dimen.detail_thumb_width);
+            int height = res.getDimensionPixelSize(R.dimen.detail_thumb_height);
             imageView.setLayoutParams(new ViewGroup.MarginLayoutParams(width, height));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 

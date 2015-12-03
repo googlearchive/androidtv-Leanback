@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.support.app.recommendation.ContentRecommendation;
 import android.util.Log;
@@ -46,9 +47,6 @@ public class UpdateRecommendationsService extends IntentService {
     private static final String TAG = "RecommendationService";
     private static final int MAX_RECOMMENDATIONS = 3;
 
-    private static final int CARD_WIDTH = 313;
-    private static final int CARD_HEIGHT = 176;
-
     private NotificationManager mNotificationManager;
 
     public UpdateRecommendationsService() {
@@ -59,6 +57,11 @@ public class UpdateRecommendationsService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Updating recommendation cards");
         HashMap<String, List<Movie>> recommendations = VideoProvider.getMovieList();
+
+        Resources res = getResources();
+        int cardWidth = res.getDimensionPixelSize(R.dimen.card_width);
+        int cardHeight = res.getDimensionPixelSize(R.dimen.card_height);
+
         if (recommendations == null) {
             return;
         }
@@ -99,7 +102,7 @@ public class UpdateRecommendationsService extends IntentService {
                 Bitmap bitmap = Glide.with(getApplication())
                         .load(movie.getCardImageUrl())
                         .asBitmap()
-                        .into(CARD_WIDTH, CARD_HEIGHT) // Only use for synchronous .get()
+                        .into(cardWidth, cardHeight) // Only use for synchronous .get()
                         .get();
                 builder.setContentImage(bitmap);
 

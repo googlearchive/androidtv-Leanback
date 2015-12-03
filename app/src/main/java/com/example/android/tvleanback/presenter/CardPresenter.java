@@ -16,6 +16,7 @@
 
 package com.example.android.tvleanback.presenter;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
@@ -34,8 +35,6 @@ import com.example.android.tvleanback.model.Movie;
 public class CardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
 
-    private static final int CARD_WIDTH = 313;
-    private static final int CARD_HEIGHT = 176;
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
     private Drawable mDefaultCardImage;
@@ -77,12 +76,18 @@ public class CardPresenter extends Presenter {
 
         Movie movie = (Movie) item;
         ImageCardView cardView = (ImageCardView) viewHolder.view;
+        Resources res = cardView.getResources();
 
         if (movie.getCardImageUrl() != null) {
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getStudio());
-            cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            Glide.with(viewHolder.view.getContext())
+
+            // Set card size from dimension resources.
+            int width = res.getDimensionPixelSize(R.dimen.card_width);
+            int height = res.getDimensionPixelSize(R.dimen.card_height);
+            cardView.setMainImageDimensions(width, height);
+
+            Glide.with(cardView.getContext())
                     .load(movie.getCardImageUrl())
                     .error(mDefaultCardImage)
                     .into(cardView.getMainImageView());
