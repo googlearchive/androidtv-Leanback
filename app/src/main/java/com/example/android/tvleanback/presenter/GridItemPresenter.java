@@ -16,6 +16,7 @@
 
 package com.example.android.tvleanback.presenter;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v17.leanback.widget.Presenter;
 import android.view.Gravity;
@@ -26,9 +27,6 @@ import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.ui.MainFragment;
 
 public class GridItemPresenter extends Presenter {
-    private static final int GRID_ITEM_WIDTH = 200;
-    private static final int GRID_ITEM_HEIGHT = 200;
-
     private final MainFragment mainFragment;
 
     public GridItemPresenter(MainFragment mainFragment) {
@@ -38,7 +36,12 @@ public class GridItemPresenter extends Presenter {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         TextView view = new TextView(parent.getContext());
-        view.setLayoutParams(new ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT));
+
+        Resources res = parent.getResources();
+        int width = res.getDimensionPixelSize(R.dimen.grid_item_width);
+        int height = res.getDimensionPixelSize(R.dimen.grid_item_height);
+
+        view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.setBackgroundColor(mainFragment.getResources().getColor(R.color.default_background, null));
