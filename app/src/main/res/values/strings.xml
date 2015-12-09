@@ -17,7 +17,7 @@
 <resources>
     <string name="app_name"><![CDATA[Videos by Google]]></string>
     <string name="browse_title"><![CDATA[Videos by Google]]></string>
-    <string name="related_movies">Related Movies</string>
+    <string name="related_movies">Related Videos</string>
     <string name="vertical_grid_title"><![CDATA[Vertical Video Grid]]></string>
 
     <string name="popular_header">Popular Videos</string>
@@ -31,8 +31,10 @@
     <string name="rent_2">From $1.99</string>
     <string name="buy_1">Buy and Own</string>
     <string name="buy_2">AT $9.99</string>
+    <string name="queue_name">Play Queue</string>
 
-    <string name="search_results">Search Results \'%1$s\'</string>
+    <string name="search_results">Search results for \'%1$s\'</string>
+    <string name="no_search_results">No search results found for \'%1$s\'</string>
     <string name="catalog_url">https://commondatastorage.googleapis.com/android-tv/android_tv_videos.json</string>
     <string name="prefix_url">https://commondatastorage.googleapis.com/android-tv/Sample%20videos/</string>
 
@@ -92,7 +94,5 @@
     <string name="guidedstep_letsdoit">Let\'s do it</string>
     <string name="guidedstep_nevermind">Never mind</string>
     <string name="guidedstep_cancel">Cancel</string>
-
     <string name="header_icon">Header icon</string>
-
 </resources>

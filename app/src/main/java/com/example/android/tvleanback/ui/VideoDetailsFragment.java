@@ -14,10 +14,14 @@
 
 package com.example.android.tvleanback.ui;
 
+import android.app.LoaderManager;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -27,6 +31,7 @@ import android.support.v17.leanback.app.DetailsFragment;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
+import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.DetailsOverviewLogoPresenter;
 import android.support.v17.leanback.widget.DetailsOverviewRow;
 import android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter;
@@ -54,20 +59,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.data.VideoProvider;
-import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.data.VideoContract;
+import com.example.android.tvleanback.model.Video;
+import com.example.android.tvleanback.model.VideoCursorMapper;
 import com.example.android.tvleanback.presenter.CardPresenter;
 import com.example.android.tvleanback.presenter.DetailsDescriptionPresenter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /*
- * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
- * It shows a detailed view of video and its meta plus related videos.
+ * VideoDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
+ * It shows a detailed view of video and its metadata plus related videos.
  */
-public class MovieDetailsFragment extends DetailsFragment {
+public class VideoDetailsFragment extends DetailsFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "DetailsFragment";
 
     private static final int NO_NOTIFICATION = -1;
@@ -75,39 +77,44 @@ public class MovieDetailsFragment extends DetailsFragment {
     private static final int ACTION_RENT = 2;
     private static final int ACTION_BUY = 3;
 
-    private Movie mSelectedMovie;
+    // ID for loader that loads related videos.
+    private static final int RELATED_VIDEO_LOADER = 1;
 
+    // ID for loader that loads the video from global search.
+    private int mGlobalSearchVideoId = 2;
+
+    private Video mSelectedVideo;
     private ArrayObjectAdapter mAdapter;
     private ClassPresenterSelector mPresenterSelector;
-
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
+    private CursorObjectAdapter mVideoCursorAdapter;
     private FullWidthDetailsOverviewSharedElementHelper mHelper;
+    private final VideoCursorMapper mVideoCursorMapper = new VideoCursorMapper();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate DetailsFragment");
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         prepareBackgroundManager();
+        mVideoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
+        mVideoCursorAdapter.setMapper(mVideoCursorMapper);
 
-        mSelectedMovie = getActivity().getIntent()
-                .getParcelableExtra(MovieDetailsActivity.MOVIE);
+        mSelectedVideo = (Video) getActivity().getIntent()
+                .getParcelableExtra(VideoDetailsActivity.VIDEO);
 
-        if (mSelectedMovie != null || checkGlobalSearchIntent()) {
+        if (mSelectedVideo != null || !hasGlobalSearchIntent()) {
             removeNotification(getActivity().getIntent()
-                    .getIntExtra(MovieDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
+                    .getIntExtra(VideoDetailsActivity.NOTIFICATION_ID, NO_NOTIFICATION));
             setupAdapter();
             setupDetailsOverviewRow();
             setupMovieListRow();
-            updateBackground(mSelectedMovie.getBackgroundImageUrl());
+            updateBackground(mSelectedVideo.bgImageUrl);
 
-            // When a Related Movie item is clicked.
+            // When a Related Video item is clicked.
             setOnItemViewClickedListener(new ItemViewClickedListener());
-        } else {
-            Intent intent = new Intent(getActivity(), MainActivity.class);
-            startActivity(intent);
         }
     }
 
@@ -125,32 +132,22 @@ public class MovieDetailsFragment extends DetailsFragment {
         super.onStop();
     }
 
-    /*
-     * Check if there is a global search intent
+    /**
+     * Check if there is a global search intent. If there is, load that video.
      */
-    private boolean checkGlobalSearchIntent() {
+    private boolean hasGlobalSearchIntent() {
         Intent intent = getActivity().getIntent();
         String intentAction = intent.getAction();
         String globalSearch = getString(R.string.global_search);
+
         if (globalSearch.equalsIgnoreCase(intentAction)) {
             Uri intentData = intent.getData();
-            Log.d(TAG, "action: " + intentAction + " intentData:" + intentData);
-            int selectedIndex = Integer.parseInt(intentData.getLastPathSegment());
-            HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-            int movieTally = 0;
-            if (movies == null) {
-                return false;
-            }
-            for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-                List<Movie> list = entry.getValue();
-                for (Movie movie : list) {
-                    movieTally++;
-                    if (selectedIndex == movieTally) {
-                        mSelectedMovie = movie;
-                        return true;
-                    }
-                }
-            }
+            String videoId = intentData.getLastPathSegment();
+
+            Bundle args = new Bundle();
+            args.putString(VideoContract.VideoEntry._ID, videoId);
+            getLoaderManager().initLoader(mGlobalSearchVideoId++, args, this);
+            return true;
         }
         return false;
     }
@@ -188,7 +185,7 @@ public class MovieDetailsFragment extends DetailsFragment {
 
         // Hook up transition element.
         mHelper = new FullWidthDetailsOverviewSharedElementHelper();
-        mHelper.setSharedElementEnterTransition(getActivity(), MovieDetailsActivity.SHARED_ELEMENT_NAME);
+        mHelper.setSharedElementEnterTransition(getActivity(), VideoDetailsActivity.SHARED_ELEMENT_NAME);
         detailsPresenter.setListener(mHelper);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
@@ -198,7 +195,7 @@ public class MovieDetailsFragment extends DetailsFragment {
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
                     Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
-                    intent.putExtra(MovieDetailsActivity.MOVIE, mSelectedMovie);
+                    intent.putExtra(VideoDetailsActivity.VIDEO, mSelectedVideo);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
@@ -211,6 +208,68 @@ public class MovieDetailsFragment extends DetailsFragment {
         mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case RELATED_VIDEO_LOADER: {
+                String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
+                return new CursorLoader(
+                        getActivity(),
+                        VideoContract.VideoEntry.CONTENT_URI,
+                        null,
+                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
+                        new String[]{category},
+                        null
+                );
+            }
+            default: {
+                // Loading video from global search.
+                Log.d(TAG, "Loading from global search.");
+                String videoId = args.getString(VideoContract.VideoEntry._ID);
+                return new CursorLoader(
+                        getActivity(),
+                        VideoContract.VideoEntry.CONTENT_URI,
+                        null,
+                        VideoContract.VideoEntry._ID + " = ?",
+                        new String[]{videoId},
+                        null
+                );
+            }
+        }
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor != null && cursor.moveToNext()) {
+            switch (loader.getId()) {
+                case RELATED_VIDEO_LOADER: {
+                    mVideoCursorAdapter.changeCursor(cursor);
+                    break;
+                }
+                default: {
+                    // Loading video from global search.
+                    mSelectedVideo = (Video) mVideoCursorMapper.convert(cursor);
+
+                    Log.d(TAG, "Loaded video " + mSelectedVideo.title);
+
+                    setupAdapter();
+                    setupDetailsOverviewRow();
+                    setupMovieListRow();
+                    updateBackground(mSelectedVideo.bgImageUrl);
+
+                    // When a Related Video item is clicked.
+                    setOnItemViewClickedListener(new ItemViewClickedListener());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mVideoCursorAdapter.changeCursor(null);
     }
 
     static class MovieDetailsOverviewLogoPresenter extends DetailsOverviewLogoPresenter {
@@ -257,12 +316,12 @@ public class MovieDetailsFragment extends DetailsFragment {
     }
 
     private void setupDetailsOverviewRow() {
-        Log.d(TAG, "doInBackground: " + mSelectedMovie.toString());
+        Log.d(TAG, "doInBackground: " + mSelectedVideo.toString());
 
-        final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedMovie);
+        final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedVideo);
 
         Glide.with(this)
-                .load(mSelectedMovie.getCardImageUrl())
+                .load(mSelectedVideo.cardImageUrl)
                 .asBitmap()
                 .dontAnimate()
                 .error(R.drawable.default_background)
@@ -292,21 +351,16 @@ public class MovieDetailsFragment extends DetailsFragment {
 
     private void setupMovieListRow() {
         String subcategories[] = {getString(R.string.related_movies)};
-        HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
 
         // Generating related video list.
-        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(new CardPresenter());
-        for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-            if (mSelectedMovie.getCategory().contains(entry.getKey())) {
-                List<Movie> list = entry.getValue();
-                for (int j = 0; j < list.size(); j++) {
-                    listRowAdapter.add(list.get(j));
-                }
-            }
-        }
+        String category = mSelectedVideo.category;
+
+        Bundle args = new Bundle();
+        args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, category);
+        getLoaderManager().initLoader(RELATED_VIDEO_LOADER, args, this);
 
         HeaderItem header = new HeaderItem(0, subcategories[0]);
-        mAdapter.add(new ListRow(header, listRowAdapter));
+        mAdapter.add(new ListRow(header, mVideoCursorAdapter));
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -314,16 +368,16 @@ public class MovieDetailsFragment extends DetailsFragment {
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Movie) {
-                Movie movie = (Movie) item;
+            if (item instanceof Video) {
+                Video video = (Video) item;
                 Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
+                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             }
         }

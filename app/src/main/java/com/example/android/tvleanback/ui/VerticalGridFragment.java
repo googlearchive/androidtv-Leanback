@@ -14,10 +14,14 @@
 
 package com.example.android.tvleanback.ui;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.OnItemViewSelectedListener;
@@ -30,30 +34,29 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.data.VideoProvider;
-import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.data.VideoContract;
+import com.example.android.tvleanback.model.Video;
+import com.example.android.tvleanback.model.VideoCursorMapper;
 import com.example.android.tvleanback.presenter.CardPresenter;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 /*
- * VerticalGridFragment shows a grid of videos
+ * VerticalGridFragment shows a grid of videos that can be scrolled vertically.
  */
-public class VerticalGridFragment extends android.support.v17.leanback.app.VerticalGridFragment {
+public class VerticalGridFragment extends android.support.v17.leanback.app.VerticalGridFragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "VerticalGridFragment";
 
     private static final int NUM_COLUMNS = 5;
-
-    private ArrayObjectAdapter mAdapter;
+    private final CursorObjectAdapter mVideoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
+    private static final int ALL_VIDEOS_LOADER = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
+
+        mVideoCursorAdapter.setMapper(new VideoCursorMapper());
+        setAdapter(mVideoCursorAdapter);
 
         setTitle(getString(R.string.vertical_grid_title));
 
@@ -68,24 +71,14 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
         gridPresenter.setNumberOfColumns(NUM_COLUMNS);
         setGridPresenter(gridPresenter);
 
-        mAdapter = new ArrayObjectAdapter(new CardPresenter());
+        getLoaderManager().initLoader(ALL_VIDEOS_LOADER, null, this);
 
+        // After 500ms, start the animation to transition the cards into view.
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                long seed = System.nanoTime();
-                HashMap<String, List<Movie>> movies = VideoProvider.getMovieList();
-                for (Map.Entry<String, List<Movie>> entry : movies.entrySet()) {
-                    List<Movie> list = entry.getValue();
-                    Collections.shuffle(list, new Random(seed));
-                    for (Movie movie : list) {
-                        mAdapter.add(movie);
-                    }
-                }
                 startEntranceTransition();
             }
         }, 500);
-
-        setAdapter(mAdapter);
 
         setOnSearchClickedListener(new View.OnClickListener() {
             @Override
@@ -99,21 +92,45 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(
+                getActivity(),
+                VideoContract.VideoEntry.CONTENT_URI,
+                null, // projection
+                null, // selection
+                null, // selection clause
+                null  // sort order
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (loader.getId() == ALL_VIDEOS_LOADER && cursor != null && cursor.moveToFirst()) {
+            mVideoCursorAdapter.changeCursor(cursor);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mVideoCursorAdapter.changeCursor(null);
+    }
+
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Movie) {
-                Movie movie = (Movie) item;
-                Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
+            if (item instanceof Video) {
+                Video video = (Video) item;
+
+                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             }
         }
@@ -125,5 +142,4 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
         }
     }
-
 }

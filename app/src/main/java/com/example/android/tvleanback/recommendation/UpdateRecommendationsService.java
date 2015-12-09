@@ -22,21 +22,18 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.support.app.recommendation.ContentRecommendation;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.data.VideoProvider;
-import com.example.android.tvleanback.model.Movie;
-import com.example.android.tvleanback.ui.MovieDetailsActivity;
+import com.example.android.tvleanback.data.VideoContract;
+import com.example.android.tvleanback.model.Video;
+import com.example.android.tvleanback.model.VideoCursorMapper;
+import com.example.android.tvleanback.ui.VideoDetailsActivity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /*
@@ -46,85 +43,81 @@ import java.util.concurrent.ExecutionException;
 public class UpdateRecommendationsService extends IntentService {
     private static final String TAG = "RecommendationService";
     private static final int MAX_RECOMMENDATIONS = 3;
+    private static final VideoCursorMapper mVideoCursorMapper = new VideoCursorMapper();
 
-    private NotificationManager mNotificationManager;
+    private NotificationManager mNotifManager;
 
     public UpdateRecommendationsService() {
         super(TAG);
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+        if (mNotifManager == null) {
+            mNotifManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+    }
+
+    @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Updating recommendation cards");
-        HashMap<String, List<Movie>> recommendations = VideoProvider.getMovieList();
 
         Resources res = getResources();
         int cardWidth = res.getDimensionPixelSize(R.dimen.card_width);
         int cardHeight = res.getDimensionPixelSize(R.dimen.card_height);
-
-        if (recommendations == null) {
-            return;
-        }
-
-        if (mNotificationManager == null) {
-            mNotificationManager = (NotificationManager) getApplicationContext()
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-        }
-
-        // This will be used to build up an object for your content recommendation that will be
-        // shown on the TV home page along with other provider's recommendations.
         ContentRecommendation.Builder builder = new ContentRecommendation.Builder()
                 .setBadgeIcon(R.drawable.videos_by_google_icon);
 
-        // flatten to list
-        List<Movie> flattenedRecommendations = new ArrayList<>();
-        for (Map.Entry<String, List<Movie>> entry : recommendations.entrySet()) {
-            for (Movie movie : entry.getValue()) {
-                flattenedRecommendations.add(movie);
-            }
-        }
+        Cursor cursor = getContentResolver().query(
+                VideoContract.VideoEntry.CONTENT_URI,
+                null, // projection
+                null, // selection
+                null, // selection clause
+                "RANDOM() LIMIT " + MAX_RECOMMENDATIONS // sort order
+        );
 
-        // Our naive approach to deciding what content to recommend involves simply shuffling all
-        // the videos in our app and picking up to MAX_RECOMMENDATIONS of them.
-        Collections.shuffle(flattenedRecommendations);
-
-        Movie movie;
-        for (int i = 0; i < flattenedRecommendations.size() && i < MAX_RECOMMENDATIONS; i++) {
-            movie = flattenedRecommendations.get(i);
-            builder.setIdTag("Video" + i + 1)
-                    .setTitle(movie.getTitle())
-                    .setText(getString(R.string.popular_header))
-                    .setContentIntentData(ContentRecommendation.INTENT_TYPE_ACTIVITY,
-                            buildPendingIntent(movie, i + 1), 0, null);
-
+        if (cursor != null && cursor.moveToNext()) {
             try {
-                // No ContentRecommendation is complete without an image.
-                Bitmap bitmap = Glide.with(getApplication())
-                        .load(movie.getCardImageUrl())
-                        .asBitmap()
-                        .into(cardWidth, cardHeight) // Only use for synchronous .get()
-                        .get();
-                builder.setContentImage(bitmap);
+                do {
+                    Video video = (Video) mVideoCursorMapper.convert(cursor);
+                    int id = Long.valueOf(video.id).hashCode();
 
-                // Create an object holding all the information used to recommend the content.
-                ContentRecommendation rec = builder.build();
-                Notification notification = rec.getNotificationObject(getApplicationContext());
+                    builder.setIdTag("Video" + id)
+                            .setTitle(video.title)
+                            .setText(getString(R.string.popular_header))
+                            .setContentIntentData(ContentRecommendation.INTENT_TYPE_ACTIVITY, buildPendingIntent(video, id), 0, null);
 
-                Log.d(TAG, "Recommending video");
+                    Bitmap bitmap = Glide.with(getApplication())
+                            .load(video.cardImageUrl)
+                            .asBitmap()
+                            .into(cardWidth, cardHeight) // Only use for synchronous .get()
+                            .get();
+                    builder.setContentImage(bitmap);
 
-                // Recommend the content by publishing the notification.
-                mNotificationManager.notify(i + 1, notification);
+                    // Create an object holding all the information used to recommend the content.
+                    ContentRecommendation rec = builder.build();
+                    Notification notification = rec.getNotificationObject(getApplicationContext());
+
+                    Log.d(TAG, "Recommending video " + video.title);
+
+                    // Recommend the content by publishing the notification.
+                    mNotifManager.notify(id, notification);
+                } while (cursor.moveToNext());
             } catch (InterruptedException | ExecutionException e) {
-                Log.e(TAG, "Could not create recommendation: " + e);
+                Log.e(TAG, "Could not create recommendation.", e);
+            } finally {
+                cursor.close();
             }
         }
     }
 
-    private Intent buildPendingIntent(Movie movie, int id) {
-        Intent detailsIntent = new Intent(this, MovieDetailsActivity.class);
-        detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
-        detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
-        detailsIntent.setAction(movie.getId());
+    private Intent buildPendingIntent(Video video, int id) {
+        Intent detailsIntent = new Intent(this, VideoDetailsActivity.class);
+        detailsIntent.putExtra(VideoDetailsActivity.VIDEO, video);
+        detailsIntent.putExtra(VideoDetailsActivity.NOTIFICATION_ID, id);
+        detailsIntent.setAction(Long.toString(video.id));
 
         return detailsIntent;
     }

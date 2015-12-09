@@ -21,12 +21,9 @@ import android.os.Bundle;
 import com.example.android.tvleanback.R;
 
 /*
- * MainActivity class that loads MainFragment
+ * MainActivity class that loads MainFragment.
  */
 public class MainActivity extends Activity {
-    /**
-     * Called when the activity is first created.
-     */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
