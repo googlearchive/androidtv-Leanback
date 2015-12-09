@@ -32,8 +32,8 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
     }
 
     @Override
-    public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object o) {
-        HeaderItem headerItem = ((ListRow) o).getHeaderItem();
+    public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
+        HeaderItem headerItem = ((ListRow) item).getHeaderItem();
         View rootView = viewHolder.view;
 
         ImageView iconView = (ImageView) rootView.findViewById(R.id.header_icon);

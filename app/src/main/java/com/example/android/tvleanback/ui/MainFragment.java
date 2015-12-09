@@ -15,15 +15,20 @@
 package com.example.android.tvleanback.ui;
 
 import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
+import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
@@ -44,17 +49,16 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.data.VideoItemLoader;
-import com.example.android.tvleanback.data.VideoProvider;
-import com.example.android.tvleanback.model.Movie;
+import com.example.android.tvleanback.data.FetchVideoService;
+import com.example.android.tvleanback.data.VideoContract;
+import com.example.android.tvleanback.model.Video;
+import com.example.android.tvleanback.model.VideoCursorMapper;
 import com.example.android.tvleanback.presenter.CardPresenter;
 import com.example.android.tvleanback.presenter.GridItemPresenter;
 import com.example.android.tvleanback.presenter.IconHeaderItemPresenter;
 import com.example.android.tvleanback.recommendation.UpdateRecommendationsService;
 
-import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -62,31 +66,55 @@ import java.util.TimerTask;
 /*
  * Main class to show BrowseFragment with header and rows of videos
  */
-public class MainFragment extends BrowseFragment implements
-        LoaderManager.LoaderCallbacks<HashMap<String, List<Movie>>> {
+public class MainFragment extends BrowseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "MainFragment";
 
     private static final int BACKGROUND_UPDATE_DELAY = 300;
-    private static String mVideosUrl;
     private final Handler mHandler = new Handler();
-    private ArrayObjectAdapter mRowsAdapter;
+    private ArrayObjectAdapter mCategoryRowAdapter;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
-    private URI mBackgroundURI;
+    private Uri mBackgroundURI;
     private BackgroundManager mBackgroundManager;
+    private static final int CATEGORY_LOADER = 123; // Unique ID for Category Loader.
+
+    // Maps a Loader Id to its CursorObjectAdapter.
+    private Map<Integer, CursorObjectAdapter> mVideoCursorAdapters;
+
+    @Override
+    public void onAttach(Context context) {
+        Log.d(TAG, "onAttach");
+        super.onAttach(context);
+
+        // Create a list to contain all the CursorObjectAdapters.
+        // Each adapter is used to render a specific row of videos in the MainFragment.
+        mVideoCursorAdapters = new HashMap<>();
+
+        // Map category results from the database to ListRow objects.
+        // This Adapter is used to render the MainFragment sidebar labels.
+        mCategoryRowAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+
+        // Start loading the categories from the database.
+        getLoaderManager().initLoader(CATEGORY_LOADER, null, this);
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
+        // Final initialization, modifying UI elements.
+        Log.d(TAG, "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
 
-        loadVideoData();
-
+        // Prepare the manager that maintains the same background image between activities.
         prepareBackgroundManager();
+
         setupUIElements();
         setupEventListeners();
         prepareEntranceTransition();
+
+        setAdapter(mCategoryRowAdapter);
+
+        updateRecommendations();
     }
 
     @Override
@@ -134,12 +162,6 @@ public class MainFragment extends BrowseFragment implements
         });
     }
 
-    private void loadVideoData() {
-        VideoProvider.setContext(getActivity());
-        mVideosUrl = getActivity().getResources().getString(R.string.catalog_url);
-        getLoaderManager().initLoader(0, null, this);
-    }
-
     private void setupEventListeners() {
         setOnSearchClickedListener(new View.OnClickListener() {
 
@@ -152,69 +174,6 @@ public class MainFragment extends BrowseFragment implements
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onCreateLoader(int,
-     * android.os.Bundle)
-     */
-    @Override
-    public Loader<HashMap<String, List<Movie>>> onCreateLoader(int arg0, Bundle arg1) {
-        Log.d(TAG, "VideoItemLoader created ");
-        return new VideoItemLoader(getActivity(), mVideosUrl);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished(android
-     * .support.v4.content.Loader, java.lang.Object)
-     */
-    @Override
-    public void onLoadFinished(Loader<HashMap<String, List<Movie>>> arg0,
-                               HashMap<String, List<Movie>> data) {
-
-        mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
-        CardPresenter cardPresenter = new CardPresenter();
-
-        int index = 0;
-
-        if (null != data && !data.isEmpty()) {
-            for (Map.Entry<String, List<Movie>> entry : data.entrySet()) {
-                ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-                List<Movie> list = entry.getValue();
-
-                for (int j = 0; j < list.size(); j++) {
-                    listRowAdapter.add(list.get(j));
-                }
-                HeaderItem header = new HeaderItem(index, entry.getKey());
-                index++;
-                mRowsAdapter.add(new ListRow(header, listRowAdapter));
-            }
-        } else {
-            Log.e(TAG, "An error occurred fetching videos");
-            Toast.makeText(getActivity(), R.string.videos_loading_error, Toast.LENGTH_LONG).show();
-        }
-
-        HeaderItem gridHeader = new HeaderItem(index, getString(R.string.more_samples));
-
-        GridItemPresenter gridPresenter = new GridItemPresenter(this);
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
-        gridRowAdapter.add(getString(R.string.grid_view));
-        gridRowAdapter.add(getString(R.string.guidedstep_first_title));
-        gridRowAdapter.add(getString(R.string.error_fragment));
-        gridRowAdapter.add(getString(R.string.personal_settings));
-        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
-
-        setAdapter(mRowsAdapter);
-
-        updateRecommendations();
-        startEntranceTransition();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<HashMap<String, List<Movie>>> arg0) {
-        mRowsAdapter.clear();
     }
 
     private void updateBackground(String uri) {
@@ -248,6 +207,112 @@ public class MainFragment extends BrowseFragment implements
         getActivity().startService(recommendationIntent);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (id == CATEGORY_LOADER) {
+            return new CursorLoader(
+                    getActivity(),   // Parent activity context
+                    VideoContract.VideoEntry.CONTENT_URI, // Table to query
+                    new String[]{"DISTINCT " + VideoContract.VideoEntry.COLUMN_CATEGORY}, // Only categories
+                    null, // No selection clause
+                    null, // No selection arguments
+                    null  // Default sort order
+            );
+        } else {
+            // Assume it is for a video.
+            String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
+
+            // This just creates a CursorLoader that gets all videos.
+            return new CursorLoader(
+                    getActivity(), // Parent activity context
+                    VideoContract.VideoEntry.CONTENT_URI, // Table to query
+                    null, // Projection to return - null means return all fields
+                    VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?", // Selection clause
+                    new String[]{category},  // Select based on the category id.
+                    null // Default sort order
+            );
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null && data.moveToFirst()) {
+            final int loaderId = loader.getId();
+
+            if (loaderId == CATEGORY_LOADER) {
+
+                // Every time we have to re-get the category loader, we must re-create the sidebar.
+                mCategoryRowAdapter.clear();
+
+                // Iterate through each category entry and add it to the ArrayAdapter.
+                while (!data.isAfterLast()) {
+
+                    int categoryIndex = data.getColumnIndex(VideoContract.VideoEntry.COLUMN_CATEGORY);
+                    String category = data.getString(categoryIndex);
+
+                    // Create header for this category.
+                    HeaderItem header = new HeaderItem(category);
+
+                    int videoLoaderId = category.hashCode(); // Create unique int from category.
+                    CursorObjectAdapter existingAdapter = mVideoCursorAdapters.get(videoLoaderId);
+                    if (existingAdapter == null) {
+
+                        // Map video results from the database to Video objects.
+                        CursorObjectAdapter videoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
+                        videoCursorAdapter.setMapper(new VideoCursorMapper());
+                        mVideoCursorAdapters.put(videoLoaderId, videoCursorAdapter);
+
+                        ListRow row = new ListRow(header, videoCursorAdapter);
+                        mCategoryRowAdapter.add(row);
+
+                        // Start loading the videos from the database for a particular category.
+                        Bundle args = new Bundle();
+                        args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, category);
+                        getLoaderManager().initLoader(videoLoaderId, args, this);
+                    } else {
+                        ListRow row = new ListRow(header, existingAdapter);
+                        mCategoryRowAdapter.add(row);
+                    }
+
+                    data.moveToNext();
+                }
+
+                // Create a row for this special case with more samples.
+                HeaderItem gridHeader = new HeaderItem(getString(R.string.more_samples));
+                GridItemPresenter gridPresenter = new GridItemPresenter(this);
+                ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
+                gridRowAdapter.add(getString(R.string.grid_view));
+                gridRowAdapter.add(getString(R.string.guidedstep_first_title));
+                gridRowAdapter.add(getString(R.string.error_fragment));
+                gridRowAdapter.add(getString(R.string.personal_settings));
+                ListRow row = new ListRow(gridHeader, gridRowAdapter);
+                mCategoryRowAdapter.add(row);
+
+                startEntranceTransition(); // TODO: Move startEntranceTransition to after all cursors have loaded.
+            } else {
+                // The CursorAdapter contains a Cursor pointing to all videos.
+                mVideoCursorAdapters.get(loaderId).changeCursor(data);
+            }
+        } else {
+            Log.d(TAG, "Loader didn't return any results");
+
+            // Start an Intent to fetch the videos.
+            Intent serviceIntent = new Intent(getActivity(), FetchVideoService.class);
+            getActivity().startService(serviceIntent);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset");
+        int loaderId = loader.getId();
+        if (loaderId != CATEGORY_LOADER) {
+            mVideoCursorAdapters.get(loaderId).changeCursor(null);
+        } else {
+            mCategoryRowAdapter.clear();
+        }
+    }
+
     private class UpdateBackgroundTask extends TimerTask {
 
         @Override
@@ -268,16 +333,16 @@ public class MainFragment extends BrowseFragment implements
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Movie) {
-                Movie movie = (Movie) item;
-                Log.d(TAG, "Movie: " + movie.toString());
-                Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-                intent.putExtra(MovieDetailsActivity.MOVIE, movie);
+            if (item instanceof Video) {
+                Video video = (Video) item;
+                Log.d(TAG, "video: " + video.toString());
+                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        MovieDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
             } else if (item instanceof String) {
                 if (((String) item).contains(getString(R.string.grid_view))) {
@@ -306,8 +371,8 @@ public class MainFragment extends BrowseFragment implements
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-            if (item instanceof Movie) {
-                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
+            if (item instanceof Video) {
+                mBackgroundURI = Uri.parse(((Video) item).bgImageUrl);
                 startBackgroundTimer();
             }
 

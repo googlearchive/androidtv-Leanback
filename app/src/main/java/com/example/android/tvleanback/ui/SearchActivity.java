@@ -17,7 +17,6 @@ package com.example.android.tvleanback.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.android.tvleanback.R;
 
@@ -42,7 +41,6 @@ public class SearchActivity extends Activity {
 
     @Override
     public boolean onSearchRequested() {
-        Log.d(TAG, "Search requested");
         if (mFragment.hasResults()) {
             startActivity(new Intent(this, SearchActivity.class));
         } else {

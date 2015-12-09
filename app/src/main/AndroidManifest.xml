@@ -14,8 +14,9 @@
      limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.android.tvleanback">
+<manifest package="com.example.android.tvleanback"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -58,7 +59,7 @@
         </activity>
 
         <activity
-            android:name=".ui.MovieDetailsActivity"
+            android:name=".ui.VideoDetailsActivity"
             android:exported="true"
             android:theme="@style/Theme.Leanback.Details">
 
@@ -90,9 +91,9 @@
 
         <!-- Provides search suggestions for keywords against video metadata. -->
         <provider
-            android:name=".data.VideoContentProvider"
-            android:authorities="com.example.androidtvleanback"
-            android:exported="true" />
+            android:name=".data.VideoProvider"
+            android:authorities="com.example.android.tvleanback"
+            tools:ignore="ExportedContentProvider" />
 
         <receiver
             android:name=".recommendation.RecommendationReceiver"
@@ -102,6 +103,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".data.FetchVideoService"
+            android:exported="false" />
 
         <service
             android:name=".recommendation.UpdateRecommendationsService"

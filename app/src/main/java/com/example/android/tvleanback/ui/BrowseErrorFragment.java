@@ -29,7 +29,7 @@ import android.widget.ProgressBar;
 import com.example.android.tvleanback.R;
 
 /*
- * This class demonstrates how to extend ErrorFragment.
+ * This class demonstrates how to extend ErrorFragment to create an error dialog.
  */
 public class BrowseErrorFragment extends ErrorFragment {
     private static final String TAG = "BrowseErrorFragment";
@@ -37,7 +37,7 @@ public class BrowseErrorFragment extends ErrorFragment {
     private static final int TIMER_DELAY = 1000;
 
     private final Handler mHandler = new Handler();
-    SpinnerFragment mSpinnerFragment;
+    private SpinnerFragment mSpinnerFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class BrowseErrorFragment extends ErrorFragment {
         getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
     }
 
-    void setErrorContent() {
+    private void setErrorContent() {
         setImageDrawable(getResources().getDrawable(R.drawable.lb_ic_sad_cloud, null));
         setMessage(getResources().getString(R.string.error_fragment_message));
         setDefaultBackground(TRANSLUCENT);
@@ -85,7 +85,7 @@ public class BrowseErrorFragment extends ErrorFragment {
         });
     }
 
-    static public class SpinnerFragment extends Fragment {
+    public static class SpinnerFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
