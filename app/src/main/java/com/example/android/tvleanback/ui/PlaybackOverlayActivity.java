@@ -200,8 +200,14 @@ public class PlaybackOverlayActivity extends Activity {
 
     private void loadViews() {
         mVideoView = (VideoView) findViewById(R.id.videoView);
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
+        // For fixing an issue which VideoView get focus by default, making control fragment lost focus on activity starts
+        mVideoView.post(new Runnable() {
+            @Override
+            public void run() {
+                mVideoView.setFocusable(false);
+                mVideoView.setFocusableInTouchMode(false);
+            }
+        });
         mSelectedMovie = getIntent().getParcelableExtra(MovieDetailsActivity.MOVIE);
 
         setVideoPath(mSelectedMovie.getVideoUrl());
