@@ -1,5 +1,6 @@
 package com.example.android.tvleanback.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -38,6 +39,7 @@ class PlaybackControlHelper extends PlaybackControlGlue {
     private PlaybackControlsRow.ThumbsDownAction mThumbsDownAction;
     private PlaybackControlsRow.FastForwardAction mFastForwardAction;
     private PlaybackControlsRow.RewindAction mRewindAction;
+    private PlaybackControlsRow.PictureInPictureAction mPipAction;
     private Video mVideo;
     private Handler mHandler = new Handler();
     private Runnable mUpdateProgressRunnable;
@@ -54,6 +56,7 @@ class PlaybackControlHelper extends PlaybackControlGlue {
         mThumbsDownAction = new PlaybackControlsRow.ThumbsDownAction(context);
         mThumbsDownAction.setIndex(PlaybackControlsRow.ThumbsDownAction.OUTLINE);
         mRepeatAction = new PlaybackControlsRow.RepeatAction(context);
+        mPipAction = new PlaybackControlsRow.PictureInPictureAction(context);
     }
 
     public MediaController.Callback createMediaControllerCallback() {
@@ -76,6 +79,9 @@ class PlaybackControlHelper extends PlaybackControlGlue {
         adapter.add(mThumbsDownAction);
         adapter.add(mRepeatAction);
         adapter.add(mThumbsUpAction);
+        if (PlaybackOverlayActivity.supportsPictureInPicture(getContext())) {
+            adapter.add(mPipAction);
+        }
 
         presenter.setOnActionClickedListener(new OnActionClickedListener() {
             @Override
@@ -238,6 +244,8 @@ class PlaybackControlHelper extends PlaybackControlGlue {
             mTransportControls.fastForward();
         } else if (action == mRewindAction) {
             mTransportControls.rewind();
+        } else if (action.getId() == mPipAction.getId()) {
+            ((Activity) getContext()).enterPictureInPictureMode();
         } else {
             super.onActionClicked(action);
         }
