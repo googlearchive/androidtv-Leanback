@@ -17,8 +17,11 @@
 package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.os.BuildCompat;
 import android.view.KeyEvent;
 
 import com.example.android.tvleanback.R;
@@ -35,6 +38,16 @@ public class PlaybackOverlayActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // Change the intent returned by {@link #getIntent()}.
+        // Note that getIntent() only returns the initial intent that created the activity
+        // but we need the latest intent that contains the information of the latest video
+        // that the user is selected.
+        setIntent(intent);
     }
 
     @Override
@@ -66,5 +79,11 @@ public class PlaybackOverlayActivity extends Activity {
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    public static boolean supportsPictureInPicture(Context context) {
+        return BuildCompat.isAtLeastN()
+                && context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 }
