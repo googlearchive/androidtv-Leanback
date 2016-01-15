@@ -28,6 +28,13 @@ import com.example.android.tvleanback.R;
  * MediaSession object used to maintain the state of the media playback.
  */
 public class PlaybackOverlayActivity extends Activity {
+    interface OnNewIntentListener {
+        void onNewIntent();
+    };
+
+    private Intent mIntent;
+    private OnNewIntentListener mOnNewIntentListener;
+
     /**
      * Called when the activity is first created.
      */
@@ -38,9 +45,28 @@ public class PlaybackOverlayActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mIntent = intent;
+        if (mOnNewIntentListener != null) {
+            mOnNewIntentListener.onNewIntent();
+        }
+    }
+
+    public void setOnNewIntentListener(OnNewIntentListener onNewIntentListener) {
+        mOnNewIntentListener = onNewIntentListener;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mIntent = null;
     }
 
     @Override
@@ -66,5 +92,12 @@ public class PlaybackOverlayActivity extends Activity {
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    public Intent getLatestIntent() {
+        if (mIntent != null) {
+            return mIntent;
+        }
+        return getIntent();
     }
 }
