@@ -529,7 +529,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     private int getUpdatePeriod() {
-        if (getView() == null || mPlaybackControlsRow.getTotalTime() <= 0) {
+        if (getView() == null || mPlaybackControlsRow.getTotalTime() <= 0
+                || getView().getWidth() == 0) {
             return DEFAULT_UPDATE_PERIOD;
         }
         return Math.max(UPDATE_PERIOD, mPlaybackControlsRow.getTotalTime() / getView().getWidth());
