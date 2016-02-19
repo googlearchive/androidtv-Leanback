@@ -67,13 +67,13 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private String mQuery;
-    private final CursorObjectAdapter mVideoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
+    private final CursorObjectAdapter mVideoCursorAdapter =
+            new CursorObjectAdapter(new CardPresenter());
 
     private int mSearchLoaderId = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
@@ -82,12 +82,12 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         setSearchResultProvider(this);
         setOnItemViewClickedListener(new ItemViewClickedListener());
         if (!hasPermission(Manifest.permission.RECORD_AUDIO)) {
-            // SpeechRecognitionCallback is not required and if not provided recognition will be handled
-            // using internal speech recognizer, in which case you must have RECORD_AUDIO permission
+            // SpeechRecognitionCallback is not required and if not provided recognition will be
+            // handled using internal speech recognizer, in which case you must have RECORD_AUDIO
+            // permission
             setSpeechRecognitionCallback(new SpeechRecognitionCallback() {
                 @Override
                 public void recognizeSpeech() {
-                    if (DEBUG) Log.v(TAG, "recognizeSpeech");
                     try {
                         startActivityForResult(getRecognizerIntent(), REQUEST_SPEECH);
                     } catch (ActivityNotFoundException e) {
@@ -106,11 +106,6 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (DEBUG) {
-            Log.v(TAG, "onActivityResult requestCode=" + requestCode +
-                    " resultCode=" + resultCode +
-                    " data=" + data);
-        }
         switch (requestCode) {
             case REQUEST_SPEECH:
                 switch (resultCode) {
@@ -142,14 +137,14 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
 
     @Override
     public boolean onQueryTextChange(String newQuery) {
-        Log.i(TAG, String.format("Search Query Text Change %s", newQuery));
+        if (DEBUG) Log.i(TAG, String.format("Search text changed: %s", newQuery));
         loadQuery(newQuery);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Log.i(TAG, String.format("Search Query Text Submit %s", query));
+        if (DEBUG) Log.i(TAG, String.format("Search text submitted: %s", query));
         loadQuery(query);
         return true;
     }
@@ -211,11 +206,10 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+                RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
-                Log.d(TAG, "video: " + video.toString());
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(VideoDetailsActivity.VIDEO, video);
 

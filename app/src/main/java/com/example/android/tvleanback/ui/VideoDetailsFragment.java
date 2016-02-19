@@ -50,7 +50,6 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,9 +70,8 @@ import com.example.android.tvleanback.presenter.DetailsDescriptionPresenter;
  * VideoDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its metadata plus related videos.
  */
-public class VideoDetailsFragment extends DetailsFragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = "DetailsFragment";
-
+public class VideoDetailsFragment extends DetailsFragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int NO_NOTIFICATION = -1;
     private static final int ACTION_WATCH_TRAILER = 1;
     private static final int ACTION_RENT = 2;
@@ -97,7 +95,6 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         prepareBackgroundManager();
@@ -170,7 +167,8 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
                 .error(mDefaultBackground)
                 .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                    public void onResourceReady(Bitmap resource,
+                            GlideAnimation<? super Bitmap> glideAnimation) {
                         mBackgroundManager.setBitmap(resource);
                     }
                 });
@@ -182,12 +180,14 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
                 new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter(),
                         new MovieDetailsOverviewLogoPresenter());
 
-        detailsPresenter.setBackgroundColor(getResources().getColor(R.color.selected_background, null));
+        detailsPresenter.setBackgroundColor(
+                getResources().getColor(R.color.selected_background, null));
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
 
         // Hook up transition element.
         mHelper = new FullWidthDetailsOverviewSharedElementHelper();
-        mHelper.setSharedElementEnterTransition(getActivity(), VideoDetailsActivity.SHARED_ELEMENT_NAME);
+        mHelper.setSharedElementEnterTransition(getActivity(),
+                VideoDetailsActivity.SHARED_ELEMENT_NAME);
         detailsPresenter.setListener(mHelper);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
@@ -228,7 +228,6 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
             }
             default: {
                 // Loading video from global search.
-                Log.d(TAG, "Loading from global search.");
                 String videoId = args.getString(VideoContract.VideoEntry._ID);
                 return new CursorLoader(
                         getActivity(),
@@ -254,8 +253,6 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
                 default: {
                     // Loading video from global search.
                     mSelectedVideo = (Video) mVideoCursorMapper.convert(cursor);
-
-                    Log.d(TAG, "Loaded video " + mSelectedVideo.title);
 
                     setupAdapter();
                     setupDetailsOverviewRow();
@@ -318,8 +315,6 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
     }
 
     private void setupDetailsOverviewRow() {
-        Log.d(TAG, "doInBackground: " + mSelectedVideo.toString());
-
         final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedVideo);
 
         Glide.with(this)
@@ -330,8 +325,7 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(final Bitmap resource,
-                                                GlideAnimation glideAnimation) {
-                        Log.d(TAG, "details overview card image url ready: " + resource);
+                            GlideAnimation glideAnimation) {
                         row.setImageBitmap(getActivity(), resource);
                         startEntranceTransition();
                     }
@@ -368,11 +362,10 @@ public class VideoDetailsFragment extends DetailsFragment implements LoaderManag
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+                RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
-                Log.d(TAG, "Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(VideoDetailsActivity.VIDEO, video);
 

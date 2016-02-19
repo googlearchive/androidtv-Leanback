@@ -72,6 +72,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.example.android.tvleanback.BuildConfig;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoContract;
@@ -93,8 +94,11 @@ import static android.media.session.MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS
  *
  * The UI is updated through events that it receives from its MediaController
  */
-public class PlaybackOverlayFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PlaybackOverlayFragment
+        extends android.support.v17.leanback.app.PlaybackOverlayFragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "PlaybackOverlayFragment";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final boolean SHOW_DETAIL = true;
     private static final boolean HIDE_MORE_ACTIONS = false;
     private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
@@ -105,6 +109,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private static final int SIMULATED_BUFFERED_TIME = 10000;
     private static final int CLICK_TRACKING_DELAY = 1000;
     private static final int INITIAL_SPEED = 10000;
+    private static final String AUTO_PLAY = "auto_play";
 
     private final Handler mClickTrackingHandler = new Handler();
 
@@ -147,24 +152,19 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private MediaController mMediaController;
     private final MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
 
-    private static final String AUTO_PLAY = "auto_play";
-
     @Override
     public void onAttach(Context context) {
-        Log.d(TAG, "onAttach");
         super.onAttach(context);
         mCallbacks = this;
 
         createMediaSession();
 
         mMediaController = getActivity().getMediaController();
-        Log.d(TAG, "register callback of mediaController");
         mMediaController.registerCallback(mMediaControllerCallback);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         // Initialize instance variables.
@@ -201,7 +201,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
             @Override
             public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                       RowPresenter.ViewHolder rowViewHolder, Row row) {
+                    RowPresenter.ViewHolder rowViewHolder, Row row) {
             }
         });
         setOnItemViewClickedListener(new ItemViewClickedListener());
@@ -209,7 +209,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop");
         stopProgressAutomation();
         mRowsAdapter = null;
         super.onStop();
@@ -217,9 +216,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     @Override
     public void onDetach() {
-        Log.d(TAG, "onDetach");
         if (mMediaController != null) {
-            Log.d(TAG, "Unregister callback of MediaController");
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
         super.onDetach();
@@ -227,7 +224,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
         super.onDestroy();
 
         mSession.release();
@@ -249,11 +245,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             mPosition = position;
         }
         mStartTimeMillis = System.currentTimeMillis();
-        Log.d(TAG, "position set to " + mPosition);
     }
 
     private void createMediaSession() {
-        Log.d(TAG, "createMediaSession");
         if (mSession == null) {
             mSession = new MediaSession(getActivity(), "LeanbackSampleApp");
             mSession.setCallback(new MediaSessionCallback());
@@ -263,7 +257,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             mSession.setActive(true);
 
             // Set the Activity's MediaController used to invoke transport controls / adjust volume.
-            getActivity().setMediaController(new MediaController(getActivity(), mSession.getSessionToken()));
+            getActivity().setMediaController(
+                    new MediaController(getActivity(), mSession.getSessionToken()));
             setPlaybackState(PlaybackState.STATE_NONE);
         }
     }
@@ -379,7 +374,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         Activity activity = getActivity();
 
         if (SHOW_DETAIL) {
-            playbackControlsRowPresenter = new PlaybackControlsRowPresenter(new DescriptionPresenter());
+            playbackControlsRowPresenter =
+                    new PlaybackControlsRowPresenter(new DescriptionPresenter());
         } else {
             playbackControlsRowPresenter = new PlaybackControlsRowPresenter();
         }
@@ -590,7 +586,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 .centerCrop()
                 .into(new SimpleTarget<GlideDrawable>(CARD_WIDTH, CARD_HEIGHT) {
                     @Override
-                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                    public void onResourceReady(GlideDrawable resource,
+                            GlideAnimation<? super GlideDrawable> glideAnimation) {
                         mPlaybackControlsRow.setImageDrawable(resource);
                         mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
                     }
@@ -619,7 +616,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                         getActivity(),
                         VideoContract.VideoEntry.CONTENT_URI,
                         null, // Projection to return - null means return all fields.
-                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?", // Selection clause is category.
+                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
+                        // Selection clause is category.
                         new String[]{category}, // Select based on the category.
                         null // Default sort order
                 );
@@ -651,7 +649,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                         // Set the queue index to the selected video.
                         if (v.id == mSelectedVideo.id) {
                             mQueueIndex = mQueue.size();
-                            Log.d(TAG, "mQueueIndex set to " + mQueueIndex);
                         }
 
                         // Add the video to the queue.
@@ -720,11 +717,10 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+                RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
-                Log.d(TAG, "Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
                 intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
@@ -757,7 +753,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_MEDIA_ID, video.id + "");
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, video.title);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, video.studio);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, video.description);
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
+                video.description);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI, video.cardImageUrl);
         metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, mDuration);
 
@@ -778,8 +775,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     }
 
     private void playVideo(Video v, Bundle extras) {
-        Log.d(TAG, "Playing video " + v.title + " with url = " + v.videoUrl);
-        Log.d(TAG, "Video: " + v.toString());
         setVideoPath(v.videoUrl);
         setPlaybackState(PlaybackState.STATE_PAUSED);
         updateMetadata(v);
@@ -820,7 +815,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
             if (nextIndex < mQueue.size()) {
                 MediaSession.QueueItem item = mQueue.get(nextIndex);
                 String mediaId = item.getDescription().getMediaId();
-                getActivity().getMediaController().getTransportControls().playFromMediaId(mediaId, bundle);
+                getActivity().getMediaController()
+                        .getTransportControls()
+                        .playFromMediaId(mediaId, bundle);
             } else {
                 getActivity().onBackPressed(); // Return to details presenter.
             }
@@ -840,7 +837,9 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 MediaSession.QueueItem item = mQueue.get(prevIndex);
                 String mediaId = item.getDescription().getMediaId();
 
-                getActivity().getMediaController().getTransportControls().playFromMediaId(mediaId, bundle);
+                getActivity().getMediaController()
+                        .getTransportControls()
+                        .playFromMediaId(mediaId, bundle);
             } else {
                 getActivity().onBackPressed(); // Return to details presenter.
             }
@@ -881,7 +880,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         public void onPlaybackStateChanged(@NonNull PlaybackState state) {
             // The playback state has changed, so update your UI accordingly.
             // This should not update any media player / state!
-            Log.d(TAG, "Playback state changed: " + state.getState());
+            if (DEBUG) Log.d(TAG, "Playback state changed: " + state.getState());
 
             int nextState = state.getState();
 
@@ -914,7 +913,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
-            Log.d(TAG, "onMetadataChanged");
             updateMovieView(metadata);
         }
     }

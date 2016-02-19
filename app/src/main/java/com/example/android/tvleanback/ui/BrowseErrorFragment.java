@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.ErrorFragment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +34,6 @@ import com.example.android.tvleanback.R;
  * This class demonstrates how to extend ErrorFragment to create an error dialog.
  */
 public class BrowseErrorFragment extends ErrorFragment {
-    private static final String TAG = "BrowseErrorFragment";
     private static final boolean TRANSLUCENT = true;
     private static final int TIMER_DELAY = 1000;
 
@@ -44,7 +42,6 @@ public class BrowseErrorFragment extends ErrorFragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setTitle(getResources().getString(R.string.app_name));
 
@@ -55,7 +52,6 @@ public class BrowseErrorFragment extends ErrorFragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart");
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -68,7 +64,6 @@ public class BrowseErrorFragment extends ErrorFragment {
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop");
         mHandler.removeCallbacksAndMessages(null);
         getFragmentManager().beginTransaction().remove(mSpinnerFragment).commit();
     }
@@ -91,7 +86,7 @@ public class BrowseErrorFragment extends ErrorFragment {
     public static class SpinnerFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+                Bundle savedInstanceState) {
             ProgressBar progressBar = new ProgressBar(container.getContext());
             if (container instanceof FrameLayout) {
                 Resources res = getResources();

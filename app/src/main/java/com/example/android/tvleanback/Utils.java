@@ -70,8 +70,8 @@ public class Utils {
     }
 
     /**
-     * Example for handling resizing content for overscan.  Typically you won't need to resize
-     * when using the Leanback support library.
+     * Example for handling resizing content for overscan.  Typically you won't need to resize when
+     * using the Leanback support library.
      */
     public void overScan(Activity activity, VideoView videoView) {
         DisplayMetrics metrics = new DisplayMetrics();

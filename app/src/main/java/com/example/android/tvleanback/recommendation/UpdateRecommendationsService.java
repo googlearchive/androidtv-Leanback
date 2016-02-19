@@ -28,6 +28,7 @@ import android.support.app.recommendation.ContentRecommendation;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.example.android.tvleanback.BuildConfig;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoContract;
 import com.example.android.tvleanback.model.Video;
@@ -62,8 +63,6 @@ public class UpdateRecommendationsService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(TAG, "Updating recommendation cards");
-
         Resources res = getResources();
         int cardWidth = res.getDimensionPixelSize(R.dimen.card_width);
         int cardHeight = res.getDimensionPixelSize(R.dimen.card_height);
@@ -87,7 +86,8 @@ public class UpdateRecommendationsService extends IntentService {
                     builder.setIdTag("Video" + id)
                             .setTitle(video.title)
                             .setText(getString(R.string.popular_header))
-                            .setContentIntentData(ContentRecommendation.INTENT_TYPE_ACTIVITY, buildPendingIntent(video, id), 0, null);
+                            .setContentIntentData(ContentRecommendation.INTENT_TYPE_ACTIVITY,
+                                    buildPendingIntent(video, id), 0, null);
 
                     Bitmap bitmap = Glide.with(getApplication())
                             .load(video.cardImageUrl)
@@ -100,7 +100,7 @@ public class UpdateRecommendationsService extends IntentService {
                     ContentRecommendation rec = builder.build();
                     Notification notification = rec.getNotificationObject(getApplicationContext());
 
-                    Log.d(TAG, "Recommending video " + video.title);
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Recommending video " + video.title);
 
                     // Recommend the content by publishing the notification.
                     mNotifManager.notify(id, notification);
