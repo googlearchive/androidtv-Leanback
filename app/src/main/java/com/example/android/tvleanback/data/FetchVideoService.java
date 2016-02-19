@@ -102,8 +102,10 @@ public class FetchVideoService extends IntentService {
                 String title = video.getString(TAG_TITLE);
                 String description = video.getString(TAG_DESCRIPTION);
                 String videoUrl = getVideoPrefix(categoryName, getVideoSourceUrl(urls));
-                String bgImageUrl = getThumbPrefix(categoryName, title, video.getString(TAG_BACKGROUND));
-                String cardImageUrl = getThumbPrefix(categoryName, title, video.getString(TAG_CARD_THUMB));
+                String bgImageUrl =
+                        getThumbPrefix(categoryName, title, video.getString(TAG_BACKGROUND));
+                String cardImageUrl =
+                        getThumbPrefix(categoryName, title, video.getString(TAG_CARD_THUMB));
                 String studio = video.getString(TAG_STUDIO);
 
                 ContentValues videoValues = new ContentValues();
@@ -121,7 +123,8 @@ public class FetchVideoService extends IntentService {
                 videoValues.put(VideoContract.VideoEntry.COLUMN_AUDIO_CHANNEL_CONFIG, "2.0");
                 videoValues.put(VideoContract.VideoEntry.COLUMN_PRODUCTION_YEAR, 2014);
                 videoValues.put(VideoContract.VideoEntry.COLUMN_DURATION, 0);
-                videoValues.put(VideoContract.VideoEntry.COLUMN_RATING_STYLE, Rating.RATING_5_STARS);
+                videoValues.put(VideoContract.VideoEntry.COLUMN_RATING_STYLE,
+                        Rating.RATING_5_STARS);
                 videoValues.put(VideoContract.VideoEntry.COLUMN_RATING_SCORE, 3.5f);
                 videoValues.put(VideoContract.VideoEntry.COLUMN_PURCHASE_PRICE,
                         getResources().getString(R.string.buy_2));
@@ -138,18 +141,18 @@ public class FetchVideoService extends IntentService {
             }
         }
 
-        int numNewRows = getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
+        getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
                 videosToInsert.toArray(new ContentValues[videosToInsert.size()]));
-
-        Log.d(TAG, "Inserted " + numNewRows + " new rows into db.");
     }
 
     /**
      * Get the video source URL.
+     * <p/>
      * TODO: Re-encode the sample data to give the full paths by default.
      *
      * @param videos the JSONArray of videos
      * @return the video source URL.
+     *
      * @throws JSONException
      */
     private String getVideoSourceUrl(final JSONArray videos) throws JSONException {
@@ -163,6 +166,7 @@ public class FetchVideoService extends IntentService {
 
     /**
      * Get the full URL path for a video.
+     * <p/>
      * TODO: Re-encode the sample data to give the full paths by default.
      *
      * @param category the category name
@@ -178,6 +182,7 @@ public class FetchVideoService extends IntentService {
 
     /**
      * Get the full URL path for a thumbnail image.
+     * <p/>
      * TODO: Re-encode the sample data to give the full paths by default.
      *
      * @param category the category name
@@ -197,6 +202,7 @@ public class FetchVideoService extends IntentService {
      * Fetch JSON object from a given URL.
      *
      * @return the JSONObject representation of the response
+     *
      * @throws JSONException
      * @throws IOException
      */
@@ -220,7 +226,7 @@ public class FetchVideoService extends IntentService {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Log.d(TAG, "JSON feed closed", e);
+                    Log.e(TAG, "JSON feed closed", e);
                 }
             }
         }

@@ -19,7 +19,6 @@ package com.example.android.tvleanback.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.example.android.tvleanback.data.VideoContract.VideoEntry;
 
@@ -27,8 +26,6 @@ import com.example.android.tvleanback.data.VideoContract.VideoEntry;
  * VideoDbHelper manages the creation and upgrade of the database used in this sample.
  */
 public class VideoDbHelper extends SQLiteOpenHelper {
-
-    private static final String TAG = "VideoDbHelper";
 
     // Change this when you change the database schema.
     private static final int DATABASE_VERSION = 4;
@@ -42,8 +39,6 @@ public class VideoDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(TAG, "Creating database tables...");
-
         // Create a table to hold videos.
         final String SQL_CREATE_VIDEO_TABLE = "CREATE TABLE " + VideoEntry.TABLE_NAME + " (" +
                 VideoEntry._ID + " INTEGER PRIMARY KEY," +
@@ -74,7 +69,6 @@ public class VideoDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(TAG, "Dropping database tables...");
         // Simply discard all old data and start over when upgrading.
         db.execSQL("DROP TABLE IF EXISTS " + VideoEntry.TABLE_NAME);
         onCreate(db);

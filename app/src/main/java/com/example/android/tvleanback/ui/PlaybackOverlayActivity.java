@@ -19,25 +19,21 @@ package com.example.android.tvleanback.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import com.example.android.tvleanback.R;
 
 /**
- * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles
- * the MediaSession object used to maintain the state of the media playback.
+ * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles the
+ * MediaSession object used to maintain the state of the media playback.
  */
 public class PlaybackOverlayActivity extends Activity {
-    private static final String TAG = PlaybackOverlayActivity.class.getSimpleName();
-
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
         setContentView(R.layout.playback_controls);
     }
 

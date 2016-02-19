@@ -32,7 +32,6 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.util.Log;
 import android.view.View;
 
 import com.example.android.tvleanback.R;
@@ -46,15 +45,14 @@ import com.example.android.tvleanback.presenter.CardPresenter;
  */
 public class VerticalGridFragment extends android.support.v17.leanback.app.VerticalGridFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = "VerticalGridFragment";
 
     private static final int NUM_COLUMNS = 5;
-    private final CursorObjectAdapter mVideoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
+    private final CursorObjectAdapter mVideoCursorAdapter =
+            new CursorObjectAdapter(new CardPresenter());
     private static final int ALL_VIDEOS_LOADER = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         mVideoCursorAdapter.setMapper(new VideoCursorMapper());
@@ -121,7 +119,7 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                                  RowPresenter.ViewHolder rowViewHolder, Row row) {
+                RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
@@ -141,7 +139,7 @@ public class VerticalGridFragment extends android.support.v17.leanback.app.Verti
     private final class ItemViewSelectedListener implements OnItemViewSelectedListener {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
+                RowPresenter.ViewHolder rowViewHolder, Row row) {
         }
     }
 }

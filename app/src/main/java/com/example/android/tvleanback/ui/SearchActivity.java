@@ -26,8 +26,6 @@ import com.example.android.tvleanback.R;
  * SearchActivity for SearchFragment
  */
 public class SearchActivity extends Activity {
-
-    private static final String TAG = "SearchActivity";
     private SearchFragment mFragment;
 
     /**

@@ -35,8 +35,6 @@ import java.util.HashMap;
  * VideoProvider is a ContentProvider that provides videos for the rest of applications.
  */
 public class VideoProvider extends ContentProvider {
-    private static final String TAG = "VideoProvider";
-
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private VideoDbHelper mOpenHelper;
 
@@ -54,7 +52,6 @@ public class VideoProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         Context context = getContext();
-
         mContentResolver = context.getContentResolver();
         mOpenHelper = new VideoDbHelper(context);
         return true;
@@ -124,29 +121,43 @@ public class VideoProvider extends ContentProvider {
         map.put(VideoContract.VideoEntry.COLUMN_NAME, VideoContract.VideoEntry.COLUMN_NAME);
         map.put(VideoContract.VideoEntry.COLUMN_DESC, VideoContract.VideoEntry.COLUMN_DESC);
         map.put(VideoContract.VideoEntry.COLUMN_CATEGORY, VideoContract.VideoEntry.COLUMN_CATEGORY);
-        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_URL, VideoContract.VideoEntry.COLUMN_VIDEO_URL);
-        map.put(VideoContract.VideoEntry.COLUMN_BG_IMAGE_URL, VideoContract.VideoEntry.COLUMN_BG_IMAGE_URL);
+        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_URL,
+                VideoContract.VideoEntry.COLUMN_VIDEO_URL);
+        map.put(VideoContract.VideoEntry.COLUMN_BG_IMAGE_URL,
+                VideoContract.VideoEntry.COLUMN_BG_IMAGE_URL);
         map.put(VideoContract.VideoEntry.COLUMN_CARD_IMG, VideoContract.VideoEntry.COLUMN_CARD_IMG);
         map.put(VideoContract.VideoEntry.COLUMN_STUDIO, VideoContract.VideoEntry.COLUMN_STUDIO);
-        map.put(VideoContract.VideoEntry.COLUMN_CONTENT_TYPE, VideoContract.VideoEntry.COLUMN_CONTENT_TYPE);
+        map.put(VideoContract.VideoEntry.COLUMN_CONTENT_TYPE,
+                VideoContract.VideoEntry.COLUMN_CONTENT_TYPE);
         map.put(VideoContract.VideoEntry.COLUMN_IS_LIVE, VideoContract.VideoEntry.COLUMN_IS_LIVE);
-        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_WIDTH, VideoContract.VideoEntry.COLUMN_VIDEO_WIDTH);
-        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_HEIGHT, VideoContract.VideoEntry.COLUMN_VIDEO_HEIGHT);
-        map.put(VideoContract.VideoEntry.COLUMN_AUDIO_CHANNEL_CONFIG, VideoContract.VideoEntry.COLUMN_AUDIO_CHANNEL_CONFIG);
-        map.put(VideoContract.VideoEntry.COLUMN_PURCHASE_PRICE, VideoContract.VideoEntry.COLUMN_PURCHASE_PRICE);
-        map.put(VideoContract.VideoEntry.COLUMN_RENTAL_PRICE, VideoContract.VideoEntry.COLUMN_RENTAL_PRICE);
-        map.put(VideoContract.VideoEntry.COLUMN_RATING_STYLE, VideoContract.VideoEntry.COLUMN_RATING_STYLE);
-        map.put(VideoContract.VideoEntry.COLUMN_RATING_SCORE, VideoContract.VideoEntry.COLUMN_RATING_SCORE);
-        map.put(VideoContract.VideoEntry.COLUMN_PRODUCTION_YEAR, VideoContract.VideoEntry.COLUMN_PRODUCTION_YEAR);
+        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_WIDTH,
+                VideoContract.VideoEntry.COLUMN_VIDEO_WIDTH);
+        map.put(VideoContract.VideoEntry.COLUMN_VIDEO_HEIGHT,
+                VideoContract.VideoEntry.COLUMN_VIDEO_HEIGHT);
+        map.put(VideoContract.VideoEntry.COLUMN_AUDIO_CHANNEL_CONFIG,
+                VideoContract.VideoEntry.COLUMN_AUDIO_CHANNEL_CONFIG);
+        map.put(VideoContract.VideoEntry.COLUMN_PURCHASE_PRICE,
+                VideoContract.VideoEntry.COLUMN_PURCHASE_PRICE);
+        map.put(VideoContract.VideoEntry.COLUMN_RENTAL_PRICE,
+                VideoContract.VideoEntry.COLUMN_RENTAL_PRICE);
+        map.put(VideoContract.VideoEntry.COLUMN_RATING_STYLE,
+                VideoContract.VideoEntry.COLUMN_RATING_STYLE);
+        map.put(VideoContract.VideoEntry.COLUMN_RATING_SCORE,
+                VideoContract.VideoEntry.COLUMN_RATING_SCORE);
+        map.put(VideoContract.VideoEntry.COLUMN_PRODUCTION_YEAR,
+                VideoContract.VideoEntry.COLUMN_PRODUCTION_YEAR);
         map.put(VideoContract.VideoEntry.COLUMN_DURATION, VideoContract.VideoEntry.COLUMN_DURATION);
         map.put(VideoContract.VideoEntry.COLUMN_ACTION, VideoContract.VideoEntry.COLUMN_ACTION);
-        map.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID, VideoContract.VideoEntry._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID);
-        map.put(SearchManager.SUGGEST_COLUMN_SHORTCUT_ID, VideoContract.VideoEntry._ID + " AS " + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID);
+        map.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID, VideoContract.VideoEntry._ID + " AS " +
+                SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID);
+        map.put(SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
+                VideoContract.VideoEntry._ID + " AS " + SearchManager.SUGGEST_COLUMN_SHORTCUT_ID);
         return map;
     }
 
     @Override
-    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
 
         switch (sUriMatcher.match(uri)) {
@@ -252,7 +263,8 @@ public class VideoProvider extends ContentProvider {
     }
 
     @Override
-    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         final int rowsUpdated;
 
         switch (sUriMatcher.match(uri)) {
