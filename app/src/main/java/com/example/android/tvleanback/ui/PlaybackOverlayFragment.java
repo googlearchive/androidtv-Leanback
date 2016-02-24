@@ -24,9 +24,9 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.SurfaceTexture;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
-import android.media.MediaPlayer;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -66,7 +66,8 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
-import android.widget.VideoView;
+import android.view.Surface;
+import android.view.TextureView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -78,7 +79,11 @@ import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoContract;
 import com.example.android.tvleanback.model.Video;
 import com.example.android.tvleanback.model.VideoCursorMapper;
+import com.example.android.tvleanback.player.ExtractorRendererBuilder;
+import com.example.android.tvleanback.player.VideoPlayer;
 import com.example.android.tvleanback.presenter.CardPresenter;
+import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.exoplayer.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +101,8 @@ import static android.media.session.MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS
  */
 public class PlaybackOverlayFragment
         extends android.support.v17.leanback.app.PlaybackOverlayFragment
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor>, TextureView.SurfaceTextureListener,
+        VideoPlayer.Listener {
     private static final String TAG = "PlaybackOverlayFragment";
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final boolean SHOW_DETAIL = true;
@@ -106,14 +112,13 @@ public class PlaybackOverlayFragment
     private static final int CARD_HEIGHT = 240;
     private static final int DEFAULT_UPDATE_PERIOD = 1000;
     private static final int UPDATE_PERIOD = 16;
-    private static final int SIMULATED_BUFFERED_TIME = 10000;
     private static final int CLICK_TRACKING_DELAY = 1000;
     private static final int INITIAL_SPEED = 10000;
     private static final String AUTO_PLAY = "auto_play";
 
     private final Handler mClickTrackingHandler = new Handler();
 
-    private VideoView mVideoView; // VideoView is used to play the video (media) in a view.
+    private TextureView mTextureView; // TextureView is used to render the video (media) in a view.
     private Video mSelectedVideo; // Video is the currently playing Video and its metadata.
     private ArrayObjectAdapter mRowsAdapter;
     private ArrayObjectAdapter mPrimaryActionsAdapter;
@@ -133,21 +138,23 @@ public class PlaybackOverlayFragment
     private PlaybackControlsRow mPlaybackControlsRow;
     private Handler mHandler;
     private Runnable mRunnable;
-    private long mDuration = -1;
     private int mFfwRwdSpeed = INITIAL_SPEED;
     private Timer mClickTrackingTimer;
     private int mClickCount;
     private int mQueueIndex = -1;
     private List<MediaSession.QueueItem> mQueue;
     private CursorObjectAdapter mVideoCursorAdapter;
-    private int mPosition = 0;
-    private long mStartTimeMillis;
     private MediaSession mSession; // MediaSession is used to hold the state of our media playback.
     private final static int RECOMMENDED_VIDEOS_LOADER = 1;
     private final static int QUEUE_VIDEOS_LOADER = 2;
     private int mSpecificVideoLoaderId = 3;
     private final VideoCursorMapper mVideoCursorMapper = new VideoCursorMapper();
     private LoaderManager.LoaderCallbacks<Cursor> mCallbacks;
+
+    private VideoPlayer mPlayer;
+    private Uri mContentUri;
+    private int mContentType;
+    private boolean mIsMetadataSet = false;
 
     private MediaController mMediaController;
     private final MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
@@ -168,17 +175,18 @@ public class PlaybackOverlayFragment
         super.onCreate(savedInstanceState);
 
         // Initialize instance variables.
-        mVideoView = (VideoView) getActivity().findViewById(R.id.videoView);
+        mTextureView = (TextureView) getActivity().findViewById(R.id.texture_view);
+        mTextureView.setSurfaceTextureListener(this);
         mSelectedVideo = getActivity().getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
         mHandler = new Handler();
         mQueue = new ArrayList<>();
 
         // Hack to get playback controls to be in focus right away.
-        mVideoView.post(new Runnable() {
+        mTextureView.post(new Runnable() {
             @Override
             public void run() {
-                mVideoView.setFocusable(false);
-                mVideoView.setFocusableInTouchMode(false);
+                mTextureView.setFocusable(false);
+                mTextureView.setFocusableInTouchMode(false);
             }
         });
 
@@ -188,8 +196,7 @@ public class PlaybackOverlayFragment
         setupRows();
 
         // Start playing the selected video.
-        setVideoPath(mSelectedVideo.videoUrl);
-        updateMetadata(mSelectedVideo);
+        setVideo(mSelectedVideo);
         playPause(true);
 
         // Start loading videos for the queue.
@@ -209,17 +216,27 @@ public class PlaybackOverlayFragment
 
     @Override
     public void onStop() {
-        stopProgressAutomation();
-        mRowsAdapter = null;
         super.onStop();
+        stopProgressAutomation();
+        mSession.release();
+        releasePlayer();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mPlayer == null) {
+            preparePlayer(true);
+        }
     }
 
     @Override
     public void onDetach() {
+        super.onDetach();
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
-        super.onDetach();
     }
 
     @Override
@@ -227,24 +244,102 @@ public class PlaybackOverlayFragment
         super.onDestroy();
 
         mSession.release();
+        releasePlayer();
+    }
 
-        if (mVideoView != null) {
-            mVideoView.stopPlayback();
-            mVideoView.suspend();
-            mVideoView.setVideoURI(null);
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPlayer.getPlayerControl().isPlaying()) {
+            boolean isVisibleBehind = getActivity().requestVisibleBehind(true);
+            if (!isVisibleBehind) {
+                playPause(false);
+            }
+        } else {
+            getActivity().requestVisibleBehind(false);
         }
     }
 
-    private void setPosition(int position) {
-        if (position > mDuration) {
-            mPosition = (int) mDuration;
-        } else if (position < 0) {
-            mPosition = 0;
-            mStartTimeMillis = System.currentTimeMillis();
-        } else {
-            mPosition = position;
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case RECOMMENDED_VIDEOS_LOADER: // Fall through.
+            case QUEUE_VIDEOS_LOADER: {
+                String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
+                return new CursorLoader(
+                        getActivity(),
+                        VideoContract.VideoEntry.CONTENT_URI,
+                        null, // Projection to return - null means return all fields.
+                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
+                        // Selection clause is category.
+                        new String[]{category}, // Select based on the category.
+                        null // Default sort order
+                );
+            }
+            default: {
+                // Loading a specific video.
+                String videoId = args.getString(VideoContract.VideoEntry._ID);
+                return new CursorLoader(
+                        getActivity(),
+                        VideoContract.VideoEntry.CONTENT_URI,
+                        null, // Projection to return - null means return all fields.
+                        VideoContract.VideoEntry._ID + " = ?", // Selection clause is id.
+                        new String[]{videoId}, // Select based on the id.
+                        null // Default sort order
+                );
+            }
         }
-        mStartTimeMillis = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (cursor != null && cursor.moveToFirst()) {
+            switch (loader.getId()) {
+                case QUEUE_VIDEOS_LOADER: {
+                    mQueue.clear();
+                    while (!cursor.isAfterLast()) {
+                        Video v = (Video) mVideoCursorMapper.convert(cursor);
+
+                        // Set the queue index to the selected video.
+                        if (v.id == mSelectedVideo.id) {
+                            mQueueIndex = mQueue.size();
+                        }
+
+                        // Add the video to the queue.
+                        MediaSession.QueueItem item = getQueueItem(v);
+                        mQueue.add(item);
+
+                        cursor.moveToNext();
+                    }
+
+                    mSession.setQueue(mQueue);
+                    mSession.setQueueTitle(getString(R.string.queue_name));
+                    break;
+                }
+                case RECOMMENDED_VIDEOS_LOADER: {
+                    mVideoCursorAdapter.changeCursor(cursor);
+                    break;
+                }
+                default: {
+                    // Playing a specific video.
+                    Video video = (Video) mVideoCursorMapper.convert(cursor);
+                    Bundle extras = new Bundle();
+                    extras.putBoolean(AUTO_PLAY, true);
+                    playVideo(video, extras);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void setPosition(long position) {
+        if (position > mPlayer.getDuration()) {
+            mPlayer.seekTo(mPlayer.getDuration());
+        } else if (position < 0) {
+            mPlayer.seekTo(0L);
+        } else {
+            mPlayer.seekTo(position);
+        }
     }
 
     private void createMediaSession() {
@@ -277,9 +372,14 @@ public class PlaybackOverlayFragment
     }
 
     private void setPlaybackState(int state) {
+        long currPosition = 0L;
+        if (mPlayer != null) {
+            currPosition = mPlayer.getCurrentPosition();
+        }
+
         PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
                 .setActions(getAvailableActions(state));
-        stateBuilder.setState(state, mPosition, 1.0f);
+        stateBuilder.setState(state, currPosition, 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
     }
 
@@ -298,74 +398,26 @@ public class PlaybackOverlayFragment
         return actions;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mVideoView.isPlaying()) {
-            if (!getActivity().requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                playPause(false);
-            }
-        } else {
-            getActivity().requestVisibleBehind(false);
-        }
-    }
-
     private void playPause(boolean doPlay) {
-        if (getPlaybackState() == PlaybackState.STATE_NONE) {
-            setupCallbacks();
+        if (mPlayer == null) {
+            setPlaybackState(PlaybackState.STATE_NONE);
+            return;
         }
-
         if (doPlay && getPlaybackState() != PlaybackState.STATE_PLAYING) {
-            if (mPosition > 0) {
-                mVideoView.seekTo(mPosition);
-            }
-            mVideoView.start();
-            mStartTimeMillis = System.currentTimeMillis();
+            mPlayer.getPlayerControl().start();
             setPlaybackState(PlaybackState.STATE_PLAYING);
         } else {
-            int timeElapsedSinceStart = (int) (System.currentTimeMillis() - mStartTimeMillis);
-            setPosition(mPosition + timeElapsedSinceStart);
-            mVideoView.pause();
+            mPlayer.getPlayerControl().pause();
             setPlaybackState(PlaybackState.STATE_PAUSED);
         }
     }
 
-    private void setVideoPath(String videoUrl) {
-        setPosition(0);
-        mVideoView.setVideoPath(videoUrl);
-        mStartTimeMillis = 0;
-        mDuration = Utils.getDuration(videoUrl);
-    }
+    private void setVideo(Video video) {
+        mSelectedVideo = video;
+        mContentUri = Uri.parse(video.videoUrl);
+        mContentType = Util.inferContentType(mContentUri.getLastPathSegment());
 
-    private void setupCallbacks() {
-
-        mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                mVideoView.stopPlayback();
-                setPlaybackState(PlaybackState.STATE_STOPPED);
-                return false;
-            }
-        });
-
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                if (getPlaybackState() == PlaybackState.STATE_PLAYING) {
-                    mVideoView.start();
-                }
-            }
-        });
-
-        mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                setPlaybackState(PlaybackState.STATE_STOPPED);
-            }
-        });
-
+        preparePlayer(true);
     }
 
     private void setupRows() {
@@ -484,18 +536,21 @@ public class PlaybackOverlayFragment
     }
 
     private void updateMovieView(MediaMetadata metadata) {
-        Video v = new Video.VideoBuilder().buildFromMediaDesc(metadata.getDescription());
-        long dur = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        Video video = new Video.VideoBuilder().buildFromMediaDesc(metadata.getDescription());
+        long duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
 
         // PlaybackControlsRow doesn't allow you to set the item, so we must create a new one
         // because our Video class is now immutable.
         // TODO(ryanseys): Implement Playback Glue support so this can be mitigated.
-        mPlaybackControlsRow = new PlaybackControlsRow(v);
-        mPlaybackControlsRow.setTotalTime((int) dur);
+        mPlaybackControlsRow = new PlaybackControlsRow(video);
+
+        if (duration != ExoPlayer.UNKNOWN_TIME) {
+            mPlaybackControlsRow.setTotalTime((int) duration);
+        }
 
         // Show the video card image if there is enough room in the UI for it.
         // If you have many primary actions, you may not have enough room.
-        updateVideoImage(v.cardImageUrl);
+        updateVideoImage(video.cardImageUrl);
 
         mRowsAdapter.clear();
         mRowsAdapter.add(mPlaybackControlsRow);
@@ -521,7 +576,6 @@ public class PlaybackOverlayFragment
 
         HeaderItem header = new HeaderItem(getString(R.string.related_movies));
         mRowsAdapter.add(new ListRow(header, mVideoCursorAdapter));
-
     }
 
     private int getUpdatePeriod() {
@@ -538,14 +592,15 @@ public class PlaybackOverlayFragment
                 @Override
                 public void run() {
                     int updatePeriod = getUpdatePeriod();
-                    int currentTime = mPlaybackControlsRow.getCurrentTime() + updatePeriod;
                     int totalTime = mPlaybackControlsRow.getTotalTime();
+                    int currentTime = (int) mPlayer.getCurrentPosition();
                     mPlaybackControlsRow.setCurrentTime(currentTime);
-                    mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
+
+                    int progress = (int) mPlayer.getBufferedPosition();
+                    mPlaybackControlsRow.setBufferedProgress(progress);
 
                     if (totalTime > 0 && totalTime <= currentTime) {
                         stopProgressAutomation();
-                        next();
                     } else {
                         mHandler.postDelayed(this, updatePeriod);
                     }
@@ -606,81 +661,105 @@ public class PlaybackOverlayFragment
         mClickTrackingTimer.schedule(new UpdateFfwRwdSpeedTask(), CLICK_TRACKING_DELAY);
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case RECOMMENDED_VIDEOS_LOADER: // Fall through.
-            case QUEUE_VIDEOS_LOADER: {
-                String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
-                return new CursorLoader(
-                        getActivity(),
-                        VideoContract.VideoEntry.CONTENT_URI,
-                        null, // Projection to return - null means return all fields.
-                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
-                        // Selection clause is category.
-                        new String[]{category}, // Select based on the category.
-                        null // Default sort order
-                );
-            }
-            default: {
-                // Loading a specific video.
-                String videoId = args.getString(VideoContract.VideoEntry._ID);
-                return new CursorLoader(
-                        getActivity(),
-                        VideoContract.VideoEntry.CONTENT_URI,
-                        null, // Projection to return - null means return all fields.
-                        VideoContract.VideoEntry._ID + " = ?", // Selection clause is id.
-                        new String[]{videoId}, // Select based on the id.
-                        null // Default sort order
-                );
-            }
+    private VideoPlayer.RendererBuilder getRendererBuilder() {
+        String userAgent = Util.getUserAgent(getContext(), "ExoVideoPlayer");
+        switch (mContentType) {
+            case Util.TYPE_OTHER:
+                return new ExtractorRendererBuilder(getContext(), userAgent, mContentUri);
+            default:
+                throw new IllegalStateException("Unsupported type: " + mContentType);
         }
     }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (cursor != null && cursor.moveToFirst()) {
-            switch (loader.getId()) {
-                case QUEUE_VIDEOS_LOADER: {
-                    mQueue.clear();
-                    while (!cursor.isAfterLast()) {
-                        Video v = (Video) mVideoCursorMapper.convert(cursor);
+    private void preparePlayer(boolean playWhenReady) {
+        if (mPlayer == null) {
+            mPlayer = new VideoPlayer(getRendererBuilder());
+            mPlayer.addListener(this);
+            mPlayer.seekTo(0L);
+            mPlayer.prepare();
+        } else {
+            mPlayer.stop();
+            mPlayer.seekTo(0L);
+            mPlayer.setRendererBuilder(getRendererBuilder());
+            mPlayer.prepare();
+        }
+        mPlayer.setPlayWhenReady(playWhenReady);
+    }
 
-                        // Set the queue index to the selected video.
-                        if (v.id == mSelectedVideo.id) {
-                            mQueueIndex = mQueue.size();
-                        }
-
-                        // Add the video to the queue.
-                        MediaSession.QueueItem item = getQueueItem(v);
-                        mQueue.add(item);
-
-                        cursor.moveToNext();
-                    }
-
-                    mSession.setQueue(mQueue);
-                    mSession.setQueueTitle(getString(R.string.queue_name));
-                    break;
-                }
-                case RECOMMENDED_VIDEOS_LOADER: {
-                    mVideoCursorAdapter.changeCursor(cursor);
-                    break;
-                }
-                default: {
-                    // Playing a specific video.
-                    Video video = (Video) mVideoCursorMapper.convert(cursor);
-                    Bundle extras = new Bundle();
-                    extras.putBoolean(AUTO_PLAY, true);
-                    playVideo(video, extras);
-                    break;
-                }
-            }
+    private void releasePlayer() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mVideoCursorAdapter.changeCursor(null);
+    }
+
+    @Override
+    public void onStateChanged(boolean playWhenReady, int playbackState) {
+        switch (playbackState) {
+            case ExoPlayer.STATE_BUFFERING:
+                // Do nothing.
+                break;
+            case ExoPlayer.STATE_ENDED:
+                next();
+                break;
+            case ExoPlayer.STATE_IDLE:
+                // Do nothing.
+                break;
+            case ExoPlayer.STATE_PREPARING:
+                mIsMetadataSet = false;
+                break;
+            case ExoPlayer.STATE_READY:
+                // Duration is set here.
+                if (!mIsMetadataSet) {
+                    updateMetadata(mSelectedVideo);
+                    mIsMetadataSet = true;
+                }
+                break;
+            default:
+                // Do nothing.
+                break;
+        }
+    }
+
+    @Override
+    public void onError(Exception e) {
+        Log.e(TAG, "An error occurred: " + e);
+    }
+
+    @Override
+    public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
+            float pixelWidthHeightRatio) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+        if (mPlayer != null) {
+            mPlayer.setSurface(new Surface(surfaceTexture));
+        }
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        // Do nothing.
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        if (mPlayer != null) {
+            mPlayer.blockingClearSurface();
+        }
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        // Do nothing.
     }
 
     private static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {
@@ -756,7 +835,9 @@ public class PlaybackOverlayFragment
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
                 video.description);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI, video.cardImageUrl);
-        metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, mDuration);
+
+        long duration = Utils.getDuration(video.videoUrl);
+        metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, duration);
 
         // And at minimum the title and artist for legacy support
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, video.title);
@@ -775,9 +856,8 @@ public class PlaybackOverlayFragment
     }
 
     private void playVideo(Video v, Bundle extras) {
-        setVideoPath(v.videoUrl);
+        setVideo(v);
         setPlaybackState(PlaybackState.STATE_PAUSED);
-        updateMetadata(v);
         playPause(extras.getBoolean(AUTO_PLAY));
     }
 
@@ -806,8 +886,6 @@ public class PlaybackOverlayFragment
         @Override
         public void onSkipToNext() {
             // Update the media to skip to the next video.
-            mPosition = 0;
-
             Bundle bundle = new Bundle();
             bundle.putBoolean(AUTO_PLAY, true);
 
@@ -826,7 +904,6 @@ public class PlaybackOverlayFragment
         @Override
         public void onSkipToPrevious() {
             // Update the media to skip to the previous video.
-            mPosition = 0;
             setPlaybackState(PlaybackState.STATE_SKIPPING_TO_PREVIOUS);
 
             Bundle bundle = new Bundle();
@@ -846,19 +923,17 @@ public class PlaybackOverlayFragment
         }
 
         @Override
-        public void onSeekTo(long pos) {
-            setPosition((int) pos);
-            mVideoView.seekTo(mPosition);
+        public void onSeekTo(long position) {
+            setPosition(position);
         }
 
         @Override
         public void onFastForward() {
-            if (mDuration != -1) {
+            if (mPlayer.getDuration() != -1) {
                 // Fast forward 10 seconds.
                 int prevState = getPlaybackState();
                 setPlaybackState(PlaybackState.STATE_FAST_FORWARDING);
-                setPosition(mVideoView.getCurrentPosition() + (10 * 1000));
-                mVideoView.seekTo(mPosition);
+                setPosition(mPlayer.getCurrentPosition() + (10 * 1000));
                 setPlaybackState(prevState);
             }
         }
@@ -868,8 +943,7 @@ public class PlaybackOverlayFragment
             // Rewind 10 seconds.
             int prevState = getPlaybackState();
             setPlaybackState(PlaybackState.STATE_REWINDING);
-            setPosition(mVideoView.getCurrentPosition() - (10 * 1000));
-            mVideoView.seekTo(mPosition);
+            setPosition(mPlayer.getCurrentPosition() - (10 * 1000));
             setPlaybackState(prevState);
         }
     }
@@ -906,9 +980,11 @@ public class PlaybackOverlayFragment
                 notifyChanged(mSkipPreviousAction);
             }
 
-            int currentTime = (int) state.getPosition();
-            mPlaybackControlsRow.setCurrentTime(currentTime);
-            mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
+            if (nextState != PlaybackState.STATE_NONE) {
+                int currentTime = (int) state.getPosition();
+                mPlaybackControlsRow.setCurrentTime(currentTime);
+                mPlaybackControlsRow.setBufferedProgress((int) mPlayer.getBufferedPosition());
+            }
         }
 
         @Override
