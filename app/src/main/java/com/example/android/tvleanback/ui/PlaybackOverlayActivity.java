@@ -34,19 +34,19 @@ public class PlaybackOverlayActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.playback_controls);
+        setContentView(R.layout.activity_playback);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        getMediaController().getTransportControls().pause();
+        finish();
     }
 
     @Override
     public void onVisibleBehindCanceled() {
-        super.onVisibleBehindCanceled();
         getMediaController().getTransportControls().pause();
+        super.onVisibleBehindCanceled();
     }
 
     @Override
