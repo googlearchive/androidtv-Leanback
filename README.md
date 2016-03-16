@@ -4,6 +4,17 @@
 
 This sample is a Videos By Google app, designed to run on an Android TV device (such as the Nexus Player), which demonstrates how to use the Leanback Support library which enables you to easily develop beautiful Android TV apps with a user-friendly UI that complies with the UX guidelines of Android TV.
 
+## Android N Preview / Picture-in-picture
+
+The Android N Preview adds [Picture-in-picture]
+(https://developer.android.com/preview/features/picture-in-picture.html)
+(PIP) to Android TV. You can try this out in the latest changes in the 
+[`add-pip` tree]
+(https://github.com/googlesamples/androidtv-Leanback/tree/add-pip). 
+
+Watch this `add-pip` tree for updates, as PIP may change during the 
+Android N preview.
+
 ## Introduction
 
 - [Read more about Android TV introduction](http://www.android.com/tv/)
