@@ -78,7 +78,11 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <activity android:name=".ui.PlaybackOverlayActivity" />
+        <activity android:name=".ui.PlaybackOverlayActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true" />
 
         <activity
             android:name=".ui.VerticalGridActivity"

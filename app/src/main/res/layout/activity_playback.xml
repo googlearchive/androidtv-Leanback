@@ -25,9 +25,15 @@
         android:layout_height="match_parent"
         android:layout_gravity="center" />
 
-    <fragment
-        android:id="@+id/playback_controls_fragment"
-        android:name="com.example.android.tvleanback.ui.PlaybackOverlayFragment"
+    <LinearLayout
+        android:id="@+id/playback_controls_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/playback_controls_fragment"
+            android:name="com.example.android.tvleanback.ui.PlaybackOverlayFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 </merge>

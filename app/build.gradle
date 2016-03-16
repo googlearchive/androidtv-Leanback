@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 'android-N'
     buildToolsVersion '23.0.2'
     defaultConfig {
         applicationId "com.example.android.tvleanback"
-        minSdkVersion 23
-        targetSdkVersion 23
+        minSdkVersion 'N'
+        targetSdkVersion 'N'
         versionCode 1
         versionName "1.1"
     }
@@ -16,13 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:leanback-v17:23.1.1'
-    compile 'com.android.support:recommendation:23.1.1'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:recyclerview-v7:24.0.0-alpha1'
+    compile 'com.android.support:leanback-v17:24.0.0-alpha1'
+    compile 'com.android.support:recommendation:24.0.0-alpha1'
     compile 'com.github.bumptech.glide:glide:3.6.1'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.6'
 }
