@@ -20,7 +20,6 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.media.Rating;
-import android.net.Uri;
 import android.util.Log;
 
 import com.example.android.tvleanback.R;
@@ -32,9 +31,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +51,6 @@ public class FetchVideoService extends IntentService {
     private static final String TAG_CARD_THUMB = "card";
     private static final String TAG_BACKGROUND = "background";
     private static final String TAG_TITLE = "title";
-    private Uri mPrefixUrl;
 
     /**
      * Creates an IntentService with a default name for the worker thread.
@@ -65,9 +61,6 @@ public class FetchVideoService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent workIntent) {
-        mPrefixUrl = Uri.parse(getResources().getString(R.string.prefix_url));
-
-        // Fetch the videos using the video catalog URL from the Intent.
         try {
             JSONObject videoData = fetchJSON(getResources().getString(R.string.catalog_url));
             buildMedia(videoData);
@@ -101,11 +94,9 @@ public class FetchVideoService extends IntentService {
 
                 String title = video.getString(TAG_TITLE);
                 String description = video.getString(TAG_DESCRIPTION);
-                String videoUrl = getVideoPrefix(categoryName, getVideoSourceUrl(urls));
-                String bgImageUrl =
-                        getThumbPrefix(categoryName, title, video.getString(TAG_BACKGROUND));
-                String cardImageUrl =
-                        getThumbPrefix(categoryName, title, video.getString(TAG_CARD_THUMB));
+                String videoUrl = (String) urls.get(0); // Get the first video only.
+                String bgImageUrl = video.getString(TAG_BACKGROUND);
+                String cardImageUrl = video.getString(TAG_CARD_THUMB);
                 String studio = video.getString(TAG_STUDIO);
 
                 ContentValues videoValues = new ContentValues();
@@ -146,63 +137,9 @@ public class FetchVideoService extends IntentService {
     }
 
     /**
-     * Get the video source URL.
-     * <p/>
-     * TODO: Re-encode the sample data to give the full paths by default.
-     *
-     * @param videos the JSONArray of videos
-     * @return the video source URL.
-     *
-     * @throws JSONException
-     */
-    private String getVideoSourceUrl(final JSONArray videos) throws JSONException {
-        try {
-            final String url = videos.getString(0);
-            return (-1) == url.indexOf('%') ? url : URLDecoder.decode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new JSONException("Broken VM: no UTF-8");
-        }
-    }
-
-    /**
-     * Get the full URL path for a video.
-     * <p/>
-     * TODO: Re-encode the sample data to give the full paths by default.
-     *
-     * @param category the category name
-     * @param videoUrl the partial video url.
-     * @return the full URL path for the video.
-     */
-    private String getVideoPrefix(String category, String videoUrl) {
-        return mPrefixUrl.buildUpon()
-                .appendPath(category)
-                .appendPath(videoUrl)
-                .toString();
-    }
-
-    /**
-     * Get the full URL path for a thumbnail image.
-     * <p/>
-     * TODO: Re-encode the sample data to give the full paths by default.
-     *
-     * @param category the category name
-     * @param title    the video title
-     * @param imageUrl the image url
-     * @return the full URL path for a thumbnail image.
-     */
-    private String getThumbPrefix(String category, String title, String imageUrl) {
-        return mPrefixUrl.buildUpon()
-                .appendPath(category)
-                .appendPath(title)
-                .appendPath(imageUrl)
-                .toString();
-    }
-
-    /**
      * Fetch JSON object from a given URL.
      *
      * @return the JSONObject representation of the response
-     *
      * @throws JSONException
      * @throws IOException
      */

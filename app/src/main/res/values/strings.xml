@@ -35,8 +35,7 @@
 
     <string name="search_results">Search results for \'%1$s\'</string>
     <string name="no_search_results">No search results found for \'%1$s\'</string>
-    <string name="catalog_url">https://commondatastorage.googleapis.com/android-tv/android_tv_videos.json</string>
-    <string name="prefix_url">https://commondatastorage.googleapis.com/android-tv/Sample%20videos/</string>
+    <string name="catalog_url">https://storage.googleapis.com/android-tv/android_tv_videos_new.json</string>
 
     <!-- Error messages -->
 
