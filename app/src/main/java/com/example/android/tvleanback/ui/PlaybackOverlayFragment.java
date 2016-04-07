@@ -197,7 +197,7 @@ public class PlaybackOverlayFragment
         super.onPause();
         if (mPlayer.getPlayerControl().isPlaying()) {
             boolean isVisibleBehind = getActivity().requestVisibleBehind(true);
-            if (!isVisibleBehind && !getActivity().inPictureInPicture()) {
+            if (!isVisibleBehind && !getActivity().isInPictureInPictureMode()) {
                 playPause(false);
             }
         } else {
@@ -206,7 +206,7 @@ public class PlaybackOverlayFragment
     }
 
     @Override
-    public void onPictureInPictureChanged(boolean isInPictureInPictureMode) {
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (isInPictureInPictureMode) {
             fadeOut();
         }
