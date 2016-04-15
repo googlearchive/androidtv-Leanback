@@ -42,9 +42,9 @@ git clone https://github.com/googlesamples/androidtv-Leanback.git
 
 Need more information about getting started with Android TV? Check the [official docs][getting-started].
 
-## Screenshot
+## Screenshots
 
-![Screenshot](app/src/main/androidtv-leanback-sample.png)
+![Screenshot](screenshots/atv-leanback-all.png)
 
 ## Support
 
