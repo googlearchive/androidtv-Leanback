@@ -44,7 +44,7 @@ Need more information about getting started with Android TV? Check the [official
 
 ## Screenshots
 
-![Screenshot](screenshots/atv-leanback-all.png)
+[![Screenshot](screenshots/atv-leanback-all.png)](https://raw.githubusercontent.com/googlesamples/androidtv-Leanback/master/screenshots/atv-leanback-all.png)
 
 ## Support
 
