@@ -18,6 +18,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <permission android:name="${applicationId}.ACCESS_VIDEO_DATA"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.ACCESS_VIDEO_DATA" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -93,7 +96,11 @@
         <provider
             android:name=".data.VideoProvider"
             android:authorities="com.example.android.tvleanback"
-            tools:ignore="ExportedContentProvider" />
+            android:permission="${applicationId}.ACCESS_VIDEO_DATA"
+            android:exported="true">
+            <path-permission android:pathPrefix="/search_suggest_query"
+                android:readPermission="android.permission.GLOBAL_SEARCH"/>
+        </provider>
 
         <receiver
             android:name=".recommendation.RecommendationReceiver"
