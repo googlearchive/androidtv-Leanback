@@ -5,7 +5,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.PlaybackControlGlue;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -14,19 +16,23 @@ import android.support.v17.leanback.widget.OnActionClickedListener;
 import android.support.v17.leanback.widget.PlaybackControlsRow;
 import android.support.v17.leanback.widget.PlaybackControlsRowPresenter;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
+import android.util.Log;
 import android.view.View;
 
+import com.example.android.tvleanback.BuildConfig;
 import com.example.android.tvleanback.model.Video;
 
 class PlaybackControlHelper extends PlaybackControlGlue {
+    private static final String TAG = "PlaybackControlHelper";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
+
     private static final int[] SEEK_SPEEDS = {2}; // A single seek speed for fast-forward / rewind.
     private static final int DEFAULT_UPDATE_PERIOD = 500;
     private static final int UPDATE_PERIOD = 16;
     Drawable mMediaArt;
-    private boolean mIsPlaying;
-    private int mSpeed;
     private PlaybackOverlayFragment mFragment;
-    private MediaController.TransportControls mTransportControls;
+    private final MediaController mMediaController;
+    private final MediaController.TransportControls mTransportControls;
     private PlaybackControlsRow.RepeatAction mRepeatAction;
     private PlaybackControlsRow.ThumbsUpAction mThumbsUpAction;
     private PlaybackControlsRow.ThumbsDownAction mThumbsDownAction;
@@ -40,15 +46,18 @@ class PlaybackControlHelper extends PlaybackControlGlue {
         super(context, fragment, SEEK_SPEEDS);
         mFragment = fragment;
         mVideo = video;
-        mTransportControls = mFragment.getActivity().getMediaController().getTransportControls();
-        mIsPlaying = true;
-        mSpeed = PLAYBACK_SPEED_NORMAL;
+        mMediaController = mFragment.getActivity().getMediaController();
+        mTransportControls = mMediaController.getTransportControls();
 
         mThumbsUpAction = new PlaybackControlsRow.ThumbsUpAction(context);
         mThumbsUpAction.setIndex(PlaybackControlsRow.ThumbsUpAction.OUTLINE);
         mThumbsDownAction = new PlaybackControlsRow.ThumbsDownAction(context);
         mThumbsDownAction.setIndex(PlaybackControlsRow.ThumbsDownAction.OUTLINE);
         mRepeatAction = new PlaybackControlsRow.RepeatAction(context);
+    }
+
+    public MediaController.Callback createMediaControllerCallback() {
+        return new MediaControllerCallback();
     }
 
     @Override
@@ -128,7 +137,17 @@ class PlaybackControlHelper extends PlaybackControlGlue {
 
     @Override
     public boolean isMediaPlaying() {
-        return mIsPlaying;
+        if (mMediaController.getPlaybackState() == null) {
+            return false;
+        }
+        int state = mMediaController.getPlaybackState().getState();
+        return (state == PlaybackState.STATE_BUFFERING
+                || state == PlaybackState.STATE_CONNECTING
+                || state == PlaybackState.STATE_PLAYING
+                || state == PlaybackState.STATE_FAST_FORWARDING
+                || state == PlaybackState.STATE_REWINDING
+                || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
+                || state == PlaybackState.STATE_SKIPPING_TO_NEXT);
     }
 
     @Override
@@ -159,7 +178,7 @@ class PlaybackControlHelper extends PlaybackControlGlue {
 
     @Override
     public int getCurrentSpeedId() {
-        return mSpeed;
+        return isMediaPlaying() ? PLAYBACK_SPEED_NORMAL : PLAYBACK_SPEED_PAUSED;
     }
 
     @Override
@@ -169,33 +188,24 @@ class PlaybackControlHelper extends PlaybackControlGlue {
 
     @Override
     protected void startPlayback(int speed) {
-        if (mSpeed == speed) {
+        if (getCurrentSpeedId() == speed) {
             return;
         }
-
-        mSpeed = speed;
-        mIsPlaying = true;
         mTransportControls.play();
     }
 
     @Override
     protected void pausePlayback() {
-        mSpeed = PlaybackControlGlue.PLAYBACK_SPEED_PAUSED;
-        mIsPlaying = false;
         mTransportControls.pause();
     }
 
     @Override
     protected void skipToNext() {
-        mSpeed = PlaybackControlGlue.PLAYBACK_SPEED_NORMAL;
-        mIsPlaying = true;
         mTransportControls.skipToNext();
     }
 
     @Override
     protected void skipToPrevious() {
-        mSpeed = PlaybackControlGlue.PLAYBACK_SPEED_NORMAL;
-        mIsPlaying = true;
         mTransportControls.skipToPrevious();
     }
 
@@ -259,5 +269,25 @@ class PlaybackControlHelper extends PlaybackControlGlue {
 
     private ArrayObjectAdapter getSecondaryActionsAdapter() {
         return (ArrayObjectAdapter) getControlsRow().getSecondaryActionsAdapter();
+    }
+
+    private class MediaControllerCallback extends MediaController.Callback {
+        @Override
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
+            // Update your UI to reflect the new state. Do not change media playback here.
+            if (DEBUG) Log.d(TAG, "Playback state changed: " + state.getState());
+
+            int nextState = state.getState();
+            if (nextState != PlaybackState.STATE_NONE) {
+                updateProgress();
+            }
+            onStateChanged();
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            PlaybackControlHelper.this.onMetadataChanged(); // Update metadata on controls.
+            mFragment.updatePlaybackRow();
+        }
     }
 }

@@ -85,7 +85,6 @@ public class PlaybackOverlayFragment
         implements LoaderManager.LoaderCallbacks<Cursor>, TextureView.SurfaceTextureListener,
         VideoPlayer.Listener {
     private static final String TAG = "PlaybackOverlayFragment";
-    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
     private static final String AUTO_PLAY = "auto_play";
     private static final Bundle mAutoPlayExtras = new Bundle();
@@ -97,7 +96,6 @@ public class PlaybackOverlayFragment
     }
 
     private final VideoCursorMapper mVideoCursorMapper = new VideoCursorMapper();
-    private final MediaController.Callback mMediaControllerCallback = new MediaControllerCallback();
     private int mSpecificVideoLoaderId = 3;
     private int mQueueIndex = -1;
     private Video mSelectedVideo; // Video is the currently playing Video and its metadata.
@@ -108,6 +106,7 @@ public class PlaybackOverlayFragment
     private LoaderManager.LoaderCallbacks<Cursor> mCallbacks;
     private MediaController mMediaController;
     private PlaybackControlHelper mGlue;
+    private MediaController.Callback mMediaControllerCallback;
     private VideoPlayer mPlayer;
     private boolean mIsMetadataSet = false;
 
@@ -117,14 +116,12 @@ public class PlaybackOverlayFragment
         mCallbacks = this;
 
         createMediaSession();
-
-        mMediaController = getActivity().getMediaController();
-        mMediaController.registerCallback(mMediaControllerCallback);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
         mSession.release();
         releasePlayer();
     }
@@ -133,16 +130,11 @@ public class PlaybackOverlayFragment
     public void onDestroy() {
         super.onDestroy();
 
-        mSession.release();
-        releasePlayer();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mMediaControllerCallback);
         }
+        mSession.release();
+        releasePlayer();
     }
 
     @Override
@@ -171,6 +163,10 @@ public class PlaybackOverlayFragment
         mGlue = new PlaybackControlHelper(getContext(), this, mSelectedVideo);
         PlaybackControlsRowPresenter controlsRowPresenter = mGlue.createControlsRowAndPresenter();
         PlaybackControlsRow controlsRow = mGlue.getControlsRow();
+        mMediaControllerCallback = mGlue.createMediaControllerCallback();
+
+        mMediaController = getActivity().getMediaController();
+        mMediaController.registerCallback(mMediaControllerCallback);
 
         ClassPresenterSelector ps = new ClassPresenterSelector();
         ps.addClassPresenter(PlaybackControlsRow.class, controlsRowPresenter);
@@ -375,7 +371,7 @@ public class PlaybackOverlayFragment
         }
     }
 
-    private void updatePlaybackRow() {
+    void updatePlaybackRow() {
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
     }
 
@@ -663,26 +659,6 @@ public class PlaybackOverlayFragment
         @Override
         public void onSeekTo(long position) {
             setPosition(position);
-        }
-    }
-
-    private class MediaControllerCallback extends MediaController.Callback {
-
-        @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
-            // Update your UI to reflect the new state. Do not change media playback here.
-            if (DEBUG) Log.d(TAG, "Playback state changed: " + state.getState());
-
-            int nextState = state.getState();
-            if (nextState != PlaybackState.STATE_NONE) {
-                mGlue.updateProgress();
-            }
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadata metadata) {
-            mGlue.onMetadataChanged(); // Update metadata on controls.
-            updatePlaybackRow();
         }
     }
 }
