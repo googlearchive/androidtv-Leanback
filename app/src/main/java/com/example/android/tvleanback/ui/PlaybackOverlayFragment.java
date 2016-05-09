@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -109,6 +110,38 @@ public class PlaybackOverlayFragment
     private MediaController.Callback mMediaControllerCallback;
     private VideoPlayer mPlayer;
     private boolean mIsMetadataSet = false;
+    private AudioManager mAudioManager;
+    private boolean mHasAudioFocus;
+    private boolean mPauseTransient;
+    private final AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener =
+            new AudioManager.OnAudioFocusChangeListener() {
+                @Override
+                public void onAudioFocusChange(int focusChange) {
+                    switch (focusChange) {
+                        case AudioManager.AUDIOFOCUS_LOSS:
+                            abandonAudioFocus();
+                            pause();
+                            break;
+                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                            if (mGlue.isMediaPlaying()) {
+                                pause();
+                                mPauseTransient = true;
+                            }
+                            break;
+                        case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                            mPlayer.mute(true);
+                            break;
+                        case AudioManager.AUDIOFOCUS_GAIN:
+                        case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                        case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                            if (mPauseTransient) {
+                                play();
+                            }
+                            mPlayer.mute(false);
+                            break;
+                    }
+                }
+            };
 
     @Override
     public void onAttach(Context context) {
@@ -142,13 +175,14 @@ public class PlaybackOverlayFragment
         super.onResume();
 
         if (mPlayer == null) {
-            preparePlayer(true);
+            preparePlayer();
         }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
 
         // Initialize instance variables.
         TextureView textureView = (TextureView) getActivity().findViewById(R.id.texture_view);
@@ -201,7 +235,7 @@ public class PlaybackOverlayFragment
         if (mPlayer.getPlayerControl().isPlaying()) {
             boolean isVisibleBehind = getActivity().requestVisibleBehind(true);
             if (!isVisibleBehind) {
-                playPause(false);
+                pause();
             }
         } else {
             getActivity().requestVisibleBehind(false);
@@ -356,19 +390,50 @@ public class PlaybackOverlayFragment
         return actions;
     }
 
-    private void playPause(boolean doPlay) {
+    private void play() {
+        // Request audio focus whenever we resume playback
+        // because the app might have abandoned audio focus due to the AUDIOFOCUS_LOSS.
+        requestAudioFocus();
+
         if (mPlayer == null) {
             setPlaybackState(PlaybackState.STATE_NONE);
             return;
         }
-
-        if (doPlay && getPlaybackState() != PlaybackState.STATE_PLAYING) {
+        if (!mGlue.isMediaPlaying()) {
             mPlayer.getPlayerControl().start();
             setPlaybackState(PlaybackState.STATE_PLAYING);
-        } else {
+        }
+    }
+
+    private void pause() {
+        mPauseTransient = false;
+
+        if (mPlayer == null) {
+            setPlaybackState(PlaybackState.STATE_NONE);
+            return;
+        }
+        if (mGlue.isMediaPlaying()) {
             mPlayer.getPlayerControl().pause();
             setPlaybackState(PlaybackState.STATE_PAUSED);
         }
+    }
+
+    private void requestAudioFocus() {
+        if (mHasAudioFocus) {
+            return;
+        }
+        int result = mAudioManager.requestAudioFocus(mOnAudioFocusChangeListener,
+                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mHasAudioFocus = true;
+        } else {
+            pause();
+        }
+    }
+
+    private void abandonAudioFocus() {
+        mHasAudioFocus = false;
+        mAudioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
     }
 
     void updatePlaybackRow() {
@@ -405,7 +470,7 @@ public class PlaybackOverlayFragment
         }
     }
 
-    private void preparePlayer(boolean playWhenReady) {
+    private void preparePlayer() {
         if (mPlayer == null) {
             mPlayer = new VideoPlayer(getRendererBuilder());
             mPlayer.addListener(this);
@@ -417,7 +482,9 @@ public class PlaybackOverlayFragment
             mPlayer.setRendererBuilder(getRendererBuilder());
             mPlayer.prepare();
         }
-        mPlayer.setPlayWhenReady(playWhenReady);
+        mPlayer.setPlayWhenReady(true);
+
+        requestAudioFocus();
     }
 
     private void releasePlayer() {
@@ -425,6 +492,7 @@ public class PlaybackOverlayFragment
             mPlayer.release();
             mPlayer = null;
         }
+        abandonAudioFocus();
     }
 
     @Override
@@ -551,9 +619,13 @@ public class PlaybackOverlayFragment
 
     private void playVideo(Video video, Bundle extras) {
         mSelectedVideo = video;
-        preparePlayer(true);
+        preparePlayer();
         setPlaybackState(PlaybackState.STATE_PAUSED);
-        playPause(extras.getBoolean(AUTO_PLAY));
+        if (extras.getBoolean(AUTO_PLAY)) {
+            play();
+        } else {
+            pause();
+        }
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -581,7 +653,7 @@ public class PlaybackOverlayFragment
 
         @Override
         public void onPlay() {
-            playPause(true);
+            play();
         }
 
         @Override
@@ -594,7 +666,7 @@ public class PlaybackOverlayFragment
 
         @Override
         public void onPause() {
-            playPause(false);
+            pause();
         }
 
         @Override
