@@ -389,6 +389,10 @@ public class VideoPlayer implements ExoPlayer.Listener, ChunkSampleSource.EventL
         return playerState;
     }
 
+    public void mute(boolean mute) {
+        player.setSelectedTrack(TYPE_AUDIO, mute ? -1 : 0);
+    }
+
     @Override
     public Format getFormat() {
         return videoFormat;
