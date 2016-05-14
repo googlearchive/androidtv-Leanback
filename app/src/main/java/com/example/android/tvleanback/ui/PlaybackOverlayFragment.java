@@ -18,6 +18,7 @@ package com.example.android.tvleanback.ui;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -111,6 +112,14 @@ public class PlaybackOverlayFragment
     private VideoPlayer mPlayer;
     private boolean mIsMetadataSet = false;
 
+    private final PlaybackOverlayActivity.OnNewIntentListener mOnNewIntentListener =
+            new PlaybackOverlayActivity.OnNewIntentListener() {
+                @Override
+                public void onNewIntent() {
+                    updateVideo();
+                }
+            };
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -118,15 +127,9 @@ public class PlaybackOverlayFragment
 
         createMediaSession();
 
+        ((PlaybackOverlayActivity) getActivity()).setOnNewIntentListener(mOnNewIntentListener);
         mMediaController = getActivity().getMediaController();
         mMediaController.registerCallback(mMediaControllerCallback);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mSession.release();
-        releasePlayer();
     }
 
     @Override
@@ -162,11 +165,27 @@ public class PlaybackOverlayFragment
         TextureView textureView = (TextureView) getActivity().findViewById(R.id.texture_view);
         textureView.setSurfaceTextureListener(this);
 
-        mSelectedVideo = getActivity().getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
         mQueue = new ArrayList<>();
 
         // Set up UI.
         setBackgroundType(BACKGROUND_TYPE);
+
+        updateVideo();
+
+        // Set up listeners.
+        setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
+            @Override
+            public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
+                    RowPresenter.ViewHolder rowViewHolder, Row row) {
+            }
+        });
+        setOnItemViewClickedListener(new ItemViewClickedListener());
+    }
+
+    private void updateVideo() {
+        if (!setSelectedVideo(null)) {
+            return;
+        }
 
         mGlue = new PlaybackControlHelper(getContext(), this, mSelectedVideo);
         PlaybackControlsRowPresenter controlsRowPresenter = mGlue.createControlsRowAndPresenter();
@@ -188,15 +207,27 @@ public class PlaybackOverlayFragment
         Bundle args = new Bundle();
         args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, mSelectedVideo.category);
         getLoaderManager().initLoader(QUEUE_VIDEOS_LOADER, args, mCallbacks);
+    }
 
-        // Set up listeners.
-        setOnItemViewSelectedListener(new OnItemViewSelectedListener() {
-            @Override
-            public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-            }
-        });
-        setOnItemViewClickedListener(new ItemViewClickedListener());
+    private boolean setSelectedVideo(Video video) {
+        PlaybackOverlayActivity activity = (PlaybackOverlayActivity) getActivity();
+        Intent intent = activity.getLatestIntent();
+        if (video == null) {
+            video = intent.getParcelableExtra(VideoDetailsActivity.VIDEO);
+        } else {
+            intent = new Intent(activity.getLatestIntent());
+            intent.putExtra(VideoDetailsActivity.VIDEO, video);
+        }
+        if (mSelectedVideo != null && mSelectedVideo.equals(video)) {
+            return false;
+        }
+        mSelectedVideo = video;
+
+        PendingIntent pi = PendingIntent.getActivity(
+                getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mSession.setSessionActivity(pi);
+
+        return true;
     }
 
     @Override
@@ -204,11 +235,22 @@ public class PlaybackOverlayFragment
         super.onPause();
         if (mPlayer.getPlayerControl().isPlaying()) {
             boolean isVisibleBehind = getActivity().requestVisibleBehind(true);
-            if (!isVisibleBehind) {
+            if (!isVisibleBehind && !getActivity().isInPictureInPictureMode()) {
                 playPause(false);
             }
         } else {
             getActivity().requestVisibleBehind(false);
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean pictureInPictureMode) {
+        if (pictureInPictureMode) {
+            mGlue.setFadingEnabled(false);
+            setFadingEnabled(true);
+            fadeOut();
+        } else {
+            mGlue.setFadingEnabled(true);
         }
     }
 
@@ -554,7 +596,7 @@ public class PlaybackOverlayFragment
     }
 
     private void playVideo(Video video, Bundle extras) {
-        mSelectedVideo = video;
+        setSelectedVideo(video);
         preparePlayer(true);
         setPlaybackState(PlaybackState.STATE_PAUSED);
         playPause(extras.getBoolean(AUTO_PLAY));
