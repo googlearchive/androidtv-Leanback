@@ -8,12 +8,9 @@ This sample is a Videos By Google app, designed to run on an Android TV device (
 
 The Android N Preview adds [Picture-in-picture][pip-docs] (PIP) to Android TV.
 
-Check out the [`add-pip`][add-pip] tree for how it is implemented in this sample.
-
-Please file any [issues][bugs] you encounter while playing around with this very new (yet very cool) feature.
+Picture-in-picture support is available directly on the `master` branch of this repo.
 
 [pip-docs]: https://developer.android.com/preview/features/picture-in-picture.html
-[add-pip]: https://github.com/googlesamples/androidtv-Leanback/tree/add-pip
 
 ## Introduction
 
