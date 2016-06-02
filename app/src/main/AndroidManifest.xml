@@ -13,28 +13,25 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.android.tvleanback">
 
-<manifest package="com.example.android.tvleanback"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <permission android:name="${applicationId}.ACCESS_VIDEO_DATA"
+    <permission
+        android:name="${applicationId}.ACCESS_VIDEO_DATA"
         android:protectionLevel="signature" />
-    <uses-permission android:name="${applicationId}.ACCESS_VIDEO_DATA" />
 
+    <uses-permission android:name="${applicationId}.ACCESS_VIDEO_DATA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
-
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-
     <uses-feature
         android:name="android.software.leanback"
         android:required="true" />
@@ -46,7 +43,6 @@
         android:label="@string/app_name"
         android:logo="@drawable/videos_by_google_banner"
         android:theme="@style/Theme.Leanback">
-
         <activity
             android:name=".ui.MainActivity"
             android:icon="@drawable/videos_by_google_banner"
@@ -77,7 +73,7 @@
             <!-- Receives the search request. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
-                <!-- No category needed, because the Intent will specify this class component-->
+                <!-- No category needed, because the Intent will specify this class component -->
             </intent-filter>
 
             <!-- Points to searchable meta data. -->
@@ -85,21 +81,18 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
-        <activity android:name=".ui.PlaybackOverlayActivity"
+        <activity
+            android:name=".ui.PlaybackOverlayActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
             android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true" />
-
         <activity
             android:name=".ui.VerticalGridActivity"
             android:exported="true"
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/Theme.Leanback.VerticalGrid" />
-
         <activity android:name=".ui.SearchActivity" />
-
         <activity
             android:name=".ui.GuidedStepActivity"
             android:theme="@style/Theme.Example.Leanback.GuidedStep" />
@@ -108,10 +101,11 @@
         <provider
             android:name=".data.VideoProvider"
             android:authorities="com.example.android.tvleanback"
-            android:permission="${applicationId}.ACCESS_VIDEO_DATA"
-            android:exported="true">
-            <path-permission android:pathPrefix="/search_suggest_query"
-                android:readPermission="android.permission.GLOBAL_SEARCH"/>
+            android:exported="true"
+            android:permission="${applicationId}.ACCESS_VIDEO_DATA">
+            <path-permission
+                android:pathPrefix="/search_suggest_query"
+                android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
 
         <receiver
@@ -126,10 +120,14 @@
         <service
             android:name=".data.FetchVideoService"
             android:exported="false" />
-
         <service
             android:name=".recommendation.UpdateRecommendationsService"
             android:enabled="true" />
+
+        <activity android:name=".ui.OnboardingActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:theme="@style/Theme.Leanback.Onboarding" />
     </application>
 
 </manifest>
