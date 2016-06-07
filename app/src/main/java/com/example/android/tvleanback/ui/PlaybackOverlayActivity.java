@@ -23,7 +23,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.os.BuildCompat;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import com.example.android.tvleanback.R;
 
@@ -31,7 +33,12 @@ import com.example.android.tvleanback.R;
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles the
  * MediaSession object used to maintain the state of the media playback.
  */
-public class PlaybackOverlayActivity extends FragmentActivity {
+public class PlaybackOverlayActivity extends Activity {
+    private static final float GAMEPAD_TRIGGER_INTENSITY_ON = 0.5f;
+    // Off-condition slightly smaller for button debouncing
+    private static final float GAMEPAD_TRIGGER_INTENSITY_OFF = 0.45f;
+    private boolean gamepadTriggerPressed = false;
+
     /**
      * Called when the activity is first created.
      */
@@ -77,9 +84,31 @@ public class PlaybackOverlayActivity extends FragmentActivity {
         } else if (keyCode == KeyEvent.KEYCODE_BUTTON_L1) {
             getMediaController().getTransportControls().skipToPrevious();
             return true;
+        } else if (keyCode == KeyEvent.KEYCODE_BUTTON_L2) {
+            getMediaController().getTransportControls().rewind();
+        } else if (keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
+            getMediaController().getTransportControls().fastForward();
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        // This method will handle gamepad events
+        if (event.getAxisValue(MotionEvent.AXIS_LTRIGGER) >
+                GAMEPAD_TRIGGER_INTENSITY_ON && !gamepadTriggerPressed) {
+            getMediaController().getTransportControls().rewind();
+            gamepadTriggerPressed = true;
+        } else if (event.getAxisValue(MotionEvent.AXIS_RTRIGGER) >
+                GAMEPAD_TRIGGER_INTENSITY_ON && !gamepadTriggerPressed) {
+            getMediaController().getTransportControls().fastForward();
+            gamepadTriggerPressed = true;
+        } else if(event.getAxisValue(MotionEvent.AXIS_LTRIGGER) < GAMEPAD_TRIGGER_INTENSITY_OFF
+                && event.getAxisValue(MotionEvent.AXIS_RTRIGGER) < GAMEPAD_TRIGGER_INTENSITY_OFF) {
+            gamepadTriggerPressed = false;
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     public static boolean supportsPictureInPicture(Context context) {
