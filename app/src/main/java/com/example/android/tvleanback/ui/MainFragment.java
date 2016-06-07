@@ -359,6 +359,12 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
                     BrowseErrorFragment errorFragment = new BrowseErrorFragment();
                     getFragmentManager().beginTransaction().replace(R.id.main_frame, errorFragment)
                             .addToBackStack(null).commit();
+                } else if(((String) item).contains(getString(R.string.personal_settings))) {
+                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                    Bundle bundle =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity())
+                                    .toBundle();
+                    startActivity(intent, bundle);
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();

@@ -102,7 +102,6 @@ public class VideoProvider extends ContentProvider {
 
     private Cursor getSuggestions(String query) {
         query = query.toLowerCase();
-
         return sVideosContainingQueryBuilder.query(
                 mOpenHelper.getReadableDatabase(),
                 sVideosContainingQueryColumns,
@@ -159,7 +158,6 @@ public class VideoProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
-
         switch (sUriMatcher.match(uri)) {
             case SEARCH_SUGGEST: {
                 String rawQuery = "";

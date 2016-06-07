@@ -20,8 +20,12 @@
     <permission
         android:name="${applicationId}.ACCESS_VIDEO_DATA"
         android:protectionLevel="signature" />
+    <permission
+        android:name="${applicationId}.ACCESS_MOVIES_DATA"
+        android:protectionLevel="signature" />
 
     <uses-permission android:name="${applicationId}.ACCESS_VIDEO_DATA" />
+    <uses-permission android:name="${applicationId}.ACCESS_MOVIES_DATA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -65,6 +69,8 @@
             </intent-filter>
         </activity>
 
+        <meta-data android:name="android.app.default_searchable"
+            android:value=".ui.VideoDetailsActivity" />
         <activity
             android:name=".ui.VideoDetailsActivity"
             android:exported="true"
@@ -100,11 +106,10 @@
         <!-- Provides search suggestions for keywords against video metadata. -->
         <provider
             android:name=".data.VideoProvider"
-            android:authorities="com.example.android.tvleanback"
-            android:exported="true"
-            android:permission="${applicationId}.ACCESS_VIDEO_DATA">
+            android:authorities="${packageName}"
+            android:exported="true">
             <path-permission
-                android:pathPrefix="/search_suggest_query"
+                android:pathPrefix="/search"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
 
@@ -128,6 +133,13 @@
             android:enabled="true"
             android:exported="true"
             android:theme="@style/Theme.Leanback.Onboarding" />
+        <activity android:name=".ui.SettingsActivity"
+            android:exported="true"
+            android:theme="@style/LeanbackPreferences"
+            />
+        <activity
+            android:name=".ui.AuthenticationActivity"
+            android:theme="@style/Theme.Example.Leanback.GuidedStep" />
     </application>
 
 </manifest>
