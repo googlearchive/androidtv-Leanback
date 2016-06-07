@@ -38,8 +38,6 @@ import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -418,6 +416,8 @@ public class PlaybackOverlayFragment
                 PlaybackState.ACTION_PLAY_FROM_SEARCH |
                 PlaybackState.ACTION_SKIP_TO_NEXT |
                 PlaybackState.ACTION_SKIP_TO_PREVIOUS |
+                PlaybackState.ACTION_FAST_FORWARD |
+                PlaybackState.ACTION_REWIND |
                 PlaybackState.ACTION_PAUSE;
 
         if (nextState == PlaybackState.STATE_PLAYING) {
