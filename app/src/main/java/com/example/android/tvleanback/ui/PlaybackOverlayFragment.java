@@ -170,8 +170,8 @@ public class PlaybackOverlayFragment
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         // Set up UI
         Video video = getActivity().getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
@@ -196,13 +196,18 @@ public class PlaybackOverlayFragment
         updatePlaybackRow();
         setAdapter(mRowsAdapter);
 
-        // Prepare the player and start playing the selected video.
-        playVideo(mSelectedVideo, mAutoPlayExtras);
+        startPlaying();
+    }
 
-        // Start loading videos for the queue.
-        Bundle args = new Bundle();
-        args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, mSelectedVideo.category);
-        getLoaderManager().initLoader(QUEUE_VIDEOS_LOADER, args, mCallbacks);
+    @Override
+    public void onResume() {
+        super.onResume();
+        Video video = getActivity().getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
+        if (!updateSelectedVideo(video)) {
+            return;
+        }
+
+        startPlaying();
     }
 
     @Override
@@ -646,6 +651,16 @@ public class PlaybackOverlayFragment
         } else {
             pause();
         }
+    }
+
+    private void startPlaying() {
+        // Prepare the player and start playing the selected video
+        playVideo(mSelectedVideo, mAutoPlayExtras);
+
+        // Start loading videos for the queue
+        Bundle args = new Bundle();
+        args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, mSelectedVideo.category);
+        getLoaderManager().initLoader(QUEUE_VIDEOS_LOADER, args, mCallbacks);
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
