@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'android-N'
-    buildToolsVersion '24.0.0 rc2'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
     defaultConfig {
         applicationId "com.example.android.tvleanback"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
