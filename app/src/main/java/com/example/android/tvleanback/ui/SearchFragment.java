@@ -113,19 +113,15 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
                     case Activity.RESULT_OK:
                         setSearchQuery(data, true);
                         break;
-                    case Activity.RESULT_CANCELED:
-                        // Once recognizer canceled, user expects the current activity to process
-                        // the same BACK press as user doesn't know about overlay activity.
-                        // However, you may not want this behaviour as it makes harder to
-                        // fall back to keyboard input.
+                    default:
+                        // If recognizer is canceled or failed, keep focus on the search orb
                         if (FINISH_ON_RECOGNIZER_CANCELED) {
                             if (!hasResults()) {
-                                if (DEBUG) Log.v(TAG, "Delegating BACK press from recognizer");
-                                getActivity().onBackPressed();
+                                if (DEBUG) Log.v(TAG, "Voice search canceled");
+                                getView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
                             }
                         }
                         break;
-                    // the rest includes various recognizer errors, see {@link RecognizerIntent}
                 }
                 break;
         }
