@@ -51,6 +51,7 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
     public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
         HeaderItem headerItem = ((ListRow) item).getHeaderItem();
         View rootView = viewHolder.view;
+        rootView.setFocusable(true);
 
         ImageView iconView = (ImageView) rootView.findViewById(R.id.header_icon);
         Drawable icon = rootView.getResources().getDrawable(R.drawable.android_header, null);
