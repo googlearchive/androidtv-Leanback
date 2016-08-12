@@ -49,6 +49,7 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,7 +182,7 @@ public class VideoDetailsFragment extends DetailsFragment
                         new MovieDetailsOverviewLogoPresenter());
 
         detailsPresenter.setBackgroundColor(
-                getResources().getColor(R.color.selected_background, null));
+                ContextCompat.getColor(getActivity(), R.color.selected_background));
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
 
         // Hook up transition element.

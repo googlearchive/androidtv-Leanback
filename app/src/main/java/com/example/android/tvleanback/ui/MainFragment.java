@@ -42,6 +42,7 @@ import android.support.v17.leanback.widget.PresenterSelector;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
@@ -146,10 +147,10 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
         setHeadersTransitionOnBackEnabled(true);
 
         // Set fastLane (or headers) background color
-        setBrandColor(getResources().getColor(R.color.fastlane_background, null));
+        setBrandColor(ContextCompat.getColor(getActivity(), R.color.fastlane_background));
 
         // Set search icon color.
-        setSearchAffordanceColor(getResources().getColor(R.color.search_opaque, null));
+        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.search_opaque));
 
         setHeaderPresenterSelector(new PresenterSelector() {
             @Override
