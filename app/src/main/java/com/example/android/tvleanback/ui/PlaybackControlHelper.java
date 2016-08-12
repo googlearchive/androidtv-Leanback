@@ -1,5 +1,6 @@
 package com.example.android.tvleanback.ui;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
@@ -7,6 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.PlaybackControlGlue;
@@ -233,6 +237,7 @@ class PlaybackControlHelper extends PlaybackControlGlue {
         super.onMetadataChanged();
     }
 
+    @TargetApi(VERSION_CODES.N)
     public void dispatchAction(Action action) {
         if (action instanceof PlaybackControlsRow.MultiAction) {
             PlaybackControlsRow.MultiAction multiAction = (PlaybackControlsRow.MultiAction) action;

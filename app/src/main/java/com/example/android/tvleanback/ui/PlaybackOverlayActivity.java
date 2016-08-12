@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.os.BuildCompat;
 import android.view.KeyEvent;
 
@@ -30,7 +31,7 @@ import com.example.android.tvleanback.R;
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles the
  * MediaSession object used to maintain the state of the media playback.
  */
-public class PlaybackOverlayActivity extends Activity {
+public class PlaybackOverlayActivity extends FragmentActivity {
     /**
      * Called when the activity is first created.
      */
