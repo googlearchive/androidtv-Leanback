@@ -16,12 +16,10 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.os.BuildCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -33,7 +31,7 @@ import com.example.android.tvleanback.R;
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment and handles the
  * MediaSession object used to maintain the state of the media playback.
  */
-public class PlaybackOverlayActivity extends Activity {
+public class PlaybackOverlayActivity extends LeanbackActivity {
     private static final float GAMEPAD_TRIGGER_INTENSITY_ON = 0.5f;
     // Off-condition slightly smaller for button debouncing
     private static final float GAMEPAD_TRIGGER_INTENSITY_OFF = 0.45f;
@@ -68,12 +66,6 @@ public class PlaybackOverlayActivity extends Activity {
     public void onVisibleBehindCanceled() {
         getMediaController().getTransportControls().pause();
         super.onVisibleBehindCanceled();
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-        startActivity(new Intent(this, SearchActivity.class));
-        return true;
     }
 
     @Override

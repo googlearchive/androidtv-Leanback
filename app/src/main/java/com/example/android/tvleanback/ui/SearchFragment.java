@@ -59,7 +59,6 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         implements android.support.v17.leanback.app.SearchFragment.SearchResultProvider,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "SearchFragment";
-
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
@@ -82,6 +81,10 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
 
         setSearchResultProvider(this);
         setOnItemViewClickedListener(new ItemViewClickedListener());
+        if (DEBUG) {
+            Log.d(TAG, "User is initiating a search. Do we have RECORD_AUDIO permission? " +
+                hasPermission(Manifest.permission.RECORD_AUDIO));
+        }
         if (!hasPermission(Manifest.permission.RECORD_AUDIO)) {
             if (DEBUG) {
                 Log.d(TAG, "Does not have RECORD_AUDIO, using SpeechRecognitionCallback");

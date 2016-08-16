@@ -16,8 +16,6 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.android.tvleanback.R;
@@ -25,7 +23,7 @@ import com.example.android.tvleanback.R;
 /*
  * Details activity class that loads VideoDetailsFragment class
  */
-public class VideoDetailsActivity extends Activity {
+public class VideoDetailsActivity extends LeanbackActivity {
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String VIDEO = "Video";
     public static final String NOTIFICATION_ID = "NotificationId";
@@ -37,11 +35,5 @@ public class VideoDetailsActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_details);
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-        startActivity(new Intent(this, SearchActivity.class));
-        return true;
     }
 }

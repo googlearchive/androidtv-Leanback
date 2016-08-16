@@ -19,20 +19,13 @@ package com.example.android.tvleanback.data;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.media.Rating;
 import android.util.Log;
 
 import com.example.android.tvleanback.R;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
