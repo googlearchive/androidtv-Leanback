@@ -1,17 +1,12 @@
 package com.example.android.tvleanback;
 
 import android.content.ContentValues;
-import android.database.Cursor;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.example.android.tvleanback.data.VideoContract;
 import com.example.android.tvleanback.data.VideoDbBuilder;
-import com.example.android.tvleanback.data.VideoDbHelper;
-import com.example.android.tvleanback.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;

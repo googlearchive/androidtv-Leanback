@@ -90,10 +90,6 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
         // Each adapter is used to render a specific row of videos in the MainFragment.
         mVideoCursorAdapters = new HashMap<>();
 
-        // Map category results from the database to ListRow objects.
-        // This Adapter is used to render the MainFragment sidebar labels.
-        mCategoryRowAdapter = new ArrayObjectAdapter(new ListRowPresenter());
-
         // Start loading the categories from the database.
         getLoaderManager().initLoader(CATEGORY_LOADER, null, this);
     }
@@ -110,6 +106,9 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
         setupEventListeners();
         prepareEntranceTransition();
 
+        // Map category results from the database to ListRow objects.
+        // This Adapter is used to render the MainFragment sidebar labels.
+        mCategoryRowAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         setAdapter(mCategoryRowAdapter);
 
         updateRecommendations();

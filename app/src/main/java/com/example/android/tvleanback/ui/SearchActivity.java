@@ -16,7 +16,6 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -26,7 +25,7 @@ import com.example.android.tvleanback.R;
 /*
  * SearchActivity for SearchFragment
  */
-public class SearchActivity extends Activity {
+public class SearchActivity extends LeanbackActivity {
     private SearchFragment mFragment;
 
     /**
@@ -36,7 +35,6 @@ public class SearchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-
         mFragment = (SearchFragment) getFragmentManager().findFragmentById(R.id.search_fragment);
     }
 

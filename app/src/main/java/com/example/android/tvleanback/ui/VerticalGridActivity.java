@@ -16,8 +16,6 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.android.tvleanback.R;
@@ -25,7 +23,7 @@ import com.example.android.tvleanback.R;
 /*
  * VerticalGridActivity that loads VerticalGridFragment
  */
-public class VerticalGridActivity extends Activity {
+public class VerticalGridActivity extends LeanbackActivity {
     /**
      * Called when the activity is first created.
      */
@@ -34,11 +32,5 @@ public class VerticalGridActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.vertical_grid);
         getWindow().setBackgroundDrawableResource(R.drawable.grid_bg);
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-        startActivity(new Intent(this, SearchActivity.class));
-        return true;
     }
 }
