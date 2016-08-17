@@ -83,6 +83,9 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
         setSearchResultProvider(this);
         setOnItemViewClickedListener(new ItemViewClickedListener());
         if (!hasPermission(Manifest.permission.RECORD_AUDIO)) {
+            if (DEBUG) {
+                Log.d(TAG, "Does not have RECORD_AUDIO, using SpeechRecognitionCallback");
+            }
             // SpeechRecognitionCallback is not required and if not provided recognition will be
             // handled using internal speech recognizer, in which case you must have RECORD_AUDIO
             // permission
@@ -96,6 +99,8 @@ public class SearchFragment extends android.support.v17.leanback.app.SearchFragm
                     }
                 }
             });
+        } else if (DEBUG) {
+            Log.d(TAG, "We DO have RECORD_AUDIO");
         }
     }
 
