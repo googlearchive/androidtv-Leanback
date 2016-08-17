@@ -100,12 +100,12 @@ public class VideoDbBuilder {
                     continue;
                 }
 
-                String title = video.getString(TAG_TITLE);
-                String description = video.getString(TAG_DESCRIPTION);
+                String title = video.optString(TAG_TITLE);
+                String description = video.optString(TAG_DESCRIPTION);
                 String videoUrl = (String) urls.get(0); // Get the first video only.
-                String bgImageUrl = video.getString(TAG_BACKGROUND);
-                String cardImageUrl = video.getString(TAG_CARD_THUMB);
-                String studio = video.getString(TAG_STUDIO);
+                String bgImageUrl = video.optString(TAG_BACKGROUND);
+                String cardImageUrl = video.optString(TAG_CARD_THUMB);
+                String studio = video.optString(TAG_STUDIO);
 
                 ContentValues videoValues = new ContentValues();
                 videoValues.put(VideoContract.VideoEntry.COLUMN_CATEGORY, categoryName);
