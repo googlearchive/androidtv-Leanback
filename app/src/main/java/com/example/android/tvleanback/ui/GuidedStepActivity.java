@@ -26,6 +26,7 @@ import android.support.v17.leanback.app.GuidedStepFragment;
 import android.support.v17.leanback.widget.GuidanceStylist;
 import android.support.v17.leanback.widget.GuidanceStylist.Guidance;
 import android.support.v17.leanback.widget.GuidedAction;
+import android.support.v4.content.res.ResourcesCompat;
 
 import com.example.android.tvleanback.R;
 
@@ -93,7 +94,7 @@ public class GuidedStepActivity extends Activity {
             String title = getString(R.string.guidedstep_first_title);
             String breadcrumb = getString(R.string.guidedstep_first_breadcrumb);
             String description = getString(R.string.guidedstep_first_description);
-            Drawable icon = getActivity().getDrawable(R.drawable.ic_main_icon);
+            Drawable icon = ResourcesCompat.getDrawable(getActivity().getResources(), R.drawable.ic_main_icon, null);
             return new Guidance(title, description, breadcrumb, icon);
         }
 
@@ -126,7 +127,7 @@ public class GuidedStepActivity extends Activity {
             String title = getString(R.string.guidedstep_second_title);
             String breadcrumb = getString(R.string.guidedstep_second_breadcrumb);
             String description = getString(R.string.guidedstep_second_description);
-            Drawable icon = getActivity().getDrawable(R.drawable.ic_main_icon);
+            Drawable icon = ResourcesCompat.getDrawable(getActivity().getResources(), R.drawable.ic_main_icon, null);
             return new Guidance(title, description, breadcrumb, icon);
         }
 
@@ -187,7 +188,7 @@ public class GuidedStepActivity extends Activity {
             String breadcrumb = getString(R.string.guidedstep_third_breadcrumb);
             String description = getString(R.string.guidedstep_third_command)
                     + OPTION_NAMES[getArguments().getInt(ARG_OPTION_IDX)];
-            Drawable icon = getActivity().getDrawable(R.drawable.ic_main_icon);
+            Drawable icon = ResourcesCompat.getDrawable(getActivity().getResources(), R.drawable.ic_main_icon, null);
             return new Guidance(title, description, breadcrumb, icon);
         }
 
