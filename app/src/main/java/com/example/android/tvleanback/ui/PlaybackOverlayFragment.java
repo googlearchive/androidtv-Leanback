@@ -55,7 +55,6 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -88,8 +87,9 @@ import java.util.List;
  */
 public class PlaybackOverlayFragment
         extends android.support.v17.leanback.app.PlaybackOverlayFragment
-        implements LoaderManager.LoaderCallbacks<Cursor>, TextureView.SurfaceTextureListener,
-        VideoPlayer.Listener {
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+                TextureView.SurfaceTextureListener,
+                VideoPlayer.Listener {
     private static final String TAG = "PlaybackOverlayFragment";
     private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
     private static final String AUTO_PLAY = "auto_play";
@@ -108,7 +108,8 @@ public class PlaybackOverlayFragment
     private ArrayObjectAdapter mRowsAdapter;
     private List<MediaSessionCompat.QueueItem> mQueue = new ArrayList<>();
     private CursorObjectAdapter mVideoCursorAdapter;
-    private MediaSessionCompat mSession; // MediaSession is used to hold the state of our media playback.
+    private MediaSessionCompat
+            mSession; // MediaSession is used to hold the state of our media playback.
     private LoaderManager.LoaderCallbacks<Cursor> mCallbacks;
     private MediaController mMediaController;
     private PlaybackControlHelper mGlue;
@@ -239,8 +240,9 @@ public class PlaybackOverlayFragment
         }
         mSelectedVideo = video;
 
-        PendingIntent pi = PendingIntent.getActivity(
-                getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pi =
+                PendingIntent.getActivity(
+                        getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setSessionActivity(pi);
 
         return true;
@@ -253,7 +255,7 @@ public class PlaybackOverlayFragment
         if (mGlue.isMediaPlaying()) {
             boolean isVisibleBehind = getActivity().requestVisibleBehind(true);
             boolean isInPictureInPictureMode =
-                   PlaybackOverlayActivity.supportsPictureInPicture(getActivity())
+                    PlaybackOverlayActivity.supportsPictureInPicture(getActivity())
                             && getActivity().isInPictureInPictureMode();
             if (!isVisibleBehind && !isInPictureInPictureMode) {
                 pause();
@@ -278,30 +280,32 @@ public class PlaybackOverlayFragment
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case RECOMMENDED_VIDEOS_LOADER: // Fall through.
-            case QUEUE_VIDEOS_LOADER: {
-                String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
-                return new CursorLoader(
-                        getActivity(),
-                        VideoContract.VideoEntry.CONTENT_URI,
-                        null, // Projection to return - null means return all fields.
-                        VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
-                        // Selection clause is category.
-                        new String[]{category}, // Select based on the category.
-                        null // Default sort order
-                );
-            }
-            default: {
-                // Loading a specific video.
-                String videoId = args.getString(VideoContract.VideoEntry._ID);
-                return new CursorLoader(
-                        getActivity(),
-                        VideoContract.VideoEntry.CONTENT_URI,
-                        null, // Projection to return - null means return all fields.
-                        VideoContract.VideoEntry._ID + " = ?", // Selection clause is id.
-                        new String[]{videoId}, // Select based on the id.
-                        null // Default sort order
-                );
-            }
+            case QUEUE_VIDEOS_LOADER:
+                {
+                    String category = args.getString(VideoContract.VideoEntry.COLUMN_CATEGORY);
+                    return new CursorLoader(
+                            getActivity(),
+                            VideoContract.VideoEntry.CONTENT_URI,
+                            null, // Projection to return - null means return all fields.
+                            VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?",
+                            // Selection clause is category.
+                            new String[] {category}, // Select based on the category.
+                            null // Default sort order
+                            );
+                }
+            default:
+                {
+                    // Loading a specific video.
+                    String videoId = args.getString(VideoContract.VideoEntry._ID);
+                    return new CursorLoader(
+                            getActivity(),
+                            VideoContract.VideoEntry.CONTENT_URI,
+                            null, // Projection to return - null means return all fields.
+                            VideoContract.VideoEntry._ID + " = ?", // Selection clause is id.
+                            new String[] {videoId}, // Select based on the id.
+                            null // Default sort order
+                            );
+                }
         }
     }
 
@@ -309,37 +313,40 @@ public class PlaybackOverlayFragment
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.moveToFirst()) {
             switch (loader.getId()) {
-                case QUEUE_VIDEOS_LOADER: {
-                    mQueue.clear();
-                    while (!cursor.isAfterLast()) {
-                        Video v = (Video) mVideoCursorMapper.convert(cursor);
+                case QUEUE_VIDEOS_LOADER:
+                    {
+                        mQueue.clear();
+                        while (!cursor.isAfterLast()) {
+                            Video v = (Video) mVideoCursorMapper.convert(cursor);
 
-                        // Set the queue index to the selected video.
-                        if (v.id == mSelectedVideo.id) {
-                            mQueueIndex = mQueue.size();
+                            // Set the queue index to the selected video.
+                            if (v.id == mSelectedVideo.id) {
+                                mQueueIndex = mQueue.size();
+                            }
+
+                            // Add the video to the queue.
+                            MediaSessionCompat.QueueItem item = getQueueItem(v);
+                            mQueue.add(item);
+
+                            cursor.moveToNext();
                         }
 
-                        // Add the video to the queue.
-                        MediaSessionCompat.QueueItem item = getQueueItem(v);
-                        mQueue.add(item);
-
-                        cursor.moveToNext();
+                        mSession.setQueue(mQueue);
+                        mSession.setQueueTitle(getString(R.string.queue_name));
+                        break;
                     }
-
-                    mSession.setQueue(mQueue);
-                    mSession.setQueueTitle(getString(R.string.queue_name));
-                    break;
-                }
-                case RECOMMENDED_VIDEOS_LOADER: {
-                    mVideoCursorAdapter.changeCursor(cursor);
-                    break;
-                }
-                default: {
-                    // Playing a specific video.
-                    Video video = (Video) mVideoCursorMapper.convert(cursor);
-                    playVideo(video, mAutoPlayExtras);
-                    break;
-                }
+                case RECOMMENDED_VIDEOS_LOADER:
+                    {
+                        mVideoCursorAdapter.changeCursor(cursor);
+                        break;
+                    }
+                default:
+                    {
+                        // Playing a specific video.
+                        Video video = (Video) mVideoCursorMapper.convert(cursor);
+                        playVideo(video, mAutoPlayExtras);
+                        break;
+                    }
             }
         }
     }
@@ -368,7 +375,8 @@ public class PlaybackOverlayFragment
 
             // Set the Activity's MediaController used to invoke transport controls / adjust volume.
             try {
-                ((FragmentActivity) getActivity()).setSupportMediaController(
+                MediaControllerCompat.setMediaController(
+                        getActivity(),
                         new MediaControllerCompat(getActivity(), mSession.getSessionToken()));
                 setPlaybackState(PlaybackState.STATE_NONE);
             } catch (RemoteException e) {
@@ -378,14 +386,15 @@ public class PlaybackOverlayFragment
     }
 
     private MediaSessionCompat.QueueItem getQueueItem(Video v) {
-        MediaDescriptionCompat desc = new MediaDescriptionCompat.Builder()
-                .setDescription(v.description)
-                .setMediaId(v.id + "")
-                .setIconUri(Uri.parse(v.cardImageUrl))
-                .setMediaUri(Uri.parse(v.videoUrl))
-                .setSubtitle(v.studio)
-                .setTitle(v.title)
-                .build();
+        MediaDescriptionCompat desc =
+                new MediaDescriptionCompat.Builder()
+                        .setDescription(v.description)
+                        .setMediaId(v.id + "")
+                        .setIconUri(Uri.parse(v.cardImageUrl))
+                        .setMediaUri(Uri.parse(v.videoUrl))
+                        .setSubtitle(v.studio)
+                        .setTitle(v.title)
+                        .build();
         return new MediaSessionCompat.QueueItem(desc, v.id);
     }
 
@@ -411,14 +420,15 @@ public class PlaybackOverlayFragment
     }
 
     private long getAvailableActions(int nextState) {
-        long actions = PlaybackState.ACTION_PLAY |
-                PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
-                PlaybackState.ACTION_PLAY_FROM_SEARCH |
-                PlaybackState.ACTION_SKIP_TO_NEXT |
-                PlaybackState.ACTION_SKIP_TO_PREVIOUS |
-                PlaybackState.ACTION_FAST_FORWARD |
-                PlaybackState.ACTION_REWIND |
-                PlaybackState.ACTION_PAUSE;
+        long actions =
+                PlaybackState.ACTION_PLAY
+                        | PlaybackState.ACTION_PLAY_FROM_MEDIA_ID
+                        | PlaybackState.ACTION_PLAY_FROM_SEARCH
+                        | PlaybackState.ACTION_SKIP_TO_NEXT
+                        | PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                        | PlaybackState.ACTION_FAST_FORWARD
+                        | PlaybackState.ACTION_REWIND
+                        | PlaybackState.ACTION_PAUSE;
 
         if (nextState == PlaybackState.STATE_PLAYING) {
             actions |= PlaybackState.ACTION_PAUSE;
@@ -459,8 +469,11 @@ public class PlaybackOverlayFragment
         if (mHasAudioFocus) {
             return;
         }
-        int result = mAudioManager.requestAudioFocus(mOnAudioFocusChangeListener,
-                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        int result =
+                mAudioManager.requestAudioFocus(
+                        mOnAudioFocusChangeListener,
+                        AudioManager.STREAM_MUSIC,
+                        AudioManager.AUDIOFOCUS_GAIN);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             mHasAudioFocus = true;
         } else {
@@ -477,9 +490,7 @@ public class PlaybackOverlayFragment
         mRowsAdapter.notifyArrayItemRangeChanged(0, 1);
     }
 
-    /**
-     * Creates a ListRow for related videos.
-     */
+    /** Creates a ListRow for related videos. */
     private void addOtherRows() {
         mVideoCursorAdapter = new CursorObjectAdapter(new CardPresenter());
         mVideoCursorAdapter.setMapper(new VideoCursorMapper());
@@ -498,12 +509,14 @@ public class PlaybackOverlayFragment
         int contentType = Util.inferContentType(contentUri.getLastPathSegment());
 
         switch (contentType) {
-            case Util.TYPE_OTHER: {
-                return new ExtractorRendererBuilder(getActivity(), userAgent, contentUri);
-            }
-            default: {
-                throw new IllegalStateException("Unsupported type: " + contentType);
-            }
+            case Util.TYPE_OTHER:
+                {
+                    return new ExtractorRendererBuilder(getActivity(), userAgent, contentUri);
+                }
+            default:
+                {
+                    throw new IllegalStateException("Unsupported type: " + contentType);
+                }
         }
     }
 
@@ -567,8 +580,8 @@ public class PlaybackOverlayFragment
     }
 
     @Override
-    public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
-            float pixelWidthHeightRatio) {
+    public void onVideoSizeChanged(
+            int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
         // Do nothing.
     }
 
@@ -614,8 +627,8 @@ public class PlaybackOverlayFragment
     private void setPlaybackState(int state) {
         long currPosition = getCurrentPosition();
 
-        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(getAvailableActions(state));
+        PlaybackStateCompat.Builder stateBuilder =
+                new PlaybackStateCompat.Builder().setActions(getAvailableActions(state));
         stateBuilder.setState(state, currPosition, 1.0f);
         mSession.setPlaybackState(stateBuilder.build());
     }
@@ -626,8 +639,8 @@ public class PlaybackOverlayFragment
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, video.id + "");
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, video.title);
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, video.studio);
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION,
-                video.description);
+        metadataBuilder.putString(
+                MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, video.description);
 
         long duration = Utils.getDuration(video.videoUrl);
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
@@ -644,13 +657,15 @@ public class PlaybackOverlayFragment
                 .load(Uri.parse(video.cardImageUrl))
                 .asBitmap()
                 .centerCrop()
-                .into(new SimpleTarget<Bitmap>(cardWidth, cardHeight) {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
-                        mSession.setMetadata(metadataBuilder.build());
-                    }
-                });
+                .into(
+                        new SimpleTarget<Bitmap>(cardWidth, cardHeight) {
+                            @Override
+                            public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                                metadataBuilder.putBitmap(
+                                        MediaMetadataCompat.METADATA_KEY_ART, bitmap);
+                                mSession.setMetadata(metadataBuilder.build());
+                            }
+                        });
     }
 
     private void playVideo(Video video, Bundle extras) {
@@ -676,18 +691,23 @@ public class PlaybackOverlayFragment
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
-        public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
-                RowPresenter.ViewHolder rowViewHolder, Row row) {
+        public void onItemClicked(
+                Presenter.ViewHolder itemViewHolder,
+                Object item,
+                RowPresenter.ViewHolder rowViewHolder,
+                Row row) {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
                 Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
                 intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
-                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
-                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                Bundle bundle =
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                        getActivity(),
+                                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                                        VideoDetailsActivity.SHARED_ELEMENT_NAME)
+                                .toBundle();
                 getActivity().startActivity(intent, bundle);
             }
         }
@@ -725,7 +745,8 @@ public class PlaybackOverlayFragment
             if (nextIndex < mQueue.size()) {
                 MediaSessionCompat.QueueItem item = mQueue.get(nextIndex);
                 String mediaId = item.getDescription().getMediaId();
-                getActivity().getMediaController()
+                getActivity()
+                        .getMediaController()
                         .getTransportControls()
                         .playFromMediaId(mediaId, bundle);
             } else {
@@ -746,7 +767,8 @@ public class PlaybackOverlayFragment
                 MediaSessionCompat.QueueItem item = mQueue.get(prevIndex);
                 String mediaId = item.getDescription().getMediaId();
 
-                getActivity().getMediaController()
+                getActivity()
+                        .getMediaController()
                         .getTransportControls()
                         .playFromMediaId(mediaId, bundle);
             } else {
