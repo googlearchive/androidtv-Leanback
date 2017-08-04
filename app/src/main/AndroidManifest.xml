@@ -88,7 +88,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ui.PlaybackOverlayActivity"
+            android:name=".ui.PlaybackActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
             android:launchMode="singleTask"
             android:resizeableActivity="true"

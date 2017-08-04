@@ -37,8 +37,8 @@ import com.google.android.exoplayer.upstream.DefaultUriDataSource;
 
 /**
  * A {@link VideoPlayer.RendererBuilder} for streams that can be read using an {@link Extractor}.
- * <p/>
- * This code was originally taken from the ExoPlayer demo application.
+ *
+ * <p>This code was originally taken from the ExoPlayer demo application.
  */
 public class ExtractorRendererBuilder implements VideoPlayer.RendererBuilder {
 
@@ -60,20 +60,34 @@ public class ExtractorRendererBuilder implements VideoPlayer.RendererBuilder {
         Allocator allocator = new DefaultAllocator(BUFFER_SEGMENT_SIZE);
 
         // Build the video and audio renderers.
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter(player.getMainHandler(),
-                null);
+        DefaultBandwidthMeter bandwidthMeter =
+                new DefaultBandwidthMeter(player.getMainHandler(), null);
         DataSource dataSource = new DefaultUriDataSource(context, bandwidthMeter, userAgent);
-        ExtractorSampleSource sampleSource = new ExtractorSampleSource(uri, dataSource, allocator,
-                BUFFER_SEGMENT_COUNT * BUFFER_SEGMENT_SIZE);
-        MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(context,
-                sampleSource, MediaCodecSelector.DEFAULT,
-                MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT, 5000,
-                player.getMainHandler(), player, 50);
-        MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(sampleSource,
-                MediaCodecSelector.DEFAULT, null, true, player.getMainHandler(), player,
-                AudioCapabilities.getCapabilities(context), AudioManager.STREAM_MUSIC);
-        TrackRenderer textRenderer = new TextTrackRenderer(sampleSource, player,
-                player.getMainHandler().getLooper());
+        ExtractorSampleSource sampleSource =
+                new ExtractorSampleSource(
+                        uri, dataSource, allocator, BUFFER_SEGMENT_COUNT * BUFFER_SEGMENT_SIZE);
+        MediaCodecVideoTrackRenderer videoRenderer =
+                new MediaCodecVideoTrackRenderer(
+                        context,
+                        sampleSource,
+                        MediaCodecSelector.DEFAULT,
+                        MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
+                        5000,
+                        player.getMainHandler(),
+                        player,
+                        50);
+        MediaCodecAudioTrackRenderer audioRenderer =
+                new MediaCodecAudioTrackRenderer(
+                        sampleSource,
+                        MediaCodecSelector.DEFAULT,
+                        null,
+                        true,
+                        player.getMainHandler(),
+                        player,
+                        AudioCapabilities.getCapabilities(context),
+                        AudioManager.STREAM_MUSIC);
+        TrackRenderer textRenderer =
+                new TextTrackRenderer(sampleSource, player, player.getMainHandler().getLooper());
 
         // Invoke the callback.
         TrackRenderer[] renderers = new TrackRenderer[VideoPlayer.RENDERER_COUNT];
@@ -87,5 +101,4 @@ public class ExtractorRendererBuilder implements VideoPlayer.RendererBuilder {
     public void cancel() {
         // Do nothing.
     }
-
 }
