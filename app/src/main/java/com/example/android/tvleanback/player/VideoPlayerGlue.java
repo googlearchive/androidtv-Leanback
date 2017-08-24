@@ -19,17 +19,13 @@ package com.example.android.tvleanback.player;
 import android.app.Activity;
 import android.app.PictureInPictureParams;
 import android.content.Context;
-import android.net.Uri;
-import android.support.v17.leanback.media.MediaPlayerAdapter;
-import android.support.v17.leanback.media.PlaybackGlue;
 import android.support.v17.leanback.media.PlaybackTransportControlGlue;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.PlaybackControlsRow;
 
 import com.example.android.tvleanback.Utils;
-import com.example.android.tvleanback.model.Playlist;
-import com.example.android.tvleanback.model.Video;
+import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
 
 import java.util.concurrent.TimeUnit;
 
@@ -51,11 +47,21 @@ import java.util.concurrent.TimeUnit;
  * Note that the superclass, {@link PlaybackTransportControlGlue}, manages the playback controls
  * row.
  */
-public class VideoPlayerGlue extends PlaybackTransportControlGlue<MediaPlayerAdapter> {
+public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayerAdapter> {
 
     private static final long TEN_SECONDS = TimeUnit.SECONDS.toMillis(10);
 
-    private final Playlist mPlaylist;
+    /** Listens for when skip to next and previous actions have been dispatched. */
+    public interface OnActionClickedListener {
+
+        /** Skip to the previous item in the queue. */
+        void onPrevious();
+
+        /** Skip to the next item in the queue. */
+        void onNext();
+    }
+
+    private final OnActionClickedListener mActionListener;
 
     private PlaybackControlsRow.RepeatAction mRepeatAction;
     private PlaybackControlsRow.PictureInPictureAction mPipAction;
@@ -67,10 +73,12 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<MediaPlayerAda
     private PlaybackControlsRow.RewindAction mRewindAction;
 
     public VideoPlayerGlue(
-            Context context, MediaPlayerAdapter mediaPlayerAdapter, Playlist playlist) {
-        super(context, mediaPlayerAdapter);
+            Context context,
+            LeanbackPlayerAdapter playerAdapter,
+            OnActionClickedListener actionListener) {
+        super(context, playerAdapter);
 
-        mPlaylist = playlist;
+        mActionListener = actionListener;
 
         mSkipPreviousAction = new PlaybackControlsRow.SkipPreviousAction(context);
         mSkipNextAction = new PlaybackControlsRow.SkipNextAction(context);
@@ -160,16 +168,14 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<MediaPlayerAda
         }
     }
 
-    /** Plays the next video in the playlist. */
     @Override
     public void next() {
-        play(mPlaylist.next());
+        mActionListener.onNext();
     }
 
-    /** Plays the previous video in the playlist. */
     @Override
     public void previous() {
-        play(mPlaylist.previous());
+        mActionListener.onPrevious();
     }
 
     /** Skips backwards 10 seconds. */
@@ -185,37 +191,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<MediaPlayerAda
             long newPosition = getCurrentPosition() + TEN_SECONDS;
             newPosition = (newPosition > getDuration()) ? getDuration() : newPosition;
             getPlayerAdapter().seekTo(newPosition);
-        }
-    }
-
-    /**
-     * Updates the title and description in the controls row and starts playing the video as soon as
-     * possible.
-     *
-     * @param video to be played
-     */
-    public void play(Video video) {
-        setTitle(video.title);
-        setSubtitle(video.description);
-        getPlayerAdapter().setDataSource(Uri.parse(video.videoUrl));
-        playWhenReady();
-    }
-
-    private void playWhenReady() {
-        if (isPrepared()) {
-            play();
-        } else {
-            addPlayerCallback(
-                    new PlaybackGlue.PlayerCallback() {
-                        @Override
-                        public void onPreparedStateChanged(PlaybackGlue glue) {
-                            super.onPreparedStateChanged(glue);
-                            if (glue.isPrepared()) {
-                                glue.removePlayerCallback(this);
-                                glue.play();
-                            }
-                        }
-                    });
         }
     }
 }
