@@ -23,11 +23,12 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.VideoFragment;
 import android.support.v17.leanback.app.VideoFragmentGlueHost;
-import android.support.v17.leanback.media.MediaPlayerAdapter;
+import android.support.v17.leanback.media.PlaybackGlue;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
@@ -49,6 +50,20 @@ import com.example.android.tvleanback.model.Video;
 import com.example.android.tvleanback.model.VideoCursorMapper;
 import com.example.android.tvleanback.player.VideoPlayerGlue;
 import com.example.android.tvleanback.presenter.CardPresenter;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import static com.example.android.tvleanback.ui.PlaybackFragment.VideoLoaderCallbacks.RELATED_VIDEOS_LOADER;
 
@@ -58,7 +73,13 @@ import static com.example.android.tvleanback.ui.PlaybackFragment.VideoLoaderCall
  */
 public class PlaybackFragment extends VideoFragment {
 
-    private VideoPlayerGlue mMediaPlayerGlue;
+    private static final int UPDATE_DELAY = 16;
+
+    private VideoPlayerGlue mPlayerGlue;
+    private LeanbackPlayerAdapter mPlayerAdapter;
+    private SimpleExoPlayer mPlayer;
+    private TrackSelector mTrackSelector;
+    private PlaylistActionListener mPlaylistActionListener;
 
     private Video mVideo;
     private Playlist mPlaylist;
@@ -74,12 +95,6 @@ public class PlaybackFragment extends VideoFragment {
 
         mVideoLoaderCallbacks = new VideoLoaderCallbacks(mPlaylist);
 
-        MediaPlayerAdapter adapter = new MediaPlayerAdapter(getActivity());
-        mMediaPlayerGlue = new VideoPlayerGlue(getActivity(), adapter, mPlaylist);
-        mMediaPlayerGlue.setHost(new VideoFragmentGlueHost(this));
-
-        mMediaPlayerGlue.play(mVideo);
-
         // Loads the playlist.
         Bundle args = new Bundle();
         args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, mVideo.category);
@@ -87,8 +102,22 @@ public class PlaybackFragment extends VideoFragment {
                 .initLoader(VideoLoaderCallbacks.QUEUE_VIDEOS_LOADER, args, mVideoLoaderCallbacks);
 
         mVideoCursorAdapter = setupRelatedVideosCursor();
-        ArrayObjectAdapter mRowsAdapter = initializeRelatedVideosRow();
-        setAdapter(mRowsAdapter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || mPlayer == null)) {
+            initializePlayer();
+        }
     }
 
     /** Pauses the player. If on Android N+, handles picture-in-picture. */
@@ -97,15 +126,26 @@ public class PlaybackFragment extends VideoFragment {
     public void onPause() {
         super.onPause();
 
-        if (mMediaPlayerGlue != null) {
-            if (mMediaPlayerGlue.isPlaying()) {
+        if (mPlayerGlue != null) {
+            if (mPlayerGlue.isPlaying()) {
                 boolean isInPictureInPictureMode =
                         Utils.supportsPictureInPicture(getActivity())
                                 && getActivity().isInPictureInPictureMode();
                 if (!isInPictureInPictureMode) {
-                    mMediaPlayerGlue.pause();
+                    mPlayerGlue.pause();
                 }
             }
+        }
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
         }
     }
 
@@ -114,7 +154,7 @@ public class PlaybackFragment extends VideoFragment {
             boolean isInPictureInPictureMode, Configuration newConfig) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
 
-        mMediaPlayerGlue.setControlsOverlayAutoHideEnabled(!isInPictureInPictureMode);
+        mPlayerGlue.setControlsOverlayAutoHideEnabled(!isInPictureInPictureMode);
 
         if (isInPictureInPictureMode) {
             setControlsOverlayAutoHideEnabled(true);
@@ -122,9 +162,69 @@ public class PlaybackFragment extends VideoFragment {
         }
     }
 
+    private void initializePlayer() {
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        mTrackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        mPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), mTrackSelector);
+        mPlayerAdapter = new LeanbackPlayerAdapter(getActivity(), mPlayer, UPDATE_DELAY);
+        mPlaylistActionListener = new PlaylistActionListener(mPlaylist);
+        mPlayerGlue = new VideoPlayerGlue(getActivity(), mPlayerAdapter, mPlaylistActionListener);
+        mPlayerGlue.setHost(new VideoFragmentGlueHost(this));
+        mPlayerGlue.addPlayerCallback(
+                new PlaybackGlue.PlayerCallback() {
+                    @Override
+                    public void onPreparedStateChanged(PlaybackGlue glue) {
+                        super.onPreparedStateChanged(glue);
+                        if (glue.isPrepared()) {
+                            glue.removePlayerCallback(this);
+                            glue.play();
+                        }
+                    }
+                });
+
+        play(mVideo);
+
+        ArrayObjectAdapter mRowsAdapter = initializeRelatedVideosRow();
+        setAdapter(mRowsAdapter);
+    }
+
+    private void releasePlayer() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+            mTrackSelector = null;
+            mPlayerGlue = null;
+            mPlayerAdapter = null;
+            mPlaylistActionListener = null;
+        }
+    }
+
+    private void play(Video video) {
+        mPlayerGlue.setTitle(video.title);
+        mPlayerGlue.setSubtitle(video.description);
+        prepareMediaForPlaying(Uri.parse(video.videoUrl));
+        mPlayerGlue.play();
+    }
+
+    private void prepareMediaForPlaying(Uri mediaSourceUri) {
+        String userAgent = Util.getUserAgent(getActivity(), "VideoPlayerGlue");
+        MediaSource mediaSource =
+                new ExtractorMediaSource(
+                        mediaSourceUri,
+                        new DefaultDataSourceFactory(getActivity(), userAgent),
+                        new DefaultExtractorsFactory(),
+                        null,
+                        null);
+
+        mPlayer.prepare(mediaSource);
+    }
+
     private ArrayObjectAdapter initializeRelatedVideosRow() {
         /*
-         * To add a new row to the adapter and not lose the controls row that is provided by the
+         * To add a new row to the mPlayerAdapter and not lose the controls row that is provided by the
          * glue, we need to compose a new row with the controls row and our related videos row.
          *
          * We start by creating a new {@link ClassPresenterSelector}. Then add the controls row from
@@ -132,13 +232,12 @@ public class PlaybackFragment extends VideoFragment {
          */
         ClassPresenterSelector presenterSelector = new ClassPresenterSelector();
         presenterSelector.addClassPresenter(
-                mMediaPlayerGlue.getControlsRow().getClass(),
-                mMediaPlayerGlue.getPlaybackRowPresenter());
+                mPlayerGlue.getControlsRow().getClass(), mPlayerGlue.getPlaybackRowPresenter());
         presenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
 
         ArrayObjectAdapter rowsAdapter = new ArrayObjectAdapter(presenterSelector);
 
-        rowsAdapter.add(mMediaPlayerGlue.getControlsRow());
+        rowsAdapter.add(mPlayerGlue.getControlsRow());
 
         HeaderItem header = new HeaderItem(getString(R.string.related_movies));
         ListRow row = new ListRow(header, mVideoCursorAdapter);
@@ -161,19 +260,19 @@ public class PlaybackFragment extends VideoFragment {
     }
 
     public void skipToNext() {
-        mMediaPlayerGlue.next();
+        mPlayerGlue.next();
     }
 
     public void skipToPrevious() {
-        mMediaPlayerGlue.previous();
+        mPlayerGlue.previous();
     }
 
     public void rewind() {
-        mMediaPlayerGlue.rewind();
+        mPlayerGlue.rewind();
     }
 
     public void fastForward() {
-        mMediaPlayerGlue.fastForward();
+        mPlayerGlue.fastForward();
     }
 
     /** Opens the video details page when a related video has been clicked. */
@@ -256,6 +355,25 @@ public class PlaybackFragment extends VideoFragment {
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
             mVideoCursorAdapter.changeCursor(null);
+        }
+    }
+
+    class PlaylistActionListener implements VideoPlayerGlue.OnActionClickedListener {
+
+        private Playlist mPlaylist;
+
+        PlaylistActionListener(Playlist playlist) {
+            this.mPlaylist = playlist;
+        }
+
+        @Override
+        public void onPrevious() {
+            play(mPlaylist.previous());
+        }
+
+        @Override
+        public void onNext() {
+            play(mPlaylist.next());
         }
     }
 }
