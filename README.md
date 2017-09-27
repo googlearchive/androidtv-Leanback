@@ -21,14 +21,14 @@ Need more information about getting started with Android TV? Check the [official
 ## Explore the sample
 
 - Choose a layout
-  - Videos grouped by [category] [mainfragment] (See BrowseFragment in [screenshots][screenshots])
-  - Freeform [vertical grid] [verticalgridfragment] of videos (See Vertical Grid Fragment in [screenshots][screenshots])
+  - Videos grouped by [category][mainfragment] (See BrowseFragment in [screenshots][screenshots])
+  - Freeform [vertical grid][verticalgridfragment] of videos (See Vertical Grid Fragment in [screenshots][screenshots])
 - Customize video cards with a [Card Presenter][cardpresenter] (See Card Views in [screenshots][screenshots])
 - Display in-depth [details][detailsfragment] about your video
 - Play a video
-  - [Playback with ExoPlayer2] [playbackfragment]
+  - [Playback with ExoPlayer2][playbackfragment]
   - [Add extra buttons to control playback][videoplayerglue]
-- [Display an error] [errorfragment]
+- [Display an error][errorfragment]
 - Make your app globally searchable
   - Review searchable training [document][searchable]
      - Creating a [content provider][videoprovider]
