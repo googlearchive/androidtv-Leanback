@@ -21,9 +21,9 @@ Need more information about getting started with Android TV? Check the [official
 ## Explore the sample
 
 - Choose a layout
- - Videos grouped by [category] [mainfragment] (See BrowseFragment in screenshot)
- - Freeform [vertical grid] [verticalgridfragment] of videos (See Vertical Grid Fragment in screenshot)
-- Customize video cards with a [Card Presenter][cardpresenter] (See Card Views in screenshot)
+  - Videos grouped by [category] [mainfragment] (See BrowseFragment in [screenshots][screenshots])
+  - Freeform [vertical grid] [verticalgridfragment] of videos (See Vertical Grid Fragment in [screenshots][screenshots])
+- Customize video cards with a [Card Presenter][cardpresenter] (See Card Views in [screenshots][screenshots])
 - Display in-depth [details][detailsfragment] about your video
 - Play a video
   - [Playback with ExoPlayer2] [playbackfragment]
@@ -39,35 +39,37 @@ Need more information about getting started with Android TV? Check the [official
 - Customize [preference and settings][settingsfragment]
 - Add a wizard with [guided steps][guidedstep]
 
-[manifestsearch]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml#L79]
+[screenshots]: https://github.com/googlesamples/androidtv-Leanback#screenshots
 
-[searchfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/SearchFragment.java]
+[manifestsearch]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml#L79
 
-[cardpresenter]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/presenter/CardPresenter.java]
+[searchfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/SearchFragment.java
 
-[searchable.xml]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/res/xml/searchable.xml]
+[cardpresenter]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/presenter/CardPresenter.java
 
-[searchable]: [https://developer.android.com/training/tv/discovery/searchable.html]
+[searchable.xml]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/res/xml/searchable.xml
 
-[videoprovider]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/data/VideoProvider.java]
+[searchable]: https://developer.android.com/training/tv/discovery/searchable.html
 
-[errorfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/BrowseErrorFragment.java]
+[videoprovider]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/data/VideoProvider.java
 
-[mainfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/MainFragment.java]
+[errorfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/BrowseErrorFragment.java
 
-[detailsfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/VideoDetailsFragment.java]
+[mainfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/MainFragment.java
 
-[verticalgridfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/VerticalGridFragment.java]
+[detailsfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/VideoDetailsFragment.java
 
-[guidedstep]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/GuidedStepActivity.java]
+[verticalgridfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/VerticalGridFragment.java
 
-[onboardingfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/OnboardingFragment.java]
+[guidedstep]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/GuidedStepActivity.java
 
-[settingsfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/SettingsFragment.java]
+[onboardingfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/OnboardingFragment.java
 
-[videoplayerglue]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/player/VideoPlayerGlue.java]
+[settingsfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/SettingsFragment.java
 
-[playbackfragment]: [https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/PlaybackFragment.java]
+[videoplayerglue]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/player/VideoPlayerGlue.java
+
+[playbackfragment]: https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/ui/PlaybackFragment.java
 
 ## Additonal Resouroces
 
