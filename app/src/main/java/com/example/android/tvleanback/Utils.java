@@ -97,16 +97,4 @@ public class Utils {
         }
         return Long.parseLong(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
     }
-
-    /**
-     * Returns if picture-in-picture (PIP) is supported by the system.
-     *
-     * @param context Used to query system features.
-     * @return If the system supports PIP.
-     */
-    public static boolean supportsPictureInPicture(Context context) {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-                && context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_PICTURE_IN_PICTURE);
-    }
 }
