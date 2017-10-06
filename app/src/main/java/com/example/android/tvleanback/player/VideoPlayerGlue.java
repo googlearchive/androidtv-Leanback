@@ -16,15 +16,12 @@
 
 package com.example.android.tvleanback.player;
 
-import android.app.Activity;
-import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.support.v17.leanback.media.PlaybackTransportControlGlue;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.PlaybackControlsRow;
 
-import com.example.android.tvleanback.Utils;
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
 
 import java.util.concurrent.TimeUnit;
@@ -35,7 +32,6 @@ import java.util.concurrent.TimeUnit;
  *
  * <ul>
  *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.RepeatAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.PictureInPictureAction}
  *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.ThumbsDownAction}
  *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.ThumbsUpAction}
  *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.SkipPreviousAction}
@@ -64,7 +60,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
     private final OnActionClickedListener mActionListener;
 
     private PlaybackControlsRow.RepeatAction mRepeatAction;
-    private PlaybackControlsRow.PictureInPictureAction mPipAction;
     private PlaybackControlsRow.ThumbsUpAction mThumbsUpAction;
     private PlaybackControlsRow.ThumbsDownAction mThumbsDownAction;
     private PlaybackControlsRow.SkipPreviousAction mSkipPreviousAction;
@@ -90,7 +85,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
         mThumbsDownAction = new PlaybackControlsRow.ThumbsDownAction(context);
         mThumbsDownAction.setIndex(PlaybackControlsRow.ThumbsDownAction.INDEX_OUTLINE);
         mRepeatAction = new PlaybackControlsRow.RepeatAction(context);
-        mPipAction = new PlaybackControlsRow.PictureInPictureAction(context);
     }
 
     @Override
@@ -112,9 +106,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
         adapter.add(mThumbsDownAction);
         adapter.add(mThumbsUpAction);
         adapter.add(mRepeatAction);
-        if (Utils.supportsPictureInPicture(getContext())) {
-            adapter.add(mPipAction);
-        }
     }
 
     @Override
@@ -131,7 +122,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
     private boolean shouldDispatchAction(Action action) {
         return action == mRewindAction
                 || action == mFastForwardAction
-                || action == mPipAction
                 || action == mThumbsDownAction
                 || action == mThumbsUpAction
                 || action == mRepeatAction;
@@ -143,10 +133,6 @@ public class VideoPlayerGlue extends PlaybackTransportControlGlue<LeanbackPlayer
             rewind();
         } else if (action == mFastForwardAction) {
             fastForward();
-        } else if (action == mPipAction
-                && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            PictureInPictureParams params = new PictureInPictureParams.Builder().build();
-            ((Activity) getContext()).enterPictureInPictureMode(params);
         } else if (action instanceof PlaybackControlsRow.MultiAction) {
             PlaybackControlsRow.MultiAction multiAction = (PlaybackControlsRow.MultiAction) action;
             multiAction.nextIndex();

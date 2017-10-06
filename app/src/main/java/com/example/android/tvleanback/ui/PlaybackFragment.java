@@ -21,7 +21,6 @@ import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -43,7 +42,6 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 
 import com.example.android.tvleanback.R;
-import com.example.android.tvleanback.Utils;
 import com.example.android.tvleanback.data.VideoContract;
 import com.example.android.tvleanback.model.Playlist;
 import com.example.android.tvleanback.model.Video;
@@ -120,21 +118,14 @@ public class PlaybackFragment extends VideoFragment {
         }
     }
 
-    /** Pauses the player. If on Android N+, handles picture-in-picture. */
+    /** Pauses the player. */
     @TargetApi(Build.VERSION_CODES.N)
     @Override
     public void onPause() {
         super.onPause();
 
-        if (mPlayerGlue != null) {
-            if (mPlayerGlue.isPlaying()) {
-                boolean isInPictureInPictureMode =
-                        Utils.supportsPictureInPicture(getActivity())
-                                && getActivity().isInPictureInPictureMode();
-                if (!isInPictureInPictureMode) {
-                    mPlayerGlue.pause();
-                }
-            }
+        if (mPlayerGlue != null && mPlayerGlue.isPlaying()) {
+            mPlayerGlue.pause();
         }
         if (Util.SDK_INT <= 23) {
             releasePlayer();
@@ -146,19 +137,6 @@ public class PlaybackFragment extends VideoFragment {
         super.onStop();
         if (Util.SDK_INT > 23) {
             releasePlayer();
-        }
-    }
-
-    @Override
-    public void onPictureInPictureModeChanged(
-            boolean isInPictureInPictureMode, Configuration newConfig) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-
-        mPlayerGlue.setControlsOverlayAutoHideEnabled(!isInPictureInPictureMode);
-
-        if (isInPictureInPictureMode) {
-            setControlsOverlayAutoHideEnabled(true);
-            hideControlsOverlay(false);
         }
     }
 
