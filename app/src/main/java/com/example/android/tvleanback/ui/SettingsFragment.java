@@ -66,7 +66,7 @@ public class SettingsFragment extends LeanbackSettingsFragment
         return fragment;
     }
 
-    private class PrefFragment extends LeanbackPreferenceFragment {
+    public static class PrefFragment extends LeanbackPreferenceFragment {
 
         @Override
         public void onCreatePreferences(Bundle bundle, String s) {
