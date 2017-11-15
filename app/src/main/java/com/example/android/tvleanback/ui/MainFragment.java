@@ -48,8 +48,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.FetchVideoService;
 import com.example.android.tvleanback.data.VideoContract;
@@ -176,15 +177,20 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
     private void updateBackground(String uri) {
         int width = mMetrics.widthPixels;
         int height = mMetrics.heightPixels;
-        Glide.with(this)
-                .load(uri)
-                .asBitmap()
+
+        RequestOptions options = new RequestOptions()
                 .centerCrop()
-                .error(mDefaultBackground)
+                .error(mDefaultBackground);
+
+        Glide.with(this)
+                .asBitmap()
+                .load(uri)
+                .apply(options)
                 .into(new SimpleTarget<Bitmap>(width, height) {
                     @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap>
-                            glideAnimation) {
+                    public void onResourceReady(
+                            Bitmap resource,
+                            Transition<? super Bitmap> transition) {
                         mBackgroundManager.setBitmap(resource);
                     }
                 });

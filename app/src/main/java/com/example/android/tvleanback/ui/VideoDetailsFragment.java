@@ -58,8 +58,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoContract;
 import com.example.android.tvleanback.model.Video;
@@ -161,15 +162,19 @@ public class VideoDetailsFragment extends DetailsFragment
     }
 
     private void updateBackground(String uri) {
-        Glide.with(this)
-                .load(uri)
-                .asBitmap()
+        RequestOptions options = new RequestOptions()
                 .centerCrop()
-                .error(mDefaultBackground)
+                .error(mDefaultBackground);
+
+        Glide.with(this)
+                .asBitmap()
+                .load(uri)
+                .apply(options)
                 .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onResourceReady(Bitmap resource,
-                            GlideAnimation<? super Bitmap> glideAnimation) {
+                    public void onResourceReady(
+                            Bitmap resource,
+                            Transition<? super Bitmap> transition) {
                         mBackgroundManager.setBitmap(resource);
                     }
                 });
@@ -318,15 +323,19 @@ public class VideoDetailsFragment extends DetailsFragment
     private void setupDetailsOverviewRow() {
         final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedVideo);
 
-        Glide.with(this)
-                .load(mSelectedVideo.cardImageUrl)
-                .asBitmap()
-                .dontAnimate()
+        RequestOptions options = new RequestOptions()
                 .error(R.drawable.default_background)
+                .dontAnimate();
+
+        Glide.with(this)
+                .asBitmap()
+                .load(mSelectedVideo.cardImageUrl)
+                .apply(options)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(final Bitmap resource,
-                            GlideAnimation glideAnimation) {
+                    public void onResourceReady(
+                            Bitmap resource,
+                            Transition<? super Bitmap> transition) {
                         row.setImageBitmap(getActivity(), resource);
                         startEntranceTransition();
                     }

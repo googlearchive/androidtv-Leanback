@@ -151,17 +151,7 @@ public class PlaybackFragment extends VideoFragment {
         mPlaylistActionListener = new PlaylistActionListener(mPlaylist);
         mPlayerGlue = new VideoPlayerGlue(getActivity(), mPlayerAdapter, mPlaylistActionListener);
         mPlayerGlue.setHost(new VideoFragmentGlueHost(this));
-        mPlayerGlue.addPlayerCallback(
-                new PlaybackGlue.PlayerCallback() {
-                    @Override
-                    public void onPreparedStateChanged(PlaybackGlue glue) {
-                        super.onPreparedStateChanged(glue);
-                        if (glue.isPrepared()) {
-                            glue.removePlayerCallback(this);
-                            glue.play();
-                        }
-                    }
-                });
+        mPlayerGlue.playWhenPrepared();
 
         play(mVideo);
 
