@@ -99,9 +99,9 @@ public class UpdateRecommendationsService extends IntentService {
                                     buildPendingIntent(video, id), 0, null);
 
                     Bitmap bitmap = Glide.with(getApplication())
-                            .load(video.cardImageUrl)
                             .asBitmap()
-                            .into(cardWidth, cardHeight) // Only use for synchronous .get()
+                            .load(video.cardImageUrl)
+                            .submit(cardWidth, cardHeight) // Only use for synchronous .get()
                             .get();
                     builder.setContentImage(bitmap);
 
