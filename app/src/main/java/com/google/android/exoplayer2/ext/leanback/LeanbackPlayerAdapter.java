@@ -261,7 +261,7 @@ public final class LeanbackPlayerAdapter extends PlayerAdapter {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
             Callback callback = getCallback();
             callback.onCurrentPositionChanged(LeanbackPlayerAdapter.this);
             callback.onBufferedPositionChanged(LeanbackPlayerAdapter.this);
@@ -273,7 +273,17 @@ public final class LeanbackPlayerAdapter extends PlayerAdapter {
         }
 
         @Override
+        public void onSeekProcessed() {
+            // Do nothing.
+        }
+
+        @Override
         public void onRepeatModeChanged(int repeatMode) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
             // Do nothing.
         }
 
