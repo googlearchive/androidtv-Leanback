@@ -16,6 +16,7 @@
 
 package com.example.android.tvleanback.ui;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -84,8 +85,8 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
     private Map<Integer, CursorObjectAdapter> mVideoCursorAdapters;
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
         // Create a list to contain all the CursorObjectAdapters.
         // Each adapter is used to render a specific row of videos in the MainFragment.
