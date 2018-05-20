@@ -63,8 +63,6 @@ import com.example.android.tvleanback.recommendation.UpdateRecommendationsServic
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /*
  * Main class to show BrowseFragment with header and rows of videos
@@ -77,7 +75,7 @@ public class MainFragment extends BrowseSupportFragment
     private ArrayObjectAdapter mCategoryRowAdapter;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
-    private Timer mBackgroundTimer;
+    private Runnable mBackgroundTask;
     private Uri mBackgroundURI;
     private BackgroundManager mBackgroundManager;
     private static final int CATEGORY_LOADER = 123; // Unique ID for Category Loader.
@@ -119,10 +117,7 @@ public class MainFragment extends BrowseSupportFragment
 
     @Override
     public void onDestroy() {
-        if (null != mBackgroundTimer) {
-            mBackgroundTimer.cancel();
-            mBackgroundTimer = null;
-        }
+        mHandler.removeCallbacks(mBackgroundTask);
         mBackgroundManager = null;
         super.onDestroy();
     }
@@ -137,6 +132,7 @@ public class MainFragment extends BrowseSupportFragment
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
+        mBackgroundTask = new UpdateBackgroundTask();
         mMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
@@ -196,15 +192,11 @@ public class MainFragment extends BrowseSupportFragment
                         mBackgroundManager.setBitmap(resource);
                     }
                 });
-        mBackgroundTimer.cancel();
     }
 
     private void startBackgroundTimer() {
-        if (null != mBackgroundTimer) {
-            mBackgroundTimer.cancel();
-        }
-        mBackgroundTimer = new Timer();
-        mBackgroundTimer.schedule(new UpdateBackgroundTask(), BACKGROUND_UPDATE_DELAY);
+        mHandler.removeCallbacks(mBackgroundTask);
+        mHandler.postDelayed(mBackgroundTask, BACKGROUND_UPDATE_DELAY);
     }
 
     private void updateRecommendations() {
@@ -319,18 +311,13 @@ public class MainFragment extends BrowseSupportFragment
         }
     }
 
-    private class UpdateBackgroundTask extends TimerTask {
+    private class UpdateBackgroundTask implements Runnable {
 
         @Override
         public void run() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mBackgroundURI != null) {
-                        updateBackground(mBackgroundURI.toString());
-                    }
-                }
-            });
+            if (mBackgroundURI != null) {
+                updateBackground(mBackgroundURI.toString());
+            }
         }
     }
 
