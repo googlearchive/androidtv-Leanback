@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.example.android.tvleanback"
         minSdkVersion 21
@@ -23,22 +22,24 @@ android {
     }
 }
 
+ext.supportVersion = '27.1.1'
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:recyclerview-v7:27.1.0'
-    implementation 'com.android.support:leanback-v17:27.1.0'
-    implementation 'com.android.support:recommendation:27.1.0'
-    implementation 'com.android.support:preference-leanback-v17:27.1.0'
+    implementation "com.android.support:recyclerview-v7:$supportVersion"
+    implementation "com.android.support:leanback-v17:$supportVersion"
+    implementation "com.android.support:recommendation:$supportVersion"
+    implementation "com.android.support:preference-leanback-v17:$supportVersion"
 
-    implementation 'com.github.bumptech.glide:glide:4.3.1'
+    implementation 'com.github.bumptech.glide:glide:4.7.1'
 
     implementation 'com.google.android.exoplayer:exoplayer:2.6.1'
     implementation 'com.google.android.exoplayer:extension-leanback:2.6.1'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:1.10.19'
-    testImplementation 'org.robolectric:robolectric:3.1'
-    androidTestImplementation 'com.android.support:support-annotations:27.1.0'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    testImplementation 'org.mockito:mockito-core:2.16.0'
+    testImplementation 'org.robolectric:robolectric:3.8'
+    androidTestImplementation "com.android.support:support-annotations:$supportVersion"
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
 }
