@@ -20,15 +20,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.v17.leanback.app.OnboardingSupportFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +35,7 @@ import com.example.android.tvleanback.R;
 
 import java.util.ArrayList;
 
-public class OnboardingFragment extends android.support.v17.leanback.app.OnboardingFragment {
+public class OnboardingFragment extends OnboardingSupportFragment {
     public static final String COMPLETED_ONBOARDING = "completed_onboarding";
 
     private static final int[] pageTitles = {

@@ -16,8 +16,8 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -41,7 +41,7 @@ public class PlaybackActivity extends LeanbackActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback);
         Fragment fragment =
-                getFragmentManager().findFragmentByTag(getString(R.string.playback_tag));
+                getSupportFragmentManager().findFragmentByTag(getString(R.string.playback_tag));
         if (fragment instanceof PlaybackFragment) {
             mPlaybackFragment = (PlaybackFragment) fragment;
         }
