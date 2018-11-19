@@ -20,12 +20,8 @@
     <permission
         android:name="${applicationId}.ACCESS_VIDEO_DATA"
         android:protectionLevel="signature" />
-    <permission
-        android:name="${applicationId}.ACCESS_MOVIES_DATA"
-        android:protectionLevel="signature" />
 
     <uses-permission android:name="${applicationId}.ACCESS_VIDEO_DATA" />
-    <uses-permission android:name="${applicationId}.ACCESS_MOVIES_DATA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -46,7 +42,8 @@
         android:icon="@drawable/app_icon_quantum"
         android:label="@string/app_name"
         android:logo="@drawable/videos_by_google_banner"
-        android:theme="@style/Theme.Leanback">
+        android:theme="@style/Theme.Leanback"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ui.MainActivity"
             android:icon="@drawable/videos_by_google_banner"
@@ -106,6 +103,7 @@
         <provider
             android:name=".data.VideoProvider"
             android:authorities="${packageName}"
+            android:permission="${applicationId}.ACCESS_VIDEO_DATA"
             android:exported="true">
             <path-permission
                 android:pathPrefix="/search"
