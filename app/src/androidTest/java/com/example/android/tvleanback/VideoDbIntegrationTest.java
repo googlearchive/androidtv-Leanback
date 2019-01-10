@@ -1,46 +1,45 @@
 package com.example.android.tvleanback;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.ActivityInstrumentationTestCase2;
 
 import com.example.android.tvleanback.data.FetchVideoService;
 import com.example.android.tvleanback.data.VideoContract;
+import com.example.android.tvleanback.data.VideoContract.VideoEntry;
 import com.example.android.tvleanback.data.VideoDbBuilder;
 import com.example.android.tvleanback.data.VideoDbHelper;
-import com.example.android.tvleanback.ui.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-@RunWith(AndroidJUnit4.class)
-public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<MainActivity> {
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-    public VideoDbIntegrationTest() {
-        super(MainActivity.class);
-    }
+@RunWith(AndroidJUnit4.class)
+public class VideoDbIntegrationTest {
+
+    private Context mContext;
 
     @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-        getActivity();
+    public void setup() {
+        mContext = ApplicationProvider.getApplicationContext();
     }
 
     @Test
     public void resetAndRedownloadDatabase() throws InterruptedException {
-        VideoDbHelper mVideoDbHelper = new VideoDbHelper(getActivity());
+        VideoDbHelper mVideoDbHelper = new VideoDbHelper(mContext);
         // Clear database by downgrading
         mVideoDbHelper.onDowngrade(mVideoDbHelper.getReadableDatabase(), 0, 0);
         String[] queryColumns = new String[] {
@@ -61,10 +60,11 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assertEquals(mCursor.getCount(), 0); // Confirm database is empty
+
+        assertThat(mCursor.getCount()).isEqualTo(0); // Confirm database is empty
         mCursor.close();
         try {
-            getActivity().startService(new Intent(getActivity(), FetchVideoService.class));
+            mContext.startService(new Intent(mContext, FetchVideoService.class));
             Thread.sleep(1000*30);
             mCursor = mVideoDbHelper.getReadableDatabase().query(
                     VideoContract.VideoEntry.TABLE_NAME,
@@ -75,7 +75,7 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                     null,
                     null
             );
-            assertFalse(mCursor.getCount() == 0); // Confirm database is no longer empty
+            assertThat(mCursor.getCount()).isNotEqualTo(0); // Confirm database is no longer empty
             mCursor.close();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
 
     @Test
     public void resetAndInsertLocalVideos() throws JSONException {
-        VideoDbHelper mVideoDbHelper = new VideoDbHelper(getActivity());
+        VideoDbHelper mVideoDbHelper = new VideoDbHelper(mContext);
         mVideoDbHelper.onDowngrade(mVideoDbHelper.getReadableDatabase(), 0, 0);
         String[] queryColumns = new String[] {
                 VideoContract.VideoEntry._ID,
@@ -105,7 +105,7 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assertEquals(mCursor.getCount(), 0); // Confirm database is empty
+        assertThat(mCursor.getCount()).isEqualTo(0); // Confirm database is empty
         mCursor.close();
 
         // Create some test videos
@@ -113,12 +113,17 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
         JSONObject video1 = new JSONObject();
         video1.put(VideoDbBuilder.TAG_TITLE, "New Dad")
                 .put(VideoDbBuilder.TAG_DESCRIPTION, "Google+ Instant Upload backs up your photos")
-                .put(VideoDbBuilder.TAG_STUDIO, "Google+");
+                .put(VideoDbBuilder.TAG_STUDIO, "Google+")
+                .put(VideoDbBuilder.TAG_SOURCES,
+                        new JSONArray(Collections.singletonList("https://google.com")));
         JSONObject video2 = new JSONObject();
         video2.put(VideoDbBuilder.TAG_TITLE, "Pet Dog")
                 .put(VideoDbBuilder.TAG_DESCRIPTION, "Google+ lets you share videos of your pets")
-                .put(VideoDbBuilder.TAG_STUDIO, "Google+");
+                .put(VideoDbBuilder.TAG_STUDIO, "Google+")
+                .put(VideoDbBuilder.TAG_SOURCES,
+                        new JSONArray(Collections.singletonList("https://youtube.com")));
         mediaArray.put(video1);
+        mediaArray.put(video2);
         JSONObject myMediaGooglePlus = new JSONObject();
         myMediaGooglePlus.put(VideoDbBuilder.TAG_CATEGORY, "Google+")
                 .put(VideoDbBuilder.TAG_MEDIA, mediaArray);
@@ -127,10 +132,11 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
         mediaCategories.put(myMediaGooglePlus);
         myMedia.put(VideoDbBuilder.TAG_GOOGLE_VIDEOS, mediaCategories);
 
-        VideoDbBuilder videoDbBuilder = new VideoDbBuilder(getActivity());
+        VideoDbBuilder videoDbBuilder = new VideoDbBuilder(mContext);
         List<ContentValues> contentValuesList = videoDbBuilder.buildMedia(myMedia);
-        ContentValues[] downloadedVideoContentValues = contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
-        getActivity().getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
+        ContentValues[] downloadedVideoContentValues =
+                contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
+        mContext.getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
                 downloadedVideoContentValues);
 
         // Test our makeshift database
@@ -143,7 +149,7 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assert(mCursor.getCount() == 2); // Confirm database was populated
+        assertThat(mCursor.getCount()).isEqualTo(2); // Confirm database was populated
         mCursor.close();
 
         mCursor = mVideoDbHelper.getReadableDatabase().query(
@@ -155,14 +161,15 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assert(mCursor.moveToFirst());
-        assert(mCursor.getString(mCursor.getColumnIndexOrThrow(VideoContract.VideoEntry.COLUMN_STUDIO)).equals("Google+"));
+        assertThat(mCursor.moveToFirst()).isTrue();
+        String studio = mCursor.getString(mCursor.getColumnIndexOrThrow(VideoEntry.COLUMN_STUDIO));
+        assertThat(studio).isEqualTo("Google+");
         mCursor.close();
     }
 
     @Test
     public void resetAndInsertOnlineVideos() throws JSONException, IOException {
-        VideoDbHelper mVideoDbHelper = new VideoDbHelper(getActivity());
+        VideoDbHelper mVideoDbHelper = new VideoDbHelper(mContext);
         mVideoDbHelper.onDowngrade(mVideoDbHelper.getReadableDatabase(), 0, 0);
         String[] queryColumns = new String[] {
                 VideoContract.VideoEntry._ID,
@@ -182,15 +189,17 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assertEquals(mCursor.getCount(), 0); // Confirm database is empty
+        assertThat(mCursor.getCount()).isEqualTo(0); // Confirm database is empty
         mCursor.close();
 
         // Create some test videos
-        VideoDbBuilder videoDbBuilder = new VideoDbBuilder(getActivity());
-        List<ContentValues> contentValuesList = videoDbBuilder.fetch(getActivity().getResources().getString(R.string.catalog_url));
+        VideoDbBuilder videoDbBuilder = new VideoDbBuilder(mContext);
+        List<ContentValues> contentValuesList =
+                videoDbBuilder.fetch(mContext.getResources().getString(R.string.catalog_url));
         // Insert into database
-        ContentValues[] downloadedVideoContentValues = contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
-        getActivity().getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
+        ContentValues[] downloadedVideoContentValues =
+                contentValuesList.toArray(new ContentValues[contentValuesList.size()]);
+        mContext.getContentResolver().bulkInsert(VideoContract.VideoEntry.CONTENT_URI,
                 downloadedVideoContentValues);
 
         // Test our makeshift database
@@ -203,12 +212,7 @@ public class VideoDbIntegrationTest extends ActivityInstrumentationTestCase2<Mai
                 null,
                 null
         );
-        assertFalse(mCursor.getCount() == 0); // Confirm database was populated
+        assertThat(mCursor.getCount()).isGreaterThan(0); // Confirm database was populated
         mCursor.close();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 }

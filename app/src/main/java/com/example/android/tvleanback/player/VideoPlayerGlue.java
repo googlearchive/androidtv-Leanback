@@ -17,10 +17,10 @@
 package com.example.android.tvleanback.player;
 
 import android.content.Context;
-import android.support.v17.leanback.media.PlaybackTransportControlGlue;
-import android.support.v17.leanback.widget.Action;
-import android.support.v17.leanback.widget.ArrayObjectAdapter;
-import android.support.v17.leanback.widget.PlaybackControlsRow;
+import androidx.leanback.media.PlaybackTransportControlGlue;
+import androidx.leanback.widget.Action;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.PlaybackControlsRow;
 
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
 
@@ -31,13 +31,13 @@ import java.util.concurrent.TimeUnit;
  * following actions to the primary and secondary controls:
  *
  * <ul>
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.RepeatAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.ThumbsDownAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.ThumbsUpAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.SkipPreviousAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.SkipNextAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.FastForwardAction}
- *   <li>{@link android.support.v17.leanback.widget.PlaybackControlsRow.RewindAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.RepeatAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.ThumbsDownAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.ThumbsUpAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.SkipPreviousAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.SkipNextAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.FastForwardAction}
+ *   <li>{@link androidx.leanback.widget.PlaybackControlsRow.RewindAction}
  * </ul>
  *
  * Note that the superclass, {@link PlaybackTransportControlGlue}, manages the playback controls

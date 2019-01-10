@@ -26,7 +26,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
-import android.support.app.recommendation.ContentRecommendation;
+import androidx.recommendation.app.ContentRecommendation;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;

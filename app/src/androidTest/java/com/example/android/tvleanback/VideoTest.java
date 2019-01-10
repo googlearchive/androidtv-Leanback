@@ -3,7 +3,6 @@ package com.example.android.tvleanback;
 import android.media.MediaDescription;
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 
 import com.example.android.tvleanback.model.Video;
 
@@ -12,6 +11,8 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 public class VideoTest {
@@ -63,6 +64,5 @@ public class VideoTest {
             assert testVideo.cardImageUrl.equals(testVideoClone.cardImageUrl);
             assert testVideo.toString().equals(testVideoClone.toString());
         }
-
     }
 }

@@ -18,9 +18,9 @@ package com.example.android.tvleanback.presenter;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.support.v17.leanback.widget.ImageCardView;
-import android.support.v17.leanback.widget.Presenter;
-import android.support.v4.content.ContextCompat;
+import androidx.leanback.widget.ImageCardView;
+import androidx.leanback.widget.Presenter;
+import androidx.core.content.ContextCompat;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;

@@ -1,7 +1,7 @@
 package com.example.android.tvleanback.ui;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 
 /**
  * This parent class contains common methods that run in every activity such as search.

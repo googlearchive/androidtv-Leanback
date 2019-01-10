@@ -18,7 +18,7 @@ package com.example.android.tvleanback.data;
 import android.content.ContentValues;
 import android.content.Context;
 import android.media.Rating;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.example.android.tvleanback.R;
@@ -33,6 +33,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * The VideoDbBuilder is used to grab a JSON file from a server and parse the data
@@ -154,7 +156,7 @@ public class VideoDbBuilder {
     private JSONObject fetchJSON(String urlString) throws JSONException, IOException {
         BufferedReader reader = null;
         java.net.URL url = new java.net.URL(urlString);
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
         try {
             reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(),
                     "utf-8"));

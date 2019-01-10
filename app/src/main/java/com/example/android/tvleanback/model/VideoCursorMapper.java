@@ -17,7 +17,7 @@
 package com.example.android.tvleanback.model;
 
 import android.database.Cursor;
-import android.support.v17.leanback.database.CursorMapper;
+import androidx.leanback.database.CursorMapper;
 
 import com.example.android.tvleanback.data.VideoContract;
 

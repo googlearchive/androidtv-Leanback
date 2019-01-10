@@ -16,7 +16,7 @@
 
 package com.example.android.tvleanback.presenter;
 
-import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
+import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
 
 import com.example.android.tvleanback.model.Video;
 
