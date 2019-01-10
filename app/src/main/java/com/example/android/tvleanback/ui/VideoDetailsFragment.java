@@ -16,12 +16,9 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.LoaderManager;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -29,7 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.DetailsFragment;
+import android.support.v17.leanback.app.DetailsSupportFragment;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
@@ -49,7 +46,10 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,8 +72,9 @@ import com.example.android.tvleanback.presenter.DetailsDescriptionPresenter;
  * VideoDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its metadata plus related videos.
  */
-public class VideoDetailsFragment extends DetailsFragment
+public class VideoDetailsFragment extends DetailsSupportFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
+
     private static final int NO_NOTIFICATION = -1;
     private static final int ACTION_WATCH_TRAILER = 1;
     private static final int ACTION_RENT = 2;

@@ -35,7 +35,8 @@ public class SearchActivity extends LeanbackActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-        mFragment = (SearchFragment) getFragmentManager().findFragmentById(R.id.search_fragment);
+        mFragment = (SearchFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.search_fragment);
     }
 
     @Override

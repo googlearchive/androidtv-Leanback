@@ -18,16 +18,14 @@ package com.example.android.tvleanback.ui;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v17.leanback.app.SearchSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
@@ -41,6 +39,9 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.SpeechRecognitionCallback;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -55,8 +56,8 @@ import com.example.android.tvleanback.presenter.CardPresenter;
 /*
  * This class demonstrates how to do in-app search
  */
-public class SearchFragment extends android.support.v17.leanback.app.SearchFragment
-        implements android.support.v17.leanback.app.SearchFragment.SearchResultProvider,
+public class SearchFragment extends SearchSupportFragment
+        implements SearchSupportFragment.SearchResultProvider,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "SearchFragment";
     private static final boolean DEBUG = BuildConfig.DEBUG;
