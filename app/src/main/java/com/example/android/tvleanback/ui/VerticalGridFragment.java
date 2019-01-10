@@ -16,13 +16,11 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v17.leanback.app.VerticalGridSupportFragment;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
@@ -32,6 +30,9 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.View;
 
 import com.example.android.tvleanback.R;
@@ -43,7 +44,7 @@ import com.example.android.tvleanback.presenter.CardPresenter;
 /*
  * VerticalGridFragment shows a grid of videos that can be scrolled vertically.
  */
-public class VerticalGridFragment extends android.support.v17.leanback.app.VerticalGridFragment
+public class VerticalGridFragment extends VerticalGridSupportFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int NUM_COLUMNS = 5;

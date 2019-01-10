@@ -16,12 +16,8 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
-import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -29,7 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.BrowseFragment;
+import android.support.v17.leanback.app.BrowseSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.CursorObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
@@ -43,7 +39,10 @@ import android.support.v17.leanback.widget.PresenterSelector;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
@@ -70,7 +69,9 @@ import java.util.TimerTask;
 /*
  * Main class to show BrowseFragment with header and rows of videos
  */
-public class MainFragment extends BrowseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainFragment extends BrowseSupportFragment
+        implements LoaderManager.LoaderCallbacks<Cursor> {
+
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mCategoryRowAdapter;
@@ -85,8 +86,8 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
     private Map<Integer, CursorObjectAdapter> mVideoCursorAdapters;
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         // Create a list to contain all the CursorObjectAdapters.
         // Each adapter is used to render a specific row of videos in the MainFragment.
@@ -215,7 +216,7 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id == CATEGORY_LOADER) {
             return new CursorLoader(
-                    getActivity(),   // Parent activity context
+                    getContext(),
                     VideoContract.VideoEntry.CONTENT_URI, // Table to query
                     new String[]{"DISTINCT " + VideoContract.VideoEntry.COLUMN_CATEGORY},
                     // Only categories
@@ -229,7 +230,7 @@ public class MainFragment extends BrowseFragment implements LoaderManager.Loader
 
             // This just creates a CursorLoader that gets all videos.
             return new CursorLoader(
-                    getActivity(), // Parent activity context
+                    getContext(),
                     VideoContract.VideoEntry.CONTENT_URI, // Table to query
                     null, // Projection to return - null means return all fields
                     VideoContract.VideoEntry.COLUMN_CATEGORY + " = ?", // Selection clause

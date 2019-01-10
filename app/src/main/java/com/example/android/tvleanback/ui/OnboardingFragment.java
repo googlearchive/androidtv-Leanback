@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v17.leanback.app.OnboardingSupportFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +39,7 @@ import com.example.android.tvleanback.R;
 
 import java.util.ArrayList;
 
-public class OnboardingFragment extends android.support.v17.leanback.app.OnboardingFragment {
+public class OnboardingFragment extends OnboardingSupportFragment {
     public static final String COMPLETED_ONBOARDING = "completed_onboarding";
 
     private static final int[] pageTitles = {
