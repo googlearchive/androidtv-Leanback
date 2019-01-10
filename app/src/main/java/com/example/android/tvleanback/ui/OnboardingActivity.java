@@ -16,15 +16,15 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.example.android.tvleanback.R;
 
 /*
  * OnboardingActivity for OnboardingFragment
  */
-public class OnboardingActivity extends Activity {
+public class OnboardingActivity extends FragmentActivity {
 
     /**
      * Called when the activity is first created.

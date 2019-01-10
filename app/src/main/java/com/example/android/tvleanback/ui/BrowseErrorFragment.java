@@ -16,11 +16,11 @@
 
 package com.example.android.tvleanback.ui;
 
-import android.app.Fragment;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v17.leanback.app.ErrorFragment;
+import android.support.v17.leanback.app.ErrorSupportFragment;
+import android.support.v4.app.Fragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +33,7 @@ import com.example.android.tvleanback.R;
 /*
  * This class demonstrates how to extend ErrorFragment to create an error dialog.
  */
-public class BrowseErrorFragment extends ErrorFragment {
+public class BrowseErrorFragment extends ErrorSupportFragment {
     private static final boolean TRANSLUCENT = true;
     private static final int TIMER_DELAY = 1000;
 

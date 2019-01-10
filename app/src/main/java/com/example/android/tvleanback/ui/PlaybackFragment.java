@@ -17,16 +17,15 @@
 package com.example.android.tvleanback.ui;
 
 import android.annotation.TargetApi;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v17.leanback.app.VideoFragment;
 import android.support.v17.leanback.app.VideoFragmentGlueHost;
+import android.support.v17.leanback.app.VideoSupportFragment;
+import android.support.v17.leanback.app.VideoSupportFragmentGlueHost;
 import android.support.v17.leanback.media.PlaybackGlue;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
@@ -40,6 +39,9 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 
 import com.example.android.tvleanback.R;
 import com.example.android.tvleanback.data.VideoContract;
@@ -69,7 +71,7 @@ import static com.example.android.tvleanback.ui.PlaybackFragment.VideoLoaderCall
  * Plays selected video, loads playlist and related videos, and delegates playback to {@link
  * VideoPlayerGlue}.
  */
-public class PlaybackFragment extends VideoFragment {
+public class PlaybackFragment extends VideoSupportFragment {
 
     private static final int UPDATE_DELAY = 16;
 
@@ -150,7 +152,7 @@ public class PlaybackFragment extends VideoFragment {
         mPlayerAdapter = new LeanbackPlayerAdapter(getActivity(), mPlayer, UPDATE_DELAY);
         mPlaylistActionListener = new PlaylistActionListener(mPlaylist);
         mPlayerGlue = new VideoPlayerGlue(getActivity(), mPlayerAdapter, mPlaylistActionListener);
-        mPlayerGlue.setHost(new VideoFragmentGlueHost(this));
+        mPlayerGlue.setHost(new VideoSupportFragmentGlueHost(this));
         mPlayerGlue.playWhenPrepared();
 
         play(mVideo);
