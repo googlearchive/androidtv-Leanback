@@ -80,6 +80,7 @@ public class MainFragment extends BrowseSupportFragment
     private Timer mBackgroundTimer;
     private Uri mBackgroundURI;
     private BackgroundManager mBackgroundManager;
+    private LoaderManager mLoaderManager;
     private static final int CATEGORY_LOADER = 123; // Unique ID for Category Loader.
 
     // Maps a Loader Id to its CursorObjectAdapter.
@@ -94,7 +95,8 @@ public class MainFragment extends BrowseSupportFragment
         mVideoCursorAdapters = new HashMap<>();
 
         // Start loading the categories from the database.
-        getLoaderManager().initLoader(CATEGORY_LOADER, null, this);
+        mLoaderManager = LoaderManager.getInstance(this);
+        mLoaderManager.initLoader(CATEGORY_LOADER, null, this);
     }
 
     @Override
@@ -276,7 +278,7 @@ public class MainFragment extends BrowseSupportFragment
                         // Start loading the videos from the database for a particular category.
                         Bundle args = new Bundle();
                         args.putString(VideoContract.VideoEntry.COLUMN_CATEGORY, category);
-                        getLoaderManager().initLoader(videoLoaderId, args, this);
+                        mLoaderManager.initLoader(videoLoaderId, args, this);
                     } else {
                         ListRow row = new ListRow(header, existingAdapter);
                         mCategoryRowAdapter.add(row);
