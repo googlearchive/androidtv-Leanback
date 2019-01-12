@@ -12,14 +12,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.util.List;
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = "src/main/AndroidManifest.xml")
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 21, manifest = "src/main/AndroidManifest.xml")
 public class VideoDbUnitTest {
     private static final String TAG = "VideoDbTest";
 
