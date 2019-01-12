@@ -28,6 +28,7 @@ dependencies {
     implementation 'androidx.leanback:leanback:1.0.0'
     implementation 'androidx.recommendation:recommendation:1.0.0'
     implementation 'androidx.leanback:leanback-preference:1.0.0'
+    implementation 'androidx.annotation:annotation:1.0.1'
 
     implementation 'com.github.bumptech.glide:glide:4.3.1'
 
@@ -36,7 +37,6 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.1'
-    androidTestImplementation 'androidx.annotation:annotation:1.0.1'
     androidTestImplementation "androidx.test.ext:junit:1.1.0"
     androidTestImplementation "androidx.test.ext:truth:1.1.0"
     androidTestImplementation 'androidx.test:runner:1.1.1'
